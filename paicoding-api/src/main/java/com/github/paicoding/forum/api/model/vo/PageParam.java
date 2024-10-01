@@ -1,0 +1,34 @@
+package com.github.paicoding.forum.api.model.vo;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+/**
+ * 数据库分页参数
+ * */
+@Data
+public class PageParam {
+
+    public static final Long DEFAULT_PAGE_NUM = 1L;
+    public static final Long DEFAULT_PAGE_SIZE = 10L;
+
+    public static final Long TOP_PAGE_SIZE = 4L;
+
+
+    @ApiModelProperty("请求页数，从1开始计数")
+    private long pageNum;
+
+    @ApiModelProperty("请求页大小，默认为 10")
+    private long pageSize;
+    private long offset;
+    private long limit;
+
+    public static PageParam newPageInstance()  { return null; }
+
+    public static PageParam newPageInstance(Integer pageNum, Integer pageSize)  { return null; }
+
+    public static PageParam newPageInstance(Long pageNum, Long pageSize)  { return null; }
+
+    public static String getLimitSql(PageParam pageParam)  { return null; }
+
+}

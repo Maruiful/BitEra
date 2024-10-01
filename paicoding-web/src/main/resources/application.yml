@@ -1,0 +1,126 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 5m # 设置session的有效期为五分钟
+  compression:
+    enabled: true # 开启返回结果压缩，减少传输耗时
+    min-response-size: 2KB
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+    # 添加静态资源热部署配置
+    additional-paths: src/main/resources/static/**
+  application:
+    name: paicoding
+  #  Spring Boot 2.4为了提升对Kubernetes的支持 将 spring.profiles 作废了
+  #  profiles:
+  #    active: dal,web,config,image
+  # 替换上面作废的spring.profiels.actice配置参数
+  config:
+    import: application-dal.yml,application-web.yml,application-config.yml,application-image.yml,application-email.yml,application-rabbitmq.yml,application-ai.yml,application-pay.yml,application-login.yml
+
+  main:
+    # 引入下面这个配置，主要是为了解决自定义实现的多数据源功能，自主注册的datasource替换默认的
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  mvc:
+    async:
+      request-timeout:
+  liquibase:
+    change-log: classpath:liquibase/master.xml
+    enabled: true # 当实际使用的数据库不支持liquibase，如 mariadb 时，将这个参数设置为false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+
+servlet:
+  tomcat:
+    max-swallow-size: -1 # 解决上传图片超过2MB之后，出现连接重置的问题
+
+security:
+  salt: tech_π # 密码加盐, 更安全的做法是每个用户的密码使用独立的盐，并将其保存在用户表中
+  salt-index: 3 # 盐插入的位置
+
+paicoding:
+  sensitive: # 敏感词校验相关配置
+    enable: true
+    deny: # 自定义的敏感词，英文逗号分割
+    allow: 国,制作,码,亚洲,中国,公司,简历,性,国研,鬼,国庆,用户,扑克,法,鲁迅,祖国,口,色,俄罗斯 # 自定义的非敏感词，英文逗号分割
+  jwt:
+    issuer: pai_coding # 签发者
+    secret: hello_world # 签名密钥
+    expire: 432000000 # jwt的有效期，默认30天
+  openapi:
+    app-ids: test-app
+    ip-white-list: 0.0.0.0/0 # 默认白名单，所有ip都可以访问
+    oc-login-redirect-url: http://localhost:8087/api/wx/pai/callback
+
+# 默认的数据库名
+database:
+  name: pai_coding
+
+# mybatis 相关统一配置
+mybatis-plus:
+  configuration:
+    #开启下划线转驼峰
+    map-underscore-to-camel-case: true
+
+
+# knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+  openapi:
+    title: 比特纪元
+    description: 一个基于 Spring Boot、MyBatis-Plus、MySQL、Redis、ElasticSearch、MongoDB、Docker、RabbitMQ 等技术栈实现的社区系统，采用主流的互联网技术架构、全新的UI设计、支持一键源码部署，拥有完整的文章&教程发布/搜索/评论/统计流程等。
+    version: 1.0.0
+    license: Apache License 2.0
+    email: bangzewu@126.com
+    group:
+      admin:
+        group-name: 后台接口分组
+        api-rule: package
+        api-rule-resources:
+          - com.github.paicoding.forum.web.admin
+      front:
+        group-name: 前台接口分组
+        api-rule: package
+        api-rule-resources:
+          - com.github.paicoding.forum.web.front
+
+logging:
+  level:
+    com.github.paicoding.forum.service.rank.service.impl.*: debug # 指定具体包下的日志输出级别
+    org:
+      springframework:
+        web:
+          servlet:
+            handler.*: info # 定位为啥无妨访问swagger-ui时，可以把这个日志输出级别设置debug
+
+
+# 监控相关配置
+management:
+  server:
+    address: 127.0.0.1 # 设置为本地ip，防止远程访问该连接进行关闭服务
+    port: 8999
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  health:
+    elasticsearch:
+      enabled: false
+    mail:
+      enabled: false

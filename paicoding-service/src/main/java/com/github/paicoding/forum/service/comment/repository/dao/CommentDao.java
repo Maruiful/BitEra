@@ -1,0 +1,47 @@
+package com.github.paicoding.forum.service.comment.repository.dao;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.paicoding.forum.api.model.enums.YesOrNoEnum;
+import com.github.paicoding.forum.api.model.vo.PageParam;
+import com.github.paicoding.forum.service.comment.repository.entity.CommentDO;
+import com.github.paicoding.forum.service.comment.repository.mapper.CommentMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+/** */
+@Repository
+public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
+
+    /**
+     * 获取评论列表
+     *
+     * @param pageParam
+     * @return
+     */
+    public List<CommentDO> listTopCommentList(Long articleId, PageParam pageParam)  { return null; }
+
+    /**
+     * 查询所有的子评论
+     *
+     * @param articleId
+     * @return
+     */
+    public List<CommentDO> listSubCommentIdMappers(Long articleId, Collection<Long> topCommentIds)  { return null; }
+
+
+    /**
+     * 查询有效评论数
+     *
+     * @param articleId
+     * @return
+     */
+    public int commentCount(Long articleId)  { return 0; }
+
+    public CommentDO getHotComment(Long articleId)  { return null; }
+
+}

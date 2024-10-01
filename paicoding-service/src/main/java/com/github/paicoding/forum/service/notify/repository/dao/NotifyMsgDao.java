@@ -1,0 +1,64 @@
+package com.github.paicoding.forum.service.notify.repository.dao;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.paicoding.forum.api.model.enums.NotifyStatEnum;
+import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
+import com.github.paicoding.forum.api.model.vo.PageParam;
+import com.github.paicoding.forum.api.model.vo.notify.dto.NotifyMsgDTO;
+import com.github.paicoding.forum.service.notify.repository.entity.NotifyMsgDO;
+import com.github.paicoding.forum.service.notify.repository.mapper.NotifyMsgMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/** */
+@Repository
+public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
+
+    /**
+     * 查询消息记录，用于幂等过滤
+     *
+     * @param msg
+     * @return
+     */
+    public NotifyMsgDO getByUserIdRelatedIdAndType(NotifyMsgDO msg)  { return null; }
+
+
+    /**
+     * 查询用户的消息通知数量
+     *
+     * @param userId
+     * @return
+     */
+    public int countByUserIdAndStat(long userId, Integer stat)  { return 0; }
+
+    /**
+     * 查询用户各类型的未读消息数量
+     *
+     * @param userId
+     * @return
+     */
+    public Map<Integer, Integer> groupCountByUserIdAndStat(long userId, Integer stat)  { return null; }
+
+    /**
+     * 查询用户消息列表
+     *
+     * @param userId
+     * @param type
+     * @return
+     */
+    public List<NotifyMsgDTO> listNotifyMsgByUserIdAndType(long userId, NotifyTypeEnum type, PageParam page)  { return null; }
+
+    /**
+     * 设置消息为已读
+     *
+     * @param list
+     */
+    public void updateNotifyMsgToRead(List<NotifyMsgDTO> list)  {}
+}

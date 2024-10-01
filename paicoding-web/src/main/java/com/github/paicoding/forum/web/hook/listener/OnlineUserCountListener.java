@@ -1,0 +1,30 @@
+package com.github.paicoding.forum.web.hook.listener;
+
+import com.github.paicoding.forum.core.util.SpringUtil;
+import com.github.paicoding.forum.service.statistics.service.UserStatisticService;
+
+import javax.servlet.annotation.WebListener;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+/**
+ * 通过监听session来实现实时人数统计
+ * */
+@WebListener
+public class OnlineUserCountListener implements HttpSessionListener {
+
+
+    /**
+     * 新增session，在线人数统计数+1
+     *
+     * @param se
+     */
+    public void sessionCreated(HttpSessionEvent se)  {}
+
+    /**
+     * session失效，在线人数统计数-1
+     *
+     * @param se
+     */
+    public void sessionDestroyed(HttpSessionEvent se)  {}
+}

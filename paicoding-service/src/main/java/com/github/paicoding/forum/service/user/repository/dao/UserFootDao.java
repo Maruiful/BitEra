@@ -1,0 +1,70 @@
+package com.github.paicoding.forum.service.user.repository.dao;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.paicoding.forum.api.model.enums.DocumentTypeEnum;
+import com.github.paicoding.forum.api.model.enums.PraiseStatEnum;
+import com.github.paicoding.forum.api.model.vo.PageParam;
+import com.github.paicoding.forum.api.model.vo.user.dto.ArticleFootCountDTO;
+import com.github.paicoding.forum.api.model.vo.user.dto.SimpleUserInfoDTO;
+import com.github.paicoding.forum.api.model.vo.user.dto.UserFootStatisticDTO;
+import com.github.paicoding.forum.service.user.repository.entity.UserFootDO;
+import com.github.paicoding.forum.service.user.repository.mapper.UserFootMapper;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+/** */
+@Repository
+public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
+    public UserFootDO getByDocumentAndUserId(Long documentId, Integer type, Long userId)  { return null; }
+
+    public List<SimpleUserInfoDTO> listDocumentPraisedUsers(Long documentId, Integer type, int size)  { return null; }
+
+    /**
+     * 查询用户收藏的文章列表
+     *
+     * @param userId
+     * @param pageParam
+     * @return
+     */
+    public List<Long> listCollectedArticlesByUserId(Long userId, PageParam pageParam)  { return null; }
+
+
+    /**
+     * 查询用户阅读的文章列表
+     *
+     * @param userId
+     * @param pageParam
+     * @return
+     */
+    public List<Long> listReadArticleByUserId(Long userId, PageParam pageParam)  { return null; }
+
+    /**
+     * 查询文章计数信息
+     *
+     * @param articleId
+     * @return
+     */
+    public ArticleFootCountDTO countArticleByArticleId(Long articleId)  { return null; }
+
+    /**
+     * 查询作者的文章统计
+     *
+     * @param author
+     * @return
+     */
+    public ArticleFootCountDTO countArticleByUserId(Long author)  { return null; }
+
+    /**
+     * 查询评论的点赞数
+     *
+     * @param commentId
+     * @return
+     */
+    public Long countCommentPraise(Long commentId)  { return null; }
+
+    public UserFootStatisticDTO getFootCount()  { return null; }
+}

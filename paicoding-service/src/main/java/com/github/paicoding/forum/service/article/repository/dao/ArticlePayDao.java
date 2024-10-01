@@ -1,0 +1,52 @@
+package com.github.paicoding.forum.service.article.repository.dao;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.paicoding.forum.api.model.enums.pay.PayStatusEnum;
+import com.github.paicoding.forum.service.article.repository.entity.ArticlePayRecordDO;
+import com.github.paicoding.forum.service.article.repository.mapper.ArticleMapper;
+import com.github.paicoding.forum.service.article.repository.mapper.ArticlePayRecordMapper;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 文章支付记录
+ * <p>
+ * */
+@Repository
+public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePayRecordDO> {
+
+    @Resource
+    private ArticleMapper articleMapper;
+
+    /**
+     * 用户的文章支付记录
+     *
+     * @param articleId 文章id
+     * @param payUserId 支付用户id
+     * @return 支付记录
+     */
+    public ArticlePayRecordDO queryRecordByArticleId(Long articleId, Long payUserId)  { return null; }
+
+
+    /**
+     * 查询文章成功支付的用户id
+     *
+     * @param articleId 文章id
+     * @return
+     */
+    public List<Long> querySucceedPayUsersByArticleId(Long articleId)  { return null; }
+
+
+    /**
+     * 加写锁
+     *
+     * @param id
+     * @return
+     */
+    public ArticlePayRecordDO selectForUpdate(Long id)  { return null; }
+}
