@@ -29,7 +29,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 自定义的配置工厂类，专门用于 ConfDot 属性配置文件的配置加载，支持从自定义的配置源获取
- * */
+ *
+ * @author YiHui
+ * @date 2023/6/20
+ */
 @Slf4j
 @Component
 public class DynamicConfigContainer implements EnvironmentAware, ApplicationContextAware, CommandLineRunner {
@@ -50,29 +53,55 @@ public class DynamicConfigContainer implements EnvironmentAware, ApplicationCont
     private Map<Class, Runnable> refreshCallback = Maps.newHashMap();
 
     @Override
-    public void setEnvironment(Environment environment)  {}
+    public void setEnvironment(Environment environment) {
+        this.environment = (ConfigurableEnvironment) environment;
+    }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException  {}
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     @PostConstruct
-    public void init()  {}
+    public void init() {
+        cache = Maps.newHashMap();
+        bindBeansFromLocalCache("dbConfig", cache);
+    }
 
     /**
      * 从db中获取全量的配置信息
      *
      * @return true 表示有信息变更; false 表示无信息变更
      */
-    private boolean loadAllConfigFromDb()  { return false; }
+    private boolean loadAllConfigFromDb() {
+        List<Map<String, Object>> list = SpringUtil.getBean(JdbcTemplate.class).queryForList("select `key`, `value` from global_conf where deleted = 0");
+        Map<String, Object> val = Maps.newHashMapWithExpectedSize(list.size());
+        for (Map<String, Object> conf : list) {
+            val.put(conf.get("key").toString(), conf.get("value").toString());
+        }
+        if (val.equals(cache)) {
+            return false;
+        }
+        cache.clear();
+        cache.putAll(val);
+        return true;
+    }
 
-    private void bindBeansFromLocalCache(String namespace, Map<String, Object> cache)  {}
+    private void bindBeansFromLocalCache(String namespace, Map<String, Object> cache) {
+        // 将内存的配置信息设置为最高优先级
+        MapPropertySource propertySource = new MapPropertySource(namespace, cache);
+        environment.getPropertySources().addFirst(propertySource);
+        this.binder = new DynamicConfigBinder(this.applicationContext, environment.getPropertySources());
+    }
 
     /**
      * 配置绑定
      *
      * @param bindable
      */
-    public void bind(Bindable bindable)  {}
+    public void bind(Bindable bindable) {
+        binder.bind(bindable);
+    }
 
 
     /**
@@ -90,7 +119,11 @@ public class DynamicConfigContainer implements EnvironmentAware, ApplicationCont
     /**
      * 强制刷新缓存配置
      */
-    public void forceRefresh()  {}
+    public void forceRefresh() {
+        loadAllConfigFromDb();
+        refreshConfig();
+        log.info("db配置强制刷新! {}", JsonUtil.toStr(cache));
+    }
 
     /**
      * 支持配置的动态刷新
@@ -124,14 +157,19 @@ public class DynamicConfigContainer implements EnvironmentAware, ApplicationCont
      * @param bean
      * @param run
      */
-    public void registerRefreshCallback(Object bean, Runnable run)  {}
+    public void registerRefreshCallback(Object bean, Runnable run) {
+        refreshCallback.put(bean.getClass(), run);
+    }
 
 
     /**
      * bean先加载，此时@Value对应的成员属性直接从默认的配置中读取了；这就导致无法获取db中的真实配置信息，只有这个配置再db中发生变更，才会生效
      * 因此，我们再自定义的配置加载完毕之后，重刷一下bean中的@Value属性，保证他们都获取的是最新的配置信息
      */
-    private void autoUpdateSpringValueConfig()  {}
+    private void autoUpdateSpringValueConfig() {
+        Set<String> keys = SpringValueRegistry.registry.keySet();
+        keys.forEach(SpringValueRegistry::updateValue);
+    }
 
     /**
      * 应用启动之后，执行的动态配置初始化
@@ -140,5 +178,9 @@ public class DynamicConfigContainer implements EnvironmentAware, ApplicationCont
      * @throws Exception
      */
     @Override
-    public void run(String... args) throws Exception  {}
+    public void run(String... args) throws Exception {
+        reloadConfig();
+        registerConfRefreshTask();
+        autoUpdateSpringValueConfig();
+    }
 }

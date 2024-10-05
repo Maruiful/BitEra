@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 /**
  * 自定义动态配置绑定
- * */
+ */
 public class DynamicConfigBinder {
     private final ApplicationContext applicationContext;
     private PropertySources propertySource;
@@ -46,7 +46,9 @@ public class DynamicConfigBinder {
         getBinder().bind(prefix, bindable, bindHandler);
     }
 
-    private BindHandler getBindHandler(ConfigurationProperties annotation)  { return null; }
+    private BindHandler getBindHandler(ConfigurationProperties annotation) {
+        return null;
+    }
 
     private Binder getBinder() {
         if (this.binder == null) {
@@ -61,21 +63,33 @@ public class DynamicConfigBinder {
         return this.binder;
     }
 
-    private Iterable<ConfigurationPropertySource> getConfigurationPropertySources()  { return null; }
+    private Iterable<ConfigurationPropertySource> getConfigurationPropertySources() {
+        return ConfigurationPropertySources.from(this.propertySource);
+    }
 
     /**
      * 指定占位符的前缀、后缀、默认值分隔符、未解析忽略、环境变量容器
      *
      * @return
      */
-    private PropertySourcesPlaceholdersResolver getPropertySourcesPlaceholdersResolver()  { return null; }
+    private PropertySourcesPlaceholdersResolver getPropertySourcesPlaceholdersResolver() {
+        return new PropertySourcesPlaceholdersResolver(this.propertySource);
+    }
 
     /**
      * 类型转换
      *
      * @return
      */
-    private ConversionService getConversionService()  { return null; }
+    private ConversionService getConversionService() {
+        return new DefaultConversionService();
+    }
 
-    private Consumer<PropertyEditorRegistry> getPropertyEditorInitializer()  { return null; }
+    private Consumer<PropertyEditorRegistry> getPropertyEditorInitializer() {
+        if (this.applicationContext instanceof ConfigurableApplicationContext) {
+            return ((ConfigurableApplicationContext) this.applicationContext)
+                    .getBeanFactory()::copyRegisteredEditorsTo;
+        }
+        return null;
+    }
 }

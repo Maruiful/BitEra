@@ -20,5 +20,8 @@ public class ConfigRefreshEventListener implements ApplicationListener<ConfigRef
      * @param event
      */
     @Override
-    public void onApplicationEvent(ConfigRefreshEvent event)  {}
+    public void onApplicationEvent(ConfigRefreshEvent event)  {
+        dynamicConfigContainer.reloadConfig();
+        SpringValueRegistry.updateValue(event.getKey());
+    }
 }
