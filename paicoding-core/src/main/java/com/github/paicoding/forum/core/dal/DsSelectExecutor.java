@@ -30,5 +30,12 @@ public class DsSelectExecutor {
      * @param ds
      * @param call
      */
-    public static void execute(DS ds, Runnable call)  {}
+    public static void execute(DS ds, Runnable call)  {
+        DsContextHolder.set(ds);
+        try {
+            call.run();
+        } finally {
+            DsContextHolder.reset();
+        }
+    }
 }

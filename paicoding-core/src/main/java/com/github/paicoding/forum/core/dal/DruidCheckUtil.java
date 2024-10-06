@@ -10,6 +10,8 @@ public class DruidCheckUtil {
      *
      * @return
      */
-    public static boolean hasDuridPkg()  { return false; }
+    public static boolean hasDuridPkg() {
+        return ClassUtils.isPresent("com.alibaba.druid.pool.DruidDataSource", DataSourceConfig.class.getClassLoader());
+    }
 
 }

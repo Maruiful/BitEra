@@ -35,5 +35,14 @@ public class DsAspect {
         }
     }
 
-    private DsAno getDsAno(ProceedingJoinPoint proceedingJoinPoint)  { return null; }
+    private DsAno getDsAno(ProceedingJoinPoint proceedingJoinPoint)  {
+        MethodSignature signature = (MethodSignature) proceedingJoinPoint.getSignature();
+        Method method = signature.getMethod();
+        DsAno ds = method.getAnnotation(DsAno.class);
+        if (ds == null) {
+            // 获取类上的注解
+            ds = (DsAno) proceedingJoinPoint.getSignature().getDeclaringType().getAnnotation(DsAno.class);
+        }
+        return ds;
+    }
 }

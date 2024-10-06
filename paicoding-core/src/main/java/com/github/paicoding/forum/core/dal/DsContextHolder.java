@@ -2,7 +2,8 @@ package com.github.paicoding.forum.core.dal;
 
 /**
  * 数据源选择上下持有类，用于存储当前选中的是哪个数据源
- * */
+ *
+ */
 public class DsContextHolder {
     /**
      * 使用继承的线程上下文，支持异步时选择传递
@@ -14,28 +15,52 @@ public class DsContextHolder {
     }
 
 
-    public static void set(String dbType)  {}
+    public static void set(String dbType) {
+        DsNode current = CONTEXT_HOLDER.get();
+        CONTEXT_HOLDER.set(new DsNode(current, dbType));
+    }
 
-    public static String get()  { return null; }
+    public static String get() {
+        DsNode ds = CONTEXT_HOLDER.get();
+        return ds == null ? null : ds.ds;
+    }
 
 
-    public static void set(DS ds)  {}
+    public static void set(DS ds) {
+        set(ds.name().toUpperCase());
+    }
 
 
     /**
      * 移除上下文
      */
-    public static void reset()  {}
+    public static void reset() {
+        DsNode ds = CONTEXT_HOLDER.get();
+        if (ds == null) {
+            return;
+        }
+
+        if (ds.pre != null) {
+            // 退出当前的数据源选择，切回去走上一次的数据源配置
+            CONTEXT_HOLDER.set(ds.pre);
+        } else {
+            CONTEXT_HOLDER.remove();
+        }
+    }
 
     /**
      * 使用主数据源类型
      */
-    public static void master()  {}
+    public static void master() {
+        set(MasterSlaveDsEnum.MASTER.name());
+    }
 
     /**
      * 使用从数据源类型
      */
-    public static void slave()  {}
+    public static void slave() {
+        set(MasterSlaveDsEnum.SLAVE.name());
+    }
 
     public static class DsNode {
         DsNode pre;
