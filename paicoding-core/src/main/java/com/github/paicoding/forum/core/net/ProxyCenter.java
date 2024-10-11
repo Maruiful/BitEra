@@ -9,7 +9,9 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-/** */
+/**
+ *
+ */
 public class ProxyCenter {
 
     /**
@@ -22,7 +24,9 @@ public class ProxyCenter {
     private static List<ProxyProperties.ProxyType> PROXIES = new ArrayList<>();
 
 
-    public static void initProxyPool(List<ProxyProperties.ProxyType> proxyTypes)  {}
+    public static void initProxyPool(List<ProxyProperties.ProxyType> proxyTypes) {
+        PROXIES = proxyTypes;
+    }
 
     /**
      * get proxy
@@ -43,5 +47,11 @@ public class ProxyCenter {
         return PROXIES.get(index);
     }
 
-    public static Proxy loadProxy(String host)  { return null; }
+    public static Proxy loadProxy(String host) {
+        ProxyProperties.ProxyType proxyType = getProxy(host);
+        if (proxyType == null) {
+            return null;
+        }
+        return new Proxy(proxyType.getType(), new InetSocketAddress(proxyType.getIp(), proxyType.getPort()));
+    }
 }

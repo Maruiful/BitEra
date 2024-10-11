@@ -33,7 +33,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 请求工具类
- * */
+ *
+ *
+ */
 @Slf4j
 public class HttpRequestHelper {
     public static final String CHROME_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36";
@@ -46,7 +48,9 @@ public class HttpRequestHelper {
     static {
         restTemplateMap = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(new CacheLoader<String, RestTemplate>() {
             @Override
-            public RestTemplate load(String key) throws Exception  { return null; }
+            public RestTemplate load(String key) throws Exception {
+                return buildRestTemplate();
+            }
         });
     }
 
@@ -55,10 +59,17 @@ public class HttpRequestHelper {
      *
      * @return
      */
-    private static RestTemplate buildRestTemplate()  { return null; }
+    private static RestTemplate buildRestTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(15000);
+        factory.setReadTimeout(15000);
+        return new RestTemplate(factory);
+    }
 
     @Scheduled(cron = "0 0 0/1 * * ?")
-    public static void refreshRestTemplate()  {}
+    public static void refreshRestTemplate() {
+        restTemplateMap.cleanUp();
+    }
 
 
     /**
@@ -78,7 +89,9 @@ public class HttpRequestHelper {
         //设置请求体，注意是LinkedMultiValueMap
         ByteArrayResource fileSystemResource = new ByteArrayResource(bytes) {
             @Override
-            public String getFilename()  { return null; }
+            public String getFilename() {
+                return fileName;
+            }
         };
         MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
         // post的文件
@@ -161,7 +174,15 @@ public class HttpRequestHelper {
      * @param restTemplate
      * @param host
      */
-    private static void ensureProxy(RestTemplate restTemplate, String host)  {}
+    private static void ensureProxy(RestTemplate restTemplate, String host) {
+        SimpleClientHttpRequestFactory factory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
+        if (StringUtils.isBlank(host)) {
+            factory.setProxy(null);
+            return;
+        }
+
+        Optional.ofNullable(ProxyCenter.loadProxy(host)).ifPresent(factory::setProxy);
+    }
 
     /**
      * fetch content
