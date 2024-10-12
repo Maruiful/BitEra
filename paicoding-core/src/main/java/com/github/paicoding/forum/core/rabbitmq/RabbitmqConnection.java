@@ -6,7 +6,9 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/** */
+/**
+ *RabbtMQ连接
+ */
 public class RabbitmqConnection {
 
     private Connection connection;
@@ -30,11 +32,19 @@ public class RabbitmqConnection {
      *
      * @return
      */
-    public Connection getConnection()  { return null; }
+    public Connection getConnection() {
+        return connection;
+    }
 
     /**
      * 关闭链接
      *
      */
-    public void close()  {}
+    public void close() {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

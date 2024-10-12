@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 说明：添加rabbitmq连接池后，这个就可以废弃掉 */
+ * 说明：添加rabbitmq连接池后，这个就可以废弃掉
+ *
+ */
 public class RabbitmqUtil {
 
     /**
@@ -25,10 +27,18 @@ public class RabbitmqUtil {
      * @return
      */
     private static ConnectionFactory init(String host,
-                                  Integer port,
-                                  String username,
-                                  String passport,
-                                  String virtualhost)  { return null; }
+                                          Integer port,
+                                          String username,
+                                          String passport,
+                                          String virtualhost) {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost(host);
+        factory.setPort(port);
+        factory.setUsername(username);
+        factory.setPassword(passport);
+        factory.setVirtualHost(virtualhost);
+        return factory;
+    }
 
     /**
      * 工厂单例，每个host都有属于自己的工厂
@@ -65,5 +75,7 @@ public class RabbitmqUtil {
      * @param port
      * @return
      */
-    private static String getConnectionFactoryKey(String host, Integer port)  { return null; }
+    private static String getConnectionFactoryKey(String host, Integer port) {
+        return host + ":" + port;
+    }
 }
