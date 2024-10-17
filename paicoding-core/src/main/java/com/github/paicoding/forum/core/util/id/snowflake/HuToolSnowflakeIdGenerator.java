@@ -15,5 +15,7 @@ public class HuToolSnowflakeIdGenerator implements IdGenerator {
     }
 
     @Override
-    public Long nextId()  { return null; }
+    public Long nextId()  {
+        return snowflake.nextId();
+    }
 }

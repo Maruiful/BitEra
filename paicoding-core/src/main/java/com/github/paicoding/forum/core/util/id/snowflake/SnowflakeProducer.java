@@ -1,5 +1,6 @@
 package com.github.paicoding.forum.core.util.id.snowflake;
 
+import com.alibaba.dashscope.threads.runs.Run;
 import com.github.paicoding.forum.core.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,5 +58,12 @@ public class SnowflakeProducer {
         });
     }
 
-    public Long genId()  { return null; }
+    public Long genId()  {
+        try {
+            return queue.take();
+        } catch (InterruptedException e) {
+            log.error("雪花算法生成逻辑异常");
+            throw new RuntimeException("雪花算法生成id异常!", e);
+        }
+    }
 }

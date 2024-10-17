@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * 自定义实现的雪花算法生成器
  * <p>
  * 时间 + 数据中心(3位) + 机器id(7位) + 序列号(12位)
- * */
+ */
 @Slf4j
 public class PaiSnowflakeIdGenerator implements IdGenerator {
     /**
@@ -100,7 +100,14 @@ public class PaiSnowflakeIdGenerator implements IdGenerator {
      * @param nowTime 当前时间戳
      * @return 返回新的时间戳
      */
-    private long waitToIncrDiffIfNeed(final long nowTime)  { return 0; }
+    private long waitToIncrDiffIfNeed(final long nowTime) {
+        if (lastTime <= nowTime) {
+            return nowTime;
+        }
+        long diff = lastTime - nowTime;
+        AsyncUtil.sleep(diff);
+        return getNowTime();
+    }
 
     /**
      * 等待下一秒
@@ -108,9 +115,17 @@ public class PaiSnowflakeIdGenerator implements IdGenerator {
      * @param lastTime
      * @return
      */
-    private long waitUntilNextTime(final long lastTime)  { return 0; }
+    private long waitUntilNextTime(final long lastTime) {
+        long result = getNowTime();
+        while (result <= lastTime) {
+            result = getNowTime();
+        }
+        return result;
+    }
 
-    private void vibrateSequenceOffset()  {}
+    private void vibrateSequenceOffset() {
+        sequenceOffset = (byte) (~sequenceOffset & 1);
+    }
 
 
     /**
@@ -118,7 +133,9 @@ public class PaiSnowflakeIdGenerator implements IdGenerator {
      *
      * @return 秒为单位
      */
-    private long getNowTime()  { return 0; }
+    private long getNowTime() {
+        return System.currentTimeMillis() / 1000;
+    }
 
     /**
      * 基于年月日构建分区
@@ -126,5 +143,8 @@ public class PaiSnowflakeIdGenerator implements IdGenerator {
      * @param time 时间戳
      * @return 时间分区
      */
-    private static String getDaySegment(long time)  { return null; }
+    private static String getDaySegment(long time) {
+        LocalDateTime localDate = DateUtil.time2LocalTime(time * 1000L);
+        return String.format("%02d%03d", localDate.getYear() % 100, localDate.getDayOfYear());
+    }
 }
