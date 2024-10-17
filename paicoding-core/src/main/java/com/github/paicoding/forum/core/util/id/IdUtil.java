@@ -86,6 +86,6 @@ public class IdUtil {
         AsyncUtil.sleep(3000L);
         id = producer.genId();
         System.out.println("id: " + id + " -> " + int2str(id));
-    
+
     }
 }
