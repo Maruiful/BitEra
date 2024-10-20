@@ -4,14 +4,18 @@ import java.nio.ByteBuffer;
 
 /**
  * 压缩工具类
- * */
+ *
+ *
+ */
 public class CompressUtil {
     /**
      * 进制转换数组
      */
     private static char[] BINARY_ARRAY = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-    public static String int2str(long num)  { return null; }
+    public static String int2str(long num) {
+        return int2str(num, BINARY_ARRAY.length);
+    }
 
     /**
      * 整数的进制转换
@@ -20,11 +24,26 @@ public class CompressUtil {
      * @param size 进制长度
      * @return 返回String格式的数据
      */
-    public static String int2str(long num, int size)  { return null; }
+    public static String int2str(long num, int size) {
+        if (size > BINARY_ARRAY.length) {
+            size = BINARY_ARRAY.length;
+        }
 
-    private static long zigzag(long n)  { return 0; }
+        StringBuilder builder = new StringBuilder();
+        while (num > 0) {
+            builder.insert(0, BINARY_ARRAY[(int) (num % size)]);
+            num /= size;
+        }
+        return builder.toString();
+    }
 
-    private static long unZigzag(long n)  { return 0; }
+    private static long zigzag(long n) {
+        return (n << 1) ^ (n >> 57);
+    }
+
+    private static long unZigzag(long n) {
+        return (n >>> 1) ^ (n & 1);
+    }
 
     /**
      * Returns the encoding size in bytes of its input value.
@@ -32,7 +51,14 @@ public class CompressUtil {
      * @param v the long to be measured
      * @return the encoding size in bytes of a given long value.
      */
-    public static int varLongSize(long v)  { return 0; }
+    public static int varLongSize(long v) {
+        int result = 0;
+        do {
+            result++;
+            v >>>= 7;
+        } while (v != 0);
+        return result;
+    }
 
     /**
      * Reads an up to 64 bit long varint from the current position of the
@@ -113,5 +139,10 @@ public class CompressUtil {
         }
     }
 
-    public static String putVarLong(long v)  { return null; }
+    public static String putVarLong(long v) {
+        byte[] bytes = new byte[varLongSize(v)];
+        ByteBuffer sink = ByteBuffer.wrap(bytes);
+        putVarLong(v, sink);
+        return new String(bytes);
+    }
 }
