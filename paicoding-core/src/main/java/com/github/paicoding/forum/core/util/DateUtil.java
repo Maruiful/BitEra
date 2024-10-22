@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-/** */
+/**
+ * 时间戳处理工具类
+ */
 public class DateUtil {
     public static final DateTimeFormatter UTC_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
@@ -36,20 +38,35 @@ public class DateUtil {
      * @param timestamp
      * @return
      */
-    public static String time2day(long timestamp)  { return null; }
+    public static String time2day(long timestamp) {
+        return format(BLOG_TIME_FORMAT, timestamp);
+    }
 
-    public static String time2day(Timestamp timestamp)  { return null; }
+    public static String time2day(Timestamp timestamp) {
+        return time2day(timestamp.getTime());
+    }
 
-    public static LocalDateTime time2LocalTime(long timestamp)  { return null; }
+    public static LocalDateTime time2LocalTime(long timestamp) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+    }
 
-    public static String time2utc(long timestamp)  { return null; }
+    public static String time2utc(long timestamp) {
+        return format(UTC_FORMAT, timestamp);
+    }
 
-    public static String time2date(long timestamp)  { return null; }
+    public static String time2date(long timestamp) {
+        return format(BLOG_DATE_FORMAT, timestamp);
+    }
 
-    public static String time2date(Timestamp timestamp)  { return null; }
+    public static String time2date(Timestamp timestamp) {
+        return time2date(timestamp.getTime());
+    }
 
 
-    public static String format(DateTimeFormatter format, long timestamp)  { return null; }
+    public static String format(DateTimeFormatter format, long timestamp) {
+        LocalDateTime time = time2LocalTime(timestamp);
+        return format.format(time);
+    }
 
     /**
      * 微信的支付时间，转时间戳 "2018-06-08T10:34:56+08:00"
@@ -57,8 +74,15 @@ public class DateUtil {
      * @param day
      * @return
      */
-    public static Long wxDayToTimestamp(String day)  { return null; }
+    public static Long wxDayToTimestamp(String day) {
+        LocalDateTime parse = LocalDateTime.parse(day, WX_PAY_FORMATTER);
+        return LocalDateTime.from(parse).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
 
 
-    public static boolean skipDay(long last, long now)  { return false; }
+    public static boolean skipDay(long last, long now) {
+        last = last / ONE_DAY_MILL;
+        now = now / ONE_DAY_MILL;
+        return last != now;
+    }
 }
