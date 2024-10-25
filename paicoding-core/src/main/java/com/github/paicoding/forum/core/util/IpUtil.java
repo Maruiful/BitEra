@@ -21,7 +21,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 
-/** */
+/**
+ * ip工具类
+ */
 @Slf4j
 public class IpUtil {
     private static final String UNKNOWN = "unKnown";
@@ -67,12 +69,17 @@ public class IpUtil {
      * @param ni 网卡
      * @return 如果满足要求则true，否则false
      */
-    private static boolean isValidInterface(NetworkInterface ni) throws SocketException  { return false; }
+    private static boolean isValidInterface(NetworkInterface ni) throws SocketException {
+        return !ni.isLoopback() && !ni.isPointToPoint() && ni.isUp() && !ni.isVirtual()
+                && (ni.getName().startsWith("eth") || ni.getName().startsWith("ens"));
+    }
 
     /**
      * 判断是否是IPv4，并且内网地址并过滤回环地址.
      */
-    private static boolean isValidAddress(InetAddress address)  { return false; }
+    private static boolean isValidAddress(InetAddress address) {
+        return address instanceof Inet4Address && address.isSiteLocalAddress() && !address.isLoopbackAddress();
+    }
 
     /**
      * 通过Socket 唯一确定一个IP
@@ -99,7 +106,20 @@ public class IpUtil {
      *
      * @return Inet4Address>
      */
-    public static String getLocalIp4Address() throws SocketException  { return null; }
+    public static String getLocalIp4Address() throws SocketException {
+        if (LOCAL_IP != null) {
+            return LOCAL_IP;
+        }
+
+        final List<Inet4Address> inet4Addresses = getLocalIp4AddressFromNetworkInterface();
+        if (inet4Addresses.size() != 1) {
+            final Optional<Inet4Address> ipBySocketOpt = getIpBySocket();
+            LOCAL_IP = ipBySocketOpt.map(Inet4Address::getHostAddress).orElseGet(() -> inet4Addresses.isEmpty() ? DEFAULT_IP : inet4Addresses.get(0).getHostAddress());
+            return LOCAL_IP;
+        }
+        LOCAL_IP = inet4Addresses.get(0).getHostAddress();
+        return LOCAL_IP;
+    }
 
 
     /**
@@ -158,7 +178,29 @@ public class IpUtil {
      * @param cidr CIDR格式的网段，如 "192.168.1.0/24"，表示允许 192.168.1.0到192.168.1.255的IP地址；特殊的，对于 0.0.0.0/0，表示允许所有IP地址
      * @return 如果IP在CIDR范围内返回true，否则返回false
      */
-    public static boolean isIpInRange(String ip, String cidr)  { return false; }
+    public static boolean isIpInRange(String ip, String cidr) {
+        if ("0.0.0.0/0".equals(cidr)) {
+            return true;
+        }
+
+        try {
+            String[] parts = cidr.split("/");
+            String network = parts[0];
+            int prefixLength = Integer.parseInt(parts[1]);
+
+            // 将IP地址转换为整数
+            long ipAddr = ipToLong(ip);
+            long networkAddr = ipToLong(network);
+
+            // 计算子网掩码
+            long mask = -(1L << (32 - prefixLength));
+
+            // 比较网络地址是否匹配
+            return (ipAddr & mask) == (networkAddr & mask);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * 将IP地址转换为long类型
@@ -166,7 +208,14 @@ public class IpUtil {
      * @param ip IP地址字符串
      * @return long类型的IP地址
      */
-    private static long ipToLong(String ip)  { return 0; }
+    private static long ipToLong(String ip) {
+        String[] parts = ip.split("\\.");
+        long result = 0;
+        for (int i = 0; i < 4; i++) {
+            result |= (Long.parseLong(parts[i]) << (24 - i * 8));
+        }
+        return result & 0xFFFFFFFFL;
+    }
 
     /**
      * ip库路径
