@@ -14,12 +14,20 @@ import java.math.BigInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-/** */
+/**
+ * Json工具类
+ */
 public class JsonUtil {
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();
 
-    public static JsonNode toNode(String str)  { return null; }
+    public static JsonNode toNode(String str) {
+        try {
+            return jsonMapper.readTree(str);
+        } catch (Exception e) {
+            throw new UnsupportedOperationException(e);
+        }
+    }
 
     public static <T> T toObj(String str, Class<T> clz) {
         try {
@@ -41,7 +49,18 @@ public class JsonUtil {
      * 序列换成json时,将所有的long变成string
      * 因为js中得数字类型不能包含所有的java long值
      */
-    public static SimpleModule bigIntToStrsimpleModule()  { return null; }
+    public static SimpleModule bigIntToStrsimpleModule() {
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(Long.class, newSerializer(s -> String.valueOf(s)));
+        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        simpleModule.addSerializer(long[].class, newSerializer((Function<Long, String>) String::valueOf));
+        simpleModule.addSerializer(Long[].class, newSerializer((Function<Long, String>) String::valueOf));
+        simpleModule.addSerializer(BigDecimal.class, newSerializer(BigDecimal::toString));
+        simpleModule.addSerializer(BigDecimal[].class, newSerializer(BigDecimal::toString));
+        simpleModule.addSerializer(BigInteger.class, ToStringSerializer.instance);
+        simpleModule.addSerializer(BigInteger[].class, newSerializer((Function<BigInteger, String>) BigInteger::toString));
+        return simpleModule;
+    }
 
     public static <T, K> JsonSerializer<T> newSerializer(Function<K, String> func) {
         return new JsonSerializer<T>() {
