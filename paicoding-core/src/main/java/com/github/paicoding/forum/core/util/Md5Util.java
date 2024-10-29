@@ -4,16 +4,34 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/** */
+/**
+ * Md5加密算法工具类
+ */
 public class Md5Util {
     private Md5Util() {
     }
 
-    public static String encode(String data)  { return null; }
+    public static String encode(String data) {
+        byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+        return encode(bytes);
+    }
 
-    public static String encode(byte[] bytes)  { return null; }
+    public static String encode(byte[] bytes) {
+        return encode(bytes, 0, bytes.length);
+    }
 
-    public static String encode(byte[] data, int offset, int len)  { return null; }
+    public static String encode(byte[] data, int offset, int len) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException var5) {
+            throw new RuntimeException(var5);
+        }
+
+        md.update(data, offset, len);
+        byte[] secretBytes = md.digest();
+        return getFormattedText(secretBytes);
+    }
 
     private static String getFormattedText(byte[] src) {
         if (src != null && src.length != 0) {
