@@ -11,7 +11,8 @@ import java.util.regex.Pattern;
 
 /**
  * markdown文本中的图片识别
- * */
+ *
+ */
 public class MdImgLoader {
     private static Pattern IMG_PATTERN = Pattern.compile("!\\[(.*?)\\]\\((.*?)\\)");
 
@@ -33,5 +34,12 @@ public class MdImgLoader {
         private String url;
     }
 
-    public static List<MdImg> loadImgs(String content)  { return null; }
+    public static List<MdImg> loadImgs(String content) {
+        Matcher matcher = IMG_PATTERN.matcher(content);
+        List<MdImg> list = new ArrayList<>();
+        while (matcher.find()) {
+            list.add(new MdImg(matcher.group(0), matcher.group(1), matcher.group(2)));
+        }
+        return list;
+    }
 }
