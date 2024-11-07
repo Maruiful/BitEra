@@ -5,7 +5,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Random;
 
-/** */
+/**
+ * 端口工具类
+ */
 public class SocketUtil {
 
     /**
@@ -14,11 +16,22 @@ public class SocketUtil {
      * @param port
      * @return
      */
-    public static boolean isPortAvailable(int port)  { return false; }
+    public static boolean isPortAvailable(int port) {
+        try {
+            ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(port, 1);
+            serverSocket.close();
+            return true;
+        } catch (Exception var3) {
+            return false;
+        }
+    }
 
     private static Random random = new Random();
 
-    private static int findRandomPort(int minPort, int maxPort)  { return 0; }
+    private static int findRandomPort(int minPort, int maxPort) {
+        int portRange = maxPort - minPort;
+        return minPort + random.nextInt(portRange + 1);
+    }
 
     /**
      * 找一个可用的端口号
