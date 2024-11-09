@@ -9,7 +9,9 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-/** */
+/**
+ * Spring相关工具类
+ */
 @Component
 public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
     private volatile static ApplicationContext context;
@@ -18,17 +20,25 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
     private static Binder binder;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException  {}
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        // 容器启动时自动注入，方便后续获取bean
+        SpringUtil.context = applicationContext;
+    }
 
     @Override
-    public void setEnvironment(Environment environment)  {}
+    public void setEnvironment(Environment environment) {
+        SpringUtil.environment = environment;
+        binder = Binder.get(environment);
+    }
 
     /**
      * 获取ApplicationContext
      *
      * @return
      */
-    public static ApplicationContext getContext()  { return null; }
+    public static ApplicationContext getContext() {
+        return context;
+    }
 
     /**
      * 获取bean
@@ -53,11 +63,21 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
         }
     }
 
-    public static Object getBean(String beanName)  { return null; }
+    public static Object getBean(String beanName) {
+        return context.getBean(beanName);
+    }
 
-    public static Object getBeanOrNull(String beanName)  { return null; }
+    public static Object getBeanOrNull(String beanName) {
+        try {
+            return context.getBean(beanName);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
-    public static boolean hasConfig(String key)  { return false; }
+    public static boolean hasConfig(String key) {
+        return environment.containsProperty(key);
+    }
 
     /**
      * 获取配置
@@ -65,9 +85,17 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
      * @param key
      * @return
      */
-    public static String getConfig(String key)  { return null; }
+    public static String getConfig(String key) {
+        return environment.getProperty(key);
+    }
 
-    public static String getConfigOrElse(String mainKey, String slaveKey)  { return null; }
+    public static String getConfigOrElse(String mainKey, String slaveKey) {
+        String ans = environment.getProperty(mainKey);
+        if (ans == null) {
+            return environment.getProperty(slaveKey);
+        }
+        return ans;
+    }
 
     /**
      * 获取配置
@@ -76,14 +104,18 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
      * @param val 配置不存在时的默认值
      * @return
      */
-    public static String getConfig(String key, String val)  { return null; }
+    public static String getConfig(String key, String val) {
+        return environment.getProperty(key, val);
+    }
 
     /**
      * 发布事件消息
      *
      * @param event
      */
-    public static void publishEvent(ApplicationEvent event)  {}
+    public static void publishEvent(ApplicationEvent event) {
+        context.publishEvent(event);
+    }
 
 
     /**
@@ -91,5 +123,7 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
      *
      * @return
      */
-    public static Binder getBinder()  { return null; }
+    public static Binder getBinder() {
+        return binder;
+    }
 }
