@@ -16,7 +16,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
-/** */
+/**
+ * 基础核心配置类
+ */
 @Configuration
 @EnableConfigurationProperties(ProxyProperties.class)
 @ComponentScan(basePackages = "com.github.paicoding.forum.core")
@@ -34,8 +36,22 @@ public class ForumCoreAutoConfig {
      * @return
      */
     @Bean("caffeineCacheManager")
-    public CacheManager cacheManager()  { return null; }
+    public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCaffeine(Caffeine.newBuilder().
+                // 设置过期时间，写入后五分钟国企
+                        expireAfterWrite(5, TimeUnit.MINUTES)
+                // 初始化缓存空间大小
+                .initialCapacity(100)
+                // 最大的缓存条数
+                .maximumSize(200)
+        );
+        return cacheManager;
+    }
 
     @PostConstruct
-    public void init()  {}
+    public void init() {
+        // 这里借助手动解析配置信息，并实例化为Java POJO对象，来实现代理池的初始化
+        ProxyCenter.initProxyPool(proxyProperties.getProxy());
+    }
 }
