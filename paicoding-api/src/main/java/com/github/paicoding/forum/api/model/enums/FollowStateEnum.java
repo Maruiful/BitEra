@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 关注状态枚举
- * * @since 2022/7/19
+ *
  */
 @Getter
 public enum FollowStateEnum {

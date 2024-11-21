@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 保存Category请求参数
+ * 
  * */
 @Data
 public class CategoryReq implements Serializable {

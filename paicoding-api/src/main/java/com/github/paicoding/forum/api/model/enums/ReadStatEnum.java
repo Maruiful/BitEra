@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 阅读状态枚举
- * * @since 2022/7/19
+ *
  */
 @Getter
 public enum ReadStatEnum {

@@ -13,11 +13,17 @@ import java.security.Principal;
 public class ReqInfoContext {
     private static TransmittableThreadLocal<ReqInfo> contexts = new TransmittableThreadLocal<>();
 
-    public static void addReqInfo(ReqInfo reqInfo)  {}
+    public static void addReqInfo(ReqInfo reqInfo)  {
+        contexts.set(reqInfo);
+    }
 
-    public static void clear()  {}
+    public static void clear()  {
+        contexts.remove();
+    }
 
-    public static ReqInfo getReqInfo()  { return null; }
+    public static ReqInfo getReqInfo()  {
+        return contexts.get();
+    }
 
     @Data
     public static class ReqInfo implements Principal {
@@ -78,6 +84,8 @@ public class ReqInfoContext {
         private String chatId;
 
         @Override
-        public String getName()  { return null; }
+        public String getName()  {
+            return session;
+        }
     }
 }

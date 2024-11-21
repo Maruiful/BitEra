@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 点赞状态枚举
- * * @since 2022/7/19
+ *
  */
 @Getter
 public enum PraiseStatEnum {

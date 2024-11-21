@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 关注类型枚举
- * * @since 2022/7/19
+ *
  */
 @Getter
 public enum FollowTypeEnum {

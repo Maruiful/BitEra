@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 用户页面选择枚举
- * * @since 2022/7/19
+ *
  */
 @Getter
 public enum HomeSelectEnum {
