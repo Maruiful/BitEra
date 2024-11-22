@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * 评论树状结构
- * * @since 2022/7/19
+ *
  */
 @Data
 public class BaseCommentDTO implements Comparable<BaseCommentDTO> {
