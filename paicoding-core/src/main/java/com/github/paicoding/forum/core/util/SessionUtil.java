@@ -23,7 +23,9 @@ public class SessionUtil {
 
     public static String buildSetCookieString(Cookie cookie)  { return null; }
 
-    public static Cookie newCookie(String key, String session)  { return null; }
+    public static Cookie newCookie(String key, String session)  {
+        return newCookie(key, session, "/", COOKIE_AGE);
+    }
 
     public static Cookie newCookie(String key, String session, String path, int maxAge)  { return null; }
 

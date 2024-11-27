@@ -55,15 +55,41 @@ public class LoginRestController {
      */
     @PostMapping("/login/register")
     public ResVo<Long> register(UserPwdLoginReq loginReq,
-                                   HttpServletResponse response)  { return null; }
+                                   HttpServletResponse response)  {  String session = loginService.registerByUserPwd(loginReq);
+        if (StringUtils.isNotBlank(session)) {
+            // cookie中写入用户登录信息，用于身份识别
+            response.addCookie(SessionUtil.newCookie(LoginService.SESSION_KEY, session));
+            // 获取当前登录用户的ID
+            Long userId = ReqInfoContext.getReqInfo().getUserId();
+            return ResVo.ok(userId);
+        } else {
+            return ResVo.fail(StatusEnum.LOGIN_FAILED_MIXED, "用户名和密码登录异常，请稍后重试");
+        }
+    }
 
     @Permission(role = UserRole.LOGIN)
     @RequestMapping("logout")
-    public ResVo<Boolean> logOut(HttpServletRequest request, HttpServletResponse response) throws IOException  { return null; }
+    public ResVo<Boolean> logOut(HttpServletRequest request, HttpServletResponse response) throws IOException  {
+        // 释放会话
+        request.getSession().invalidate();
+        Optional.ofNullable(ReqInfoContext.getReqInfo()).ifPresent(s -> loginService.logout(s.getSession()));
+        // 移除cookie
+        SessionUtil.delCookies(LoginService.SESSION_KEY);
+        // 重定向到当前页面
+        String referer = request.getHeader("Referer");
+        if (StringUtils.isBlank(referer)) {
+            referer = "/";
+        }
+        response.sendRedirect(referer);
+        return ResVo.ok(true);
+    }
 
     /**
      * 知识星球登录
      */
     @RequestMapping("login/zsxq")
-    public void redirectToZsxq(HttpServletResponse response) throws IOException  {}
+    public void redirectToZsxq(HttpServletResponse response) throws IOException  {
+        String url = zsxqHelper.buildZsxqLoginUrl("login");
+        response.sendRedirect(url);
+    }
 }

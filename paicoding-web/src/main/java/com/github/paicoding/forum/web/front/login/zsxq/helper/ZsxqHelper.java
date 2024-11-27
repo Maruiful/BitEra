@@ -13,7 +13,7 @@ import java.util.TreeMap;
 
 /**
  * 知识星球登录相关类
- * */
+ */
 @Slf4j
 @Component
 public class ZsxqHelper {
@@ -22,7 +22,20 @@ public class ZsxqHelper {
     @Autowired
     private ZsxqProperties zsxqProperties;
 
-    public String buildZsxqLoginUrl(String type)  { return null; }
+    public String buildZsxqLoginUrl(String type) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("app_id=").append(zsxqProperties.getAppId());
+        builder.append("&extra=").append(type);
+        builder.append("&group_number=").append(zsxqProperties.getGroupNumber());
+        builder.append("&redirect_url=").append(URLEncodeUtil.encodeAll(zsxqProperties.getRedirectUrl()));
+        builder.append("&timestamp=").append(System.currentTimeMillis() / 1000L);
+
+        String toSignParam = builder + "&secret=" + zsxqProperties.getSecret();
+        // 请求参数签名
+        String sign = sha1(toSignParam);
+        builder.append("&signature=").append(sign);
+        return zsxqProperties.getApi() + "?" + builder;
+    }
 
     /**
      * 使用SHA1算法对输入字符串进行摘要计算
@@ -30,7 +43,15 @@ public class ZsxqHelper {
      * @param input 需要进行摘要计算的字符串
      * @return SHA1摘要结果（十六进制字符串）
      */
-    private String sha1(String input)  { return null; }
+    private String sha1(String input) {
+        SHA1.Digest digest = new SHA1.Digest();
+        byte[] result = digest.digest(input.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : result) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 
     public boolean verifySignature(ZsxqLoginVo vo) {
         // 校验签名，首先使用Map来承接请求参数，key为参数名称（驼峰转下划线），value为参数值
@@ -66,32 +87,90 @@ public class ZsxqHelper {
     /**
      * 方案1: 不对user_name和user_icon进行额外编码
      */
-    private boolean verifySignatureWithoutEncoding(ZsxqLoginVo vo)  { return false; }
+    private boolean verifySignatureWithoutEncoding(ZsxqLoginVo vo) {
+        Map<String, Object> params = buildSignatureParams(vo, false);
+        return computeAndVerifySignature(params, vo.getSignature());
+    }
 
     /**
      * 方案2: 使用UTF-8编码（备用方案）
      */
-    private boolean verifySignatureWithUTF8Encoding(ZsxqLoginVo vo)  { return false; }
+    private boolean verifySignatureWithUTF8Encoding(ZsxqLoginVo vo) {
+        Map<String, Object> params = buildSignatureParams(vo, true);
+        return computeAndVerifySignature(params, vo.getSignature());
+    }
 
     /**
      * 方案3: 使用空格转+号的方式编码（模拟知识星球的编码方式）
      */
-    private boolean verifySignatureWithSpacePlusEncoding(ZsxqLoginVo vo)  { return false; }
+    private boolean verifySignatureWithSpacePlusEncoding(ZsxqLoginVo vo) {
+        Map<String, Object> params = buildSignatureParamsWithSpacePlus(vo);
+        return computeAndVerifySignature(params, vo.getSignature());
+    }
 
     /**
      * 构建签名参数（空格转+号编码版本）
      */
-    private Map<String, Object> buildSignatureParamsWithSpacePlus(ZsxqLoginVo vo)  { return null; }
+    private Map<String, Object> buildSignatureParamsWithSpacePlus(ZsxqLoginVo vo) {
+        Map<String, Object> params = new TreeMap<>();
+        params.put("app_id", vo.getApp_id());
+        params.put("group_number", vo.getGroup_number());
+        params.put("user_id", vo.getUser_id());
+
+        // 使用特殊的编码方式：空格转+号，其他字符进行UTF-8编码
+        params.put("user_name", vo.getUser_name() != null ? encodeWithSpacePlus(vo.getUser_name()) : null);
+        params.put("user_icon", vo.getUser_icon() != null ? encodeWithSpacePlus(vo.getUser_icon()) : null);
+
+        params.put("user_number", vo.getUser_number());
+        params.put("user_role", vo.getUser_role());
+        params.put("extra", vo.getExtra());
+        params.put("join_time", vo.getJoin_time());
+        params.put("expire_time", vo.getExpire_time());
+        params.put("timestamp", vo.getTimestamp());
+
+        return params;
+    }
 
     /**
      * 特殊编码：先进行UTF-8编码，然后将%20替换为+
      */
-    private String encodeWithSpacePlus(String input)  { return null; }
+    private String encodeWithSpacePlus(String input) {
+        if (input == null) {
+            return null;
+        }
+        // 先进行标准URL编码
+        String encoded = URLEncodeUtil.encodeAll(input);
+        // 将%20（空格的URL编码）替换为+号
+        return encoded.replace("%20", "+");
+    }
 
     /**
      * 构建签名参数
      */
-    private Map<String, Object> buildSignatureParams(ZsxqLoginVo vo, boolean needEncoding)  { return null; }
+    private Map<String, Object> buildSignatureParams(ZsxqLoginVo vo, boolean needEncoding) {
+        Map<String, Object> params = new TreeMap<>();
+        params.put("app_id", vo.getApp_id());
+        params.put("group_number", vo.getGroup_number());
+        params.put("user_id", vo.getUser_id());
+
+        // 根据needEncoding参数决定是否编码
+        if (needEncoding) {
+            params.put("user_name", vo.getUser_name() != null ? URLEncodeUtil.encodeAll(vo.getUser_name()) : null);
+            params.put("user_icon", vo.getUser_icon() != null ? URLEncodeUtil.encodeAll(vo.getUser_icon()) : null);
+        } else {
+            params.put("user_name", vo.getUser_name());
+            params.put("user_icon", vo.getUser_icon());
+        }
+
+        params.put("user_number", vo.getUser_number());
+        params.put("user_role", vo.getUser_role());
+        params.put("extra", vo.getExtra());
+        params.put("join_time", vo.getJoin_time());
+        params.put("expire_time", vo.getExpire_time());
+        params.put("timestamp", vo.getTimestamp());
+
+        return params;
+    }
 
     /**
      * 计算并验证签名
