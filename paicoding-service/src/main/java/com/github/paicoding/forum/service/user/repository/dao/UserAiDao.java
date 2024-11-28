@@ -38,7 +38,13 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      */
     public UserAiDO getByStarNumber(String starNumber)  { return null; }
 
-    public UserAiDO getByUserId(Long userId)  { return null; }
+    public UserAiDO getByUserId(Long userId)  {
+        LambdaQueryWrapper<UserAiDO> queryUserAi = Wrappers.lambdaQuery();
+
+        queryUserAi.eq(UserAiDO::getUserId, userId)
+                .eq(UserAiDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return userAiMapper.selectOne(queryUserAi);
+    }
 
 
     /**
@@ -54,7 +60,13 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      * @param inviteCode 邀请码
      * @return
      */
-    public UserAiDO getByInviteCode(String inviteCode)  { return null; }
+    public UserAiDO getByInviteCode(String inviteCode)  {
+        LambdaQueryWrapper<UserAiDO> queryUserAi = Wrappers.lambdaQuery();
+
+        queryUserAi.eq(UserAiDO::getInviteCode, inviteCode)
+                .eq(UserAiDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return userAiMapper.selectOne(queryUserAi);
+    }
 
     /**
      * 更新用户的邀请人数
@@ -62,7 +74,11 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      * @param id
      * @param incr
      */
-    private void updateInviteCnt(Long id, int incr)  {}
+    private void updateInviteCnt(Long id, int incr)  {
+        LambdaUpdateWrapper<UserAiDO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(UserAiDO::getId, id).setSql("invite_num = invite_num + " + incr);
+        userAiMapper.update(null, updateWrapper);
+    }
 
     public void saveOrUpdateAiBindInfo(UserAiDO ai)  {}
 

@@ -53,7 +53,13 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
 
     public void updateUserInfo(UserInfoDO user)  {}
 
-    public UserDO getUserByUserName(String userName)  { return null; }
+    public UserDO getUserByUserName(String userName)  {
+        LambdaQueryWrapper<UserDO> queryUser = Wrappers.lambdaQuery();
+        queryUser.eq(UserDO::getUserName, userName)
+                .eq(UserDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .last("limit 1");
+        return userMapper.selectOne(queryUser);
+    }
 
     public UserDO getUserByUserId(Long userId)  { return null; }
 

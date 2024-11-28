@@ -21,7 +21,9 @@ public class UserPwdEncoder {
     @Value("${security.salt-index}")
     private Integer saltIndex;
 
-    public boolean match(String plainPwd, String encPwd)  { return false; }
+    public boolean match(String plainPwd, String encPwd)  {
+        return Objects.equals(encPwd(plainPwd), encPwd);
+    }
 
     /**
      * 明文密码处理
