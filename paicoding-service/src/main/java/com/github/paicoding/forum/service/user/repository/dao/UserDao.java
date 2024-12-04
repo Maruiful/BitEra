@@ -43,7 +43,13 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
      */
     public List<UserInfoDO> getByUserNameLike(String userName)  { return null; }
 
-    public void saveUser(UserDO user)  {}
+    public void saveUser(UserDO user) {
+        if (user.getId() == null) {
+            userMapper.insert(user);
+        } else {
+            userMapper.updateById(user);
+        }
+    }
 
     public UserInfoDO getByUserId(Long userId)  { return null; }
 

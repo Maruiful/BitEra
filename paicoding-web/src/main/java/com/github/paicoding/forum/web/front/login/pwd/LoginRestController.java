@@ -55,7 +55,8 @@ public class LoginRestController {
      */
     @PostMapping("/login/register")
     public ResVo<Long> register(UserPwdLoginReq loginReq,
-                                   HttpServletResponse response)  {  String session = loginService.registerByUserPwd(loginReq);
+                                   HttpServletResponse response)  {
+        String session = loginService.registerByUserPwd(loginReq);
         if (StringUtils.isNotBlank(session)) {
             // cookie中写入用户登录信息，用于身份识别
             response.addCookie(SessionUtil.newCookie(LoginService.SESSION_KEY, session));

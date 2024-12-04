@@ -31,6 +31,13 @@ public class UserPwdEncoder {
      * @param plainPwd
      * @return
      */
-    public String encPwd(String plainPwd)  { return null; }
+    public String encPwd(String plainPwd) {
+        if (plainPwd.length() > saltIndex) {
+            plainPwd = plainPwd.substring(0, saltIndex) + salt + plainPwd.substring(saltIndex);
+        } else {
+            plainPwd = plainPwd + salt;
+        }
+        return DigestUtils.md5DigestAsHex(plainPwd.getBytes(StandardCharsets.UTF_8));
+    }
 
 }
