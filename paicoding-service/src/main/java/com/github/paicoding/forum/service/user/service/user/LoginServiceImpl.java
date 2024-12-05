@@ -56,7 +56,9 @@ public class LoginServiceImpl implements LoginService {
     public Long autoRegisterWxUserInfo(String uuid) { return null; }
 
     @Override
-    public void logout(String session) {}
+    public void logout(String session) {
+        userSessionHelper.removeSession(session);
+    }
 
     @Override
     public String loginByWx(Long userId) { return null; }

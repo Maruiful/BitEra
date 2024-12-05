@@ -65,7 +65,9 @@ public class UserSessionHelper {
         return token;
     }
 
-    public void removeSession(String session) {}
+    public void removeSession(String session) {
+        RedisClient.del(session);
+    }
 
     /**
      * 根据会话获取用户信息
