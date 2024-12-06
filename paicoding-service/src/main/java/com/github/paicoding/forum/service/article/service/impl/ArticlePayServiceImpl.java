@@ -40,6 +40,9 @@ import java.util.Objects;
 @Service
 public class ArticlePayServiceImpl implements ArticlePayService {
 
+    @Autowired
+    private ArticlePayDao articlePayDao;
+
     @Override
     public boolean hasPayed(Long article, Long currentUerId) { return false; }
 
@@ -51,7 +54,46 @@ public class ArticlePayServiceImpl implements ArticlePayService {
 
     @Override
     public boolean updatePayStatus(Long payId, String verifyCode, PayStatusEnum payStatus,
-                                   Long payTime, String transactionId) { return false; }
+                                   Long payTime, String transactionId) {
+        ArticlePayRecordDO dbRecord = articlePayDao.selectForUpdate(payId);
+        if (dbRecord == null || !Objects.equals(dbRecord.getVerifyCode(), verifyCode)) {
+            throw ExceptionUtil.of(StatusEnum.RECORDS_NOT_EXISTS, "支付记录:" + payId);
+        }
+
+        if (Objects.equals(payStatus.getStatus(), dbRecord.getPayStatus())
+                || PayStatusEnum.SUCCEED.getStatus().equals(dbRecord.getPayStatus())) {
+            // 幂等 or 已支付成功到了终态，不再进行后续的更新
+            return true;
+        }
+
+        // 更新原来的支付状态为最新的结果
+        dbRecord.setPayStatus(payStatus.getStatus());
+        dbRecord.setPayCallbackTime(new Date(payTime));
+        dbRecord.setUpdateTime(new Date());
+        dbRecord.setThirdTransCode(transactionId);
+        boolean ans = articlePayDao.updateById(dbRecord);
+        if (ans) {
+            publishPayStatusChangeNotify(dbRecord);
+        }
+        return ans;
+    }
+
+    /**
+     * 根据支付状态发布对应的通知消息
+     *
+     * @param record
+     */
+    private void publishPayStatusChangeNotify(ArticlePayRecordDO record) {
+        // 支付状态变更的消息回调
+        if (Objects.equals(record.getPayStatus(), PayStatusEnum.PAYING.getStatus())) {
+            // 更新支付状态为支付中
+            MsgNotifyHelper.publish(NotifyTypeEnum.PAYING, record);
+        } else if (Objects.equals(record.getPayStatus(), PayStatusEnum.SUCCEED.getStatus())
+                || Objects.equals(record.getPayStatus(), PayStatusEnum.FAIL.getStatus())) {
+            // 支付成功or失败
+            MsgNotifyHelper.publish(NotifyTypeEnum.PAY, record);
+        }
+    }
 
     @Override
     public PayConfirmDTO buildPayConfirmInfo(Long payId, ArticlePayRecordDO record) { return null; }

@@ -2,6 +2,7 @@ package com.github.paicoding.forum.service.notify.help;
 
 import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
 import com.github.paicoding.forum.api.model.vo.notify.NotifyMsgEvent;
+import com.github.paicoding.forum.core.util.SpringUtil;
 import org.springframework.stereotype.Service;
 
 /** */
@@ -25,5 +26,7 @@ public class MsgNotifyHelper {
      *             * @param content 消息内容
      *             * @param <T>     消息类型
      */
-    public static <T> void publish(NotifyTypeEnum type, T content) {}
+    public static <T> void publish(NotifyTypeEnum type, T content) {
+        SpringUtil.getBean(MsgNotifyHelper.class).publishMsg(type, content);
+    }
 }

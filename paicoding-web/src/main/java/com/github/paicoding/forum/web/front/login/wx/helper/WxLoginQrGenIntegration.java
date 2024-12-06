@@ -36,14 +36,28 @@ public class WxLoginQrGenIntegration {
         this.wxLoginProperties = wxLoginProperties;
     }
 
-    public LoginQrTypeEnum getLoginQrType()  { return null; }
+    public LoginQrTypeEnum getLoginQrType()  {
+        return LoginQrTypeEnum.valueOf(wxLoginProperties.getLoginQrType());
+    }
 
     /**
      * 生成登录二维码
      *
      * @return
      */
-    public String genLoginQrImg(String code)  { return null; }
+    public String genLoginQrImg(String code)  {
+        LoginQrTypeEnum type = getLoginQrType();
+        if (type == LoginQrTypeEnum.SERVICE_ACCOUNT) {
+            // 服务号登录，首先获取带链接的二维码信息
+            String qrText = genServiceAccountLoginQrCode(code);
+            // 根据二维码内容生成二维码图片，返回给前端
+            String base64Img = genQrImg(qrText);
+            return DomUtil.toDomSrc(base64Img, MediaType.ImagePng);
+        } else {
+            // 普通公众号登录时
+            return wxLoginProperties.getQrCodeImg();
+        }
+    }
 
     private String genQrImg(String qrText) {
         try {
@@ -76,7 +90,9 @@ public class WxLoginQrGenIntegration {
      *
      * @return true 有效；false 失效
      */
-    private boolean checkAccessToken()  { return false; }
+    private boolean checkAccessToken()  {
+        return accessToken != null && accessToken.expireTimestamp > System.currentTimeMillis() + 60_000L;
+    }
 
     private synchronized void refreshAccessToken() {
         WxAccessToken token = HttpRequestHelper.get(WX_TOKEN_URL,
@@ -96,7 +112,14 @@ public class WxLoginQrGenIntegration {
      * @return
      * @see <a href="https://developers.weixin.qq.com/doc/service/api/qrcode/qrcodes/api_createqrcode.html"/>
      */
-    private String genServiceAccountLoginQrCode(String code)  { return null; }
+    private String genServiceAccountLoginQrCode(String code)  {
+        String url = WX_GEN_QR_URL + getAccessToken();
+        Map<String, Object> params = MapUtils.create("expire_seconds", 300, "action_name", "QR_SCENE");
+        params.put("action_info", MapUtils.create("scene", MapUtils.create("scene_id", code, "scene_str", "paiLogin#" + code)));
+
+        WxLoginQrCodeRes res = HttpRequestHelper.postJsonData(url, params, WxLoginQrCodeRes.class);
+        return res.url;
+    }
 
     @Data
     private static class BaseWxRes {

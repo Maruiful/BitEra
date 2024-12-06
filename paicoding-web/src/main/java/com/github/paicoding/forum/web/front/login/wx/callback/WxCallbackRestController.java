@@ -37,7 +37,7 @@ import java.util.function.Function;
 
 /**
  * 微信公众号登录相关
- * */
+ */
 @Slf4j
 @RequestMapping(path = "wx")
 @RestController
@@ -60,7 +60,13 @@ public class WxCallbackRestController {
      * @return
      */
     @GetMapping(path = "callback")
-    public String check(HttpServletRequest request)  { return null; }
+    public String check(HttpServletRequest request) {
+        String echoStr = request.getParameter("echostr");
+        if (StringUtils.isNoneEmpty(echoStr)) {
+            return echoStr;
+        }
+        return "";
+    }
 
     /**
      * fixme: 需要做防刷校验
@@ -111,7 +117,24 @@ public class WxCallbackRestController {
     /**
      * 对微信的回调进行安全校验
      */
-    private void wxCallbackSecurityCheck()  {}
+    private void wxCallbackSecurityCheck() {
+        String securityToken = SpringUtil.getBean(WxLoginProperties.class).getSecurityCheckToken();
+        if (StringUtils.isBlank(securityToken)) {
+            // 没有配置接口签名校验时，直接返回
+            return;
+        }
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String sig = request.getParameter("signature");
+        String timestamp = request.getParameter("timestamp");
+        String nonce = request.getParameter("nonce");
+        // 验证签名
+        String toSign = timestamp + nonce + securityToken;
+        if (!DigestUtils.sha1Hex(toSign).equals(sig)) {
+            log.error("微信回调签名校验失败，请检查接口签名配置");
+            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS);
+        }
+    }
 
 
     /**
@@ -119,9 +142,15 @@ public class WxCallbackRestController {
      *
      * @return
      */
-    private BaseWxMsgResVo loginOcPai(WxTxtMsgReqVo msg)  { return null; }
+    private BaseWxMsgResVo loginOcPai(WxTxtMsgReqVo msg) {
+        return HttpRequestHelper.postJsonData(SpringUtil.getConfig("paicoding.openapi.oc-login-redirect-url"), msg, WxTxtMsgResVo.class);
+    }
 
-    private void fillResVo(BaseWxMsgResVo res, WxTxtMsgReqVo msg)  {}
+    private void fillResVo(BaseWxMsgResVo res, WxTxtMsgReqVo msg) {
+        res.setFromUserName(msg.getToUserName());
+        res.setToUserName(msg.getFromUserName());
+        res.setCreateTime(System.currentTimeMillis() / 1000);
+    }
 
 
     /**
@@ -135,7 +164,21 @@ public class WxCallbackRestController {
     public ResponseEntity<?> wxPayCallback(HttpServletRequest request) throws IOException {
         return payServiceFactory.getPayService(ThirdPayWayEnum.WX_NATIVE).payCallback(request, new Function<PayCallbackBo, Boolean>() {
             @Override
-            public Boolean apply(PayCallbackBo transaction)  { return null; }
+            public Boolean apply(PayCallbackBo transaction) {
+                log.info("微信支付回调执行业务逻辑 {}", transaction);
+                if (transaction.getOutTradeNo().startsWith("TEST-")) {
+                    // TestController 中关于测试支付的回调逻辑时，我们只通过消息进行通知用户即可
+                    long payUser = transaction.getPayId();
+                    SpringUtil.getBean(NotifyService.class).notifyToUser(payUser, "您的一笔微信测试支付状态已更新为：" + transaction.getPayStatus().getMsg());
+                    return true;
+                }
+
+                return articlePayService.updatePayStatus(transaction.getPayId(),
+                        transaction.getOutTradeNo(),
+                        transaction.getPayStatus(),
+                        transaction.getSuccessTime(),
+                        transaction.getThirdTransactionId());
+            }
         });
     }
 
@@ -150,7 +193,10 @@ public class WxCallbackRestController {
         return payServiceFactory.getPayService(ThirdPayWayEnum.WX_NATIVE)
                 .refundCallback(request, new Function<RefundNotification, Boolean>() {
                     @Override
-                    public Boolean apply(RefundNotification refundNotification)  { return null; }
+                    public Boolean apply(RefundNotification refundNotification) {
+                        log.info("微信退款回调执行业务逻辑{}", refundNotification);
+                        return null;
+                    }
                 });
     }
 }

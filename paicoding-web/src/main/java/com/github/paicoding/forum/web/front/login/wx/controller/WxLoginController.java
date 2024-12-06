@@ -34,11 +34,16 @@ public class WxLoginController extends BaseViewController {
     @MdcDot
     @ResponseBody
     @GetMapping(path = "subscribe", produces = {org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE})
-    public SseEmitter subscribe(String deviceId) throws IOException  { return null; }
+    public SseEmitter subscribe(String deviceId) throws IOException  {
+        return qrLoginHelper.subscribe();
+    }
+
 
     @GetMapping(path = "/login/fetch")
     @ResponseBody
-    public String resendCode(String deviceId) throws IOException  { return null; }
+    public String resendCode(String deviceId) throws IOException  {
+        return qrLoginHelper.resend();
+    }
 
     /**
      * 刷新验证码
@@ -49,5 +54,17 @@ public class WxLoginController extends BaseViewController {
     @MdcDot
     @GetMapping(path = "/login/refresh")
     @ResponseBody
-    public ResVo<WxLoginVo> refresh(String deviceId) throws IOException  { return null; }
+    public ResVo<WxLoginVo> refresh(String deviceId) throws IOException  {
+        WxLoginVo vo = new WxLoginVo();
+        String code = qrLoginHelper.refreshCode();
+        if (StringUtils.isBlank(code)) {
+            // 刷新失败，之前的连接已失效，重新建立连接
+            vo.setCode(code);
+            vo.setReconnect(true);
+        } else {
+            vo.setCode(code);
+            vo.setReconnect(false);
+        }
+        return ResVo.ok(vo);
+    }
 }

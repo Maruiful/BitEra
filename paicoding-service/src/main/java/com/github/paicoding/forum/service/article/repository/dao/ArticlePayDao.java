@@ -48,5 +48,10 @@ public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePa
      * @param id
      * @return
      */
-    public ArticlePayRecordDO selectForUpdate(Long id)  { return null; }
+    public ArticlePayRecordDO selectForUpdate(Long id)  {
+        QueryWrapper<ArticlePayRecordDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id);
+        queryWrapper.last("for update");
+        return baseMapper.selectOne(queryWrapper);
+    }
 }
