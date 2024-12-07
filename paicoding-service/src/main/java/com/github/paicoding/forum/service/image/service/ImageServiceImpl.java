@@ -33,13 +33,43 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ImageServiceImpl implements ImageService {
     @Autowired
+    private ImageUploader imageUploader;
+
     
 
     @Override
     public String saveImg(HttpServletRequest request) { return null; }
 
     @Override
-    public String saveImg(String img) { return null; }
+    public String saveImg(String img) { if (imageUploader.uploadIgnore(img)) {
+        // 已经转存过，不需要再次转存；非http图片，不处理
+        return img;
+    }
+
+        try {
+            InputStream stream = FileReadUtil.getStreamByFileName(img);
+            URI uri = URI.create(img);
+            String path = uri.getPath();
+            int index = path.lastIndexOf(".");
+            String fileType = null;
+            if (index > 0) {
+                // 从url中获取文件类型
+                fileType = path.substring(index + 1);
+            }
+            String digest = calculateSHA256(stream);
+            String ans = imgReplaceCache.getIfPresent(digest);
+            if (StringUtils.isBlank(ans)) {
+                ans = imageUploader.upload(stream, fileType);
+                imgReplaceCache.put(digest, ans);
+            }
+            if (StringUtils.isBlank(ans)) {
+                return buildUploadFailImgUrl(img);
+            }
+            return ans;
+        } catch (Exception e) {
+            log.error("外网图片转存异常! img:{}", img, e);
+            return buildUploadFailImgUrl(img);
+        } }
 
     
     public String mdImgReplace(String content) { return null; }

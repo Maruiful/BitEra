@@ -1,11 +1,14 @@
 package com.github.paicoding.forum.service.user.service.user;
 
 import com.github.paicoding.forum.api.model.context.ReqInfoContext;
+import com.github.paicoding.forum.api.model.enums.user.LoginTypeEnum;
+import com.github.paicoding.forum.api.model.enums.user.UserAIStatEnum;
 import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
 import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.api.model.vo.user.UserPwdLoginReq;
 import com.github.paicoding.forum.api.model.vo.user.UserZsxqLoginReq;
 import com.github.paicoding.forum.core.util.StarNumberUtil;
+import com.github.paicoding.forum.service.image.service.ImageService;
 import com.github.paicoding.forum.service.user.repository.dao.UserAiDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserDao;
 import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;
@@ -21,6 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * 登录相关服务类
@@ -50,6 +57,7 @@ public class LoginServiceImpl implements LoginService {
     private StarNumberHelper starNumberHelper;
     @Autowired
     private UserAiDao userAiDao;
+    private ImageService imageService;
 
 
     @Override
@@ -174,5 +182,65 @@ public class LoginServiceImpl implements LoginService {
 
 
     @Override
-    public String loginByZsxq(UserZsxqLoginReq req) { return null; }
+    @Transactional(rollbackFor = Exception.class)
+    public String loginByZsxq(UserZsxqLoginReq req) {
+        Long userId;
+        // 1 若是全新的用户，则自动进行注册
+        UserAiDO aiDO = userAiDao.getByStarNumber(req.getStarNumber());
+        if (aiDO == null) {
+            UserPwdLoginReq loginReq = new UserPwdLoginReq()
+                    // 星球编号
+                    .setStarNumber(req.getStarNumber())
+                    // 使用知识星球的starNumber作为登录用户名，前缀为zsq_
+                    .setUsername("zsxq_" + req.getStarNumber())
+                    // 系统随机生成密码
+                    .setPassword("zsxqp_" + req.getStarNumber())
+                    // 使用知识星球的用户作为当前用户
+                    .setDisplayName(StringUtils.isBlank(req.getDisplayName()) ? req.getUsername() : req.getDisplayName())
+                    // 用户头像
+                    .setAvatar(imageService.saveImg(req.getAvatar()))
+                    // 过期时间
+                    .setStarExpireTime(req.getExpireTime())
+                    // 设置登录类型为知识星球登录
+                    .setLoginType(LoginTypeEnum.ZSXQ.getType())
+                    // 设置thirdAccountId为星球用户ID
+                    .setThirdAccountId(String.valueOf(req.getStarUserId()));
+            userId = registerService.registerByUserNameAndPassword(loginReq);
+
+            if (System.currentTimeMillis() < req.getExpireTime()) {
+                // 对于知识星球授权登录的情况，无需审核，直接成功
+                userAiDao.updateUserStarState(userId, UserAIStatEnum.FORMAL.getCode());
+            }
+        } else {
+            userId = aiDO.getUserId();
+            // 2 若是已经存在的用户，则尝试更新对应的星球账号信息
+            boolean needToUpdate = false;
+
+            // 1. 更新过期时间（如果有变化）
+            if (aiDO.getStarExpireTime() == null ||
+                    Math.abs(req.getExpireTime() - aiDO.getStarExpireTime().getTime()) > 1000) { // 允许1秒误差
+                aiDO.setStarExpireTime(new Date(req.getExpireTime()));
+                needToUpdate = true;
+            }
+
+            // 2. 根据当前时间判断应该设置的状态
+            long currentTime = System.currentTimeMillis();
+            int expectedState = currentTime < req.getExpireTime() ?
+                    UserAIStatEnum.FORMAL.getCode() :
+                    UserAIStatEnum.EXPIRED.getCode(); // 假设有过期状态
+
+            if (!Objects.equals(aiDO.getState(), expectedState)) {
+                aiDO.setState(expectedState);
+                needToUpdate = true;
+            }
+
+            if (needToUpdate) {
+                aiDO.setUpdateTime(new Date());
+                userAiDao.updateById(aiDO);
+            }
+        }
+
+        ReqInfoContext.getReqInfo().setUserId(userId);
+        return userSessionHelper.genSession(userId);
+    }
 }

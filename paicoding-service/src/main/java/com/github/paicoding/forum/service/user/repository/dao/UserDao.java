@@ -67,7 +67,9 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
         return userMapper.selectOne(queryUser);
     }
 
-    public UserDO getUserByUserId(Long userId)  { return null; }
+    public UserDO getUserByUserId(Long userId)  {
+        return userMapper.selectById(userId);
+    }
 
     public void updateUser(UserDO userDO)  {}
 }
