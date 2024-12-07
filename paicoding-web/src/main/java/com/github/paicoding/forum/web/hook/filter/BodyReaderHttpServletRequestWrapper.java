@@ -19,7 +19,8 @@ import java.util.List;
  * post 流数据封装，避免因为打印日志导致请求参数被提前消费
  *
  * todo 知识点： 请求参数的封装，避免输入流读取一次就消耗了
- * */
+ *
+ */
 public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private static final List<String> POST_METHOD = Arrays.asList("POST", "PUT");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -40,16 +41,46 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
     }
 
     @Override
-    public BufferedReader getReader() throws IOException  { return null; }
+    public BufferedReader getReader() throws IOException {
+        return new BufferedReader(new InputStreamReader(getInputStream()));
+    }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        return null;
+        if (body == null) {
+            return super.getInputStream();
+        }
+
+        final ByteArrayInputStream bais = new ByteArrayInputStream(body);
+        return new ServletInputStream() {
+            @Override
+            public int read() throws IOException {
+                return bais.read();
+            }
+
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+            }
+        };
     }
 
-    public boolean hasPayload()  { return false; }
+    public boolean hasPayload() {
+        return bodyString != null;
+    }
 
-    public String getBodyString()  { return null; }
+    public String getBodyString() {
+        return bodyString;
+    }
 
     private String getBodyString(HttpServletRequest request) {
         BufferedReader br;
@@ -85,7 +116,11 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
      * @param request http request
      * @return ret
      */
-    private boolean isBinaryContent(final HttpServletRequest request)  { return false; }
+    private boolean isBinaryContent(final HttpServletRequest request) {
+        return request.getContentType() != null &&
+                (request.getContentType().startsWith("image") || request.getContentType().startsWith("video") ||
+                        request.getContentType().startsWith("audio"));
+    }
 
     /**
      * is multipart content
@@ -93,7 +128,11 @@ public class BodyReaderHttpServletRequestWrapper extends HttpServletRequestWrapp
      * @param request http request
      * @return ret
      */
-    private boolean isMultipart(final HttpServletRequest request)  { return false; }
+    private boolean isMultipart(final HttpServletRequest request) {
+        return request.getContentType() != null && request.getContentType().startsWith("multipart/form-data");
+    }
 
-    private boolean isFormPost(final HttpServletRequest request)  { return false; }
+    private boolean isFormPost(final HttpServletRequest request) {
+        return request.getContentType() != null && request.getContentType().startsWith("application/x-www-form-urlencoded");
+    }
 }

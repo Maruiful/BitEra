@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 开放平台相关配置
- * */
+ */
 @Data
 @ConfigurationProperties(prefix = "paicoding.openapi")
 @Component
@@ -32,7 +32,11 @@ public class OpenApiProperties {
     private String ocLoginRedirectUrl;
 
 
-    public List<String> appIdList()  { return null; }
+    public List<String> appIdList() {
+        return Arrays.asList(appIds.split(","));
+    }
 
-    public List<String> ipWhiteList()  { return null; }
+    public List<String> ipWhiteList() {
+        return Arrays.asList(ipWhiteList.split(","));
+    }
 }
