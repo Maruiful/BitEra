@@ -29,7 +29,8 @@ public class UserActivityRankServiceImpl implements UserActivityRankService {
     
 
     @Override
-    public void addActivityScore(Long userId, ActivityScoreBo activityScore) {}
+    public void addActivityScore(Long userId, ActivityScoreBo activityScore) {
+    }
 
     @Override
     public RankItemDTO queryRankInfo(Long userId, ActivityRankTimeEnum time) { return null; }

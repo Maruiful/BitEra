@@ -9,11 +9,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * */
 @Service
 public class UserStatisticServiceImpl implements UserStatisticService {
-    
+
+
+    /**
+     * 对于单机的场景，可以直接使用本地局部变量来实现计数
+     * 对于集群的场景，可考虑借助 redis的zset 来实现集群的在线用户人数统计
+     */
+    private AtomicInteger onlineUserCnt = new AtomicInteger(0);
 
     @Override
-    public int incrOnlineUserCnt(int add) { return 0; }
+    public int incrOnlineUserCnt(int add) {
+        return onlineUserCnt.addAndGet(add);
+    }
 
     @Override
-    public int getOnlineUserCnt() { return 0; }
+    public int getOnlineUserCnt() {
+        return onlineUserCnt.get();
+    }
 }
