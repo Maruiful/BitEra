@@ -11,6 +11,7 @@ import com.github.paicoding.forum.api.model.vo.user.UserZsxqLoginReq;
 import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;        
 import com.github.paicoding.forum.api.model.vo.user.dto.SimpleUserInfoDTO;      
 import com.github.paicoding.forum.api.model.vo.user.dto.UserStatisticInfoDTO;
+import com.github.paicoding.forum.service.user.converter.UserConverter;
 import com.github.paicoding.forum.service.user.repository.dao.UserDao;
 import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;
 import com.github.paicoding.forum.service.user.repository.entity.UserDO;        
@@ -57,7 +58,13 @@ public class UserServiceImpl implements UserService {
     public SimpleUserInfoDTO querySimpleUserInfo(Long userId) { return null; }  
 
     @Override
-    public BaseUserInfoDTO queryBasicUserInfo(Long userId) { return null; }     
+    public BaseUserInfoDTO queryBasicUserInfo(Long userId) {
+        UserInfoDO user = userDao.getByUserId(userId);
+        if (user == null) {
+            throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userId);
+        }
+        return UserConverter.toDTO(user);
+    }
 
     @Override
     public List<SimpleUserInfoDTO> batchQuerySimpleUserInfo(Collection<Long> userIds) { return null; }                                                          

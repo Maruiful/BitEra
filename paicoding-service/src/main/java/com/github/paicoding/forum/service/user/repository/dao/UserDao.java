@@ -51,7 +51,12 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
         }
     }
 
-    public UserInfoDO getByUserId(Long userId)  { return null; }
+    public UserInfoDO getByUserId(Long userId)  {
+        LambdaQueryWrapper<UserInfoDO> query = Wrappers.lambdaQuery();
+        query.eq(UserInfoDO::getUserId, userId)
+                .eq(UserInfoDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return baseMapper.selectOne(query);
+    }
 
     public List<UserInfoDO> getByUserIds(Collection<Long> userIds)  { return null; }
 

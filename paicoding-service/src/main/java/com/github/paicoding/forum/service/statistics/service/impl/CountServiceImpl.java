@@ -12,6 +12,7 @@ import com.github.paicoding.forum.service.user.repository.dao.UserDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserFootDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserRelationDao;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
@@ -24,7 +25,10 @@ import java.util.Map;
 @Slf4j
 @Service
 public class CountServiceImpl implements CountService {
-    
+
+
+    @Autowired
+    private ArticleDao articleDao;
 
     @Override
     public ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId) { return null; }
@@ -39,10 +43,28 @@ public class CountServiceImpl implements CountService {
     public UserStatisticInfoDTO queryUserStatisticInfo(Long userId) { return null; }
 
     @Override
-    public ArticleFootCountDTO queryArticleStatisticInfo(Long articleId) { return null; }
+    public ArticleFootCountDTO queryArticleStatisticInfo(Long articleId) {
+        Map<String, Integer> ans = RedisClient.hGetAll(CountConstants.ARTICLE_STATISTIC_INFO + articleId, Integer.class);
+        ArticleFootCountDTO info = new ArticleFootCountDTO();
+        info.setPraiseCount(ans.getOrDefault(CountConstants.PRAISE_COUNT, 0));
+        info.setCollectionCount(ans.getOrDefault(CountConstants.COLLECTION_COUNT, 0));
+        info.setCommentCount(ans.getOrDefault(CountConstants.COMMENT_COUNT, 0));
+        info.setReadCount(ans.getOrDefault(CountConstants.READ_COUNT, 0));
+        return info;
+    }
 
     @Override
-    public void incrArticleReadCount(Long authorUserId, Long articleId) {}
+    public void incrArticleReadCount(Long authorUserId, Long articleId) {
+        // db层的计数+1
+        articleDao.incrReadCount(articleId);
+        // redis计数器 +1
+        RedisClient.pipelineAction()
+                .add(CountConstants.ARTICLE_STATISTIC_INFO + articleId, CountConstants.READ_COUNT,
+                        (connection, key, value) -> connection.hIncrBy(key, value, 1))
+                .add(CountConstants.USER_STATISTIC_INFO + authorUserId, CountConstants.READ_COUNT,
+                        (connection, key, value) -> connection.hIncrBy(key, value, 1))
+                .execute();
+    }
 
     
 

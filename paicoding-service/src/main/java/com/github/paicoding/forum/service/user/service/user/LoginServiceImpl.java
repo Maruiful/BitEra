@@ -6,6 +6,7 @@ import com.github.paicoding.forum.api.model.enums.user.UserAIStatEnum;
 import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
 import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.api.model.vo.user.UserPwdLoginReq;
+import com.github.paicoding.forum.api.model.vo.user.UserSaveReq;
 import com.github.paicoding.forum.api.model.vo.user.UserZsxqLoginReq;
 import com.github.paicoding.forum.core.util.StarNumberUtil;
 import com.github.paicoding.forum.service.image.service.ImageService;
@@ -61,7 +62,25 @@ public class LoginServiceImpl implements LoginService {
 
 
     @Override
-    public Long autoRegisterWxUserInfo(String uuid) { return null; }
+    public Long autoRegisterWxUserInfo(String uuid) {
+        UserSaveReq req = new UserSaveReq().setLoginType(0).setThirdAccountId(uuid);
+        Long userId = registerOrGetUserInfo(req);
+        ReqInfoContext.getReqInfo().setUserId(userId);
+        return userId;
+    }
+
+    /**
+     * 没有注册时，先注册一个用户；若已经有，则登录
+     *
+     * @param req
+     */
+    private Long registerOrGetUserInfo(UserSaveReq req) {
+        UserDO user = userDao.getByThirdAccountId(req.getThirdAccountId());
+        if (user == null) {
+            return registerService.registerByWechat(req.getThirdAccountId());
+        }
+        return user.getId();
+    }
 
     @Override
     public void logout(String session) {
@@ -69,7 +88,9 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public String loginByWx(Long userId) { return null; }
+    public String loginByWx(Long userId) {
+        return userSessionHelper.genSession(userId);
+    }
 
     @Override
     public String loginByUserPwd(String username, String password) {
