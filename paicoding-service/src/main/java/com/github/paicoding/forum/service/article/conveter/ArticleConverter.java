@@ -13,6 +13,7 @@ import com.github.paicoding.forum.service.article.repository.entity.TagDO;
 import com.github.paicoding.forum.service.article.repository.params.SearchArticleParams;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 文章转换
@@ -32,9 +33,20 @@ public class ArticleConverter {
      * @param tag
      * @return
      */
-    public static TagDTO toDto(TagDO tag) { return null; }
+    public static TagDTO toDto(TagDO tag) {
+        if (tag == null) {
+            return null;
+        }
+        TagDTO dto = new TagDTO();
+        dto.setTag(tag.getTagName());
+        dto.setTagId(tag.getId());
+        dto.setStatus(tag.getStatus());
+        return dto;
+    }
 
-    public static List<TagDTO> toDtoList(List<TagDO> tags) { return null; }
+    public static List<TagDTO> toDtoList(List<TagDO> tags) {
+        return tags.stream().map(ArticleConverter::toDto).collect(Collectors.toList());
+    }
 
 
     public static CategoryDTO toDto(CategoryDO category) { return null; }

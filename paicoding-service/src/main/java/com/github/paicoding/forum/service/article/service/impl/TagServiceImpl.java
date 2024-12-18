@@ -5,6 +5,7 @@ import com.github.paicoding.forum.api.model.vo.PageVo;
 import com.github.paicoding.forum.api.model.vo.article.dto.TagDTO;
 import com.github.paicoding.forum.service.article.repository.dao.TagDao;
 import com.github.paicoding.forum.service.article.service.TagService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -13,10 +14,17 @@ import java.util.List;
  * */
 @Service
 public class TagServiceImpl implements TagService {
-    
+
+
+    @Autowired
+    private TagDao tagDao;
 
     @Override
-    public PageVo<TagDTO> queryTags(String key, PageParam pageParam) { return null; }
+    public PageVo<TagDTO> queryTags(String key, PageParam pageParam) {
+        List<TagDTO> tagDTOS = tagDao.listOnlineTag(key, pageParam);
+        Integer totalCount = tagDao.countOnlineTag(key);
+        return PageVo.build(tagDTOS, pageParam.getPageSize(), pageParam.getPageNum(), totalCount);
+    }
 
     @Override
     public Long queryTagId(String tag) { return null; }

@@ -118,7 +118,9 @@ public class ArticleRestController {
      * @return
      */
     @PostMapping(path = "generateSummary")
-    public ResVo<String> generateSummary(@RequestBody ContentPostReq req) { return null; }
+    public ResVo<String> generateSummary(@RequestBody ContentPostReq req) {
+        return ResVo.ok(articleService.generateSummary(req.getContent()));
+    }
 
     /**
      * 查询所有的标签
@@ -128,7 +130,10 @@ public class ArticleRestController {
     @GetMapping(path = "tag/list")
     public ResVo<PageVo<TagDTO>> queryTags(@RequestParam(name = "key", required = false) String key,
                                            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
-                                           @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize) { return null; }
+                                           @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
+        PageVo<TagDTO> tagDTOPageVo = tagService.queryTags(key, PageParam.newPageInstance(pageNumber, pageSize));
+        return ResVo.ok(tagDTOPageVo);
+    }
 
     /**
      * 获取所有的分类

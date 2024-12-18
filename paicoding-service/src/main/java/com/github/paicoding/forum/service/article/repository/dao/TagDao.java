@@ -26,14 +26,32 @@ public class TagDao extends ServiceImpl<TagMapper, TagDO> {
      *
      * @return
      */
-    public List<TagDTO> listOnlineTag(String key, PageParam pageParam)  { return null; }
+    public List<TagDTO> listOnlineTag(String key, PageParam pageParam)  {
+        LambdaQueryWrapper<TagDO> query = Wrappers.lambdaQuery();
+        query.eq(TagDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(TagDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .and(StringUtils.isNotBlank(key), v -> v.like(TagDO::getTagName, key))
+                .orderByDesc(TagDO::getId);
+        if (pageParam != null) {
+            query.last(PageParam.getLimitSql(pageParam));
+        }
+        List<TagDO> list = baseMapper.selectList(query);
+        return ArticleConverter.toDtoList(list);
+    }
 
     /**
      * 获取已上线 Tags 总数（分页）
      *
      * @return
      */
-    public Integer countOnlineTag(String key)  { return null; }
+    public Integer countOnlineTag(String key)  {
+        return lambdaQuery()
+                .eq(TagDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(TagDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .and(!StringUtils.isEmpty(key), v -> v.like(TagDO::getTagName, key))
+                .count()
+                .intValue();
+    }
 
     private LambdaQueryChainWrapper<TagDO> createTagQuery(SearchTagParams params)  { return null; }
 
