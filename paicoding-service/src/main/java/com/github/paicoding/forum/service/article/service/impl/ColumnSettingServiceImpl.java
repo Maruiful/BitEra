@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.paicoding.forum.api.model.enums.YesOrNoEnum;
 import com.github.paicoding.forum.api.model.enums.column.MovePositionEnum;
 import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
@@ -47,7 +48,10 @@ import java.util.stream.Collectors;
  * */
 @Service
 public class ColumnSettingServiceImpl implements ColumnSettingService {
-    
+
+
+    @Autowired
+    private ColumnArticleDao columnArticleDao;
 
     @Override
     public void saveColumn(ColumnReq req) {}
@@ -60,7 +64,28 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
     
 
     
-    public void saveColumnArticle(Long articleId, Long columnId) {}
+    public void saveColumnArticle(Long articleId, Long columnId) {
+        // 转换参数
+        // 插入的时候，需要判断是否已经存在
+        ColumnArticleDO exist = columnArticleDao.getOne(Wrappers.<ColumnArticleDO>lambdaQuery()
+                .eq(ColumnArticleDO::getArticleId, articleId));
+        if (exist != null) {
+            if (!Objects.equals(columnId, exist.getColumnId())) {
+                // 更新
+                exist.setColumnId(columnId);
+                columnArticleDao.updateById(exist);
+            }
+        } else {
+            // 将文章保存到专栏中，章节序号+1
+            ColumnArticleDO columnArticleDO = new ColumnArticleDO();
+            columnArticleDO.setColumnId(columnId);
+            columnArticleDO.setArticleId(articleId);
+            // section 自增+1
+            Integer maxSection = columnArticleDao.selectMaxSection(columnId);
+            columnArticleDO.setSection(maxSection + 1);
+            columnArticleDao.save(columnArticleDO);
+        }
+    }
 
     
 

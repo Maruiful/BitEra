@@ -26,7 +26,17 @@ public class ArticleTagDao extends ServiceImpl<ArticleTagMapper, ArticleTagDO> {
      * @param articleId
      * @param tags
      */
-    public void batchSave(Long articleId, Collection<Long> tags)  {}
+    public void batchSave(Long articleId, Collection<Long> tags)  {
+        List<ArticleTagDO> insertList = new ArrayList<>(tags.size());
+        tags.forEach(s -> {
+            ArticleTagDO tag = new ArticleTagDO();
+            tag.setTagId(s);
+            tag.setArticleId(articleId);
+            tag.setDeleted(YesOrNoEnum.NO.getCode());
+            insertList.add(tag);
+        });
+        saveBatch(insertList);
+    }
 
 
     /**

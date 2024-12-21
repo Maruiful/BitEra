@@ -72,7 +72,13 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
 
     // ------------ article content  ----------------
 
-    private ArticleDetailDO findLatestDetail(long articleId)  { return null; }
+    private ArticleDetailDO findLatestDetail(long articleId)  {
+        LambdaQueryWrapper<ArticleDetailDO> contentQuery = Wrappers.lambdaQuery();
+        contentQuery.eq(ArticleDetailDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDetailDO::getArticleId, articleId)
+                .orderByDesc(ArticleDetailDO::getVersion);
+        return articleDetailMapper.selectList(contentQuery).get(0);
+    }
 
     /**
      * 保存文章正文
@@ -81,7 +87,14 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param content
      * @return
      */
-    public Long saveArticleContent(Long articleId, String content)  { return null; }
+    public Long saveArticleContent(Long articleId, String content)  {
+        ArticleDetailDO detail = new ArticleDetailDO();
+        detail.setArticleId(articleId);
+        detail.setContent(content);
+        detail.setVersion(1L);
+        articleDetailMapper.insert(detail);
+        return detail.getId();
+    }
 
     /**
      * 更正文章正文
@@ -90,7 +103,17 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param content
      * @param update    true 表示更新最后一条记录； false 表示新插入一个新的记录
      */
-    public void updateArticleContent(Long articleId, String content, boolean update)  {}
+    public void updateArticleContent(Long articleId, String content, boolean update)  {
+        if (update) {
+            articleDetailMapper.updateContent(articleId, content);
+        } else {
+            ArticleDetailDO latest = findLatestDetail(articleId);
+            latest.setVersion(latest.getVersion() + 1);
+            latest.setId(null);
+            latest.setContent(content);
+            articleDetailMapper.insert(latest);
+        }
+    }
 
     // ------------- 文章列表查询 --------------
 

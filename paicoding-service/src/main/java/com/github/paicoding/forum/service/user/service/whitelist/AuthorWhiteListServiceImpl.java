@@ -14,11 +14,15 @@ import java.util.Set;
 /** */
 @Service
 public class AuthorWhiteListServiceImpl implements AuthorWhiteListService {
-    @Autowired
-    
+    /**
+     * 实用 redis - set 来存储允许直接发文章的白名单
+     */
+    private static final String ARTICLE_WHITE_LIST = "auth_article_white_list";
 
     @Override
-    public boolean authorInArticleWhiteList(Long authorId) { return false; }
+    public boolean authorInArticleWhiteList(Long authorId) {
+        return RedisClient.sIsMember(ARTICLE_WHITE_LIST, authorId);
+    }
 
     @Override
     public List<BaseUserInfoDTO> queryAllArticleWhiteListAuthors() { return null; }

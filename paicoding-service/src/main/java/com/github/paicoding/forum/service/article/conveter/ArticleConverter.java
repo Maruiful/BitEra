@@ -1,5 +1,9 @@
 package com.github.paicoding.forum.service.article.conveter;
 
+import com.github.paicoding.forum.api.model.enums.ArticleReadTypeEnum;
+import com.github.paicoding.forum.api.model.enums.ArticleTypeEnum;
+import com.github.paicoding.forum.api.model.enums.YesOrNoEnum;
+import com.github.paicoding.forum.api.model.enums.pay.ThirdPayWayEnum;
 import com.github.paicoding.forum.api.model.vo.article.ArticlePostReq;
 import com.github.paicoding.forum.api.model.vo.article.CategoryReq;
 import com.github.paicoding.forum.api.model.vo.article.SearchArticleReq;
@@ -11,6 +15,7 @@ import com.github.paicoding.forum.service.article.repository.entity.ArticleDO;
 import com.github.paicoding.forum.service.article.repository.entity.CategoryDO;
 import com.github.paicoding.forum.service.article.repository.entity.TagDO;
 import com.github.paicoding.forum.service.article.repository.params.SearchArticleParams;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +26,30 @@ import java.util.stream.Collectors;
  * */
 public class ArticleConverter {
 
-    public static ArticleDO toArticleDo(ArticlePostReq req, Long author) { return null; }
+    public static ArticleDO toArticleDo(ArticlePostReq req, Long author) {
+        ArticleDO article = new ArticleDO();
+        // 设置作者ID
+        article.setUserId(author);
+        article.setId(req.getArticleId());
+        article.setTitle(req.getTitle());
+        article.setShortTitle(req.getShortTitle());
+        article.setArticleType(ArticleTypeEnum.valueOf(req.getArticleType().toUpperCase()).getCode());
+        article.setPicture(req.getCover() == null ? "" : req.getCover());
+        article.setCategoryId(req.getCategoryId());
+        article.setSource(req.getSource());
+        article.setSourceUrl(req.getSourceUrl());
+        article.setSummary(req.getSummary());
+        article.setStatus(req.pushStatus().getCode());
+        article.setDeleted(req.deleted() ? YesOrNoEnum.YES.getCode() : YesOrNoEnum.NO.getCode());
+        article.setReadType(req.getReadType() == null ? ArticleReadTypeEnum.NORMAL.getType() : req.getReadType());
+        if (article.getReadType().equals(ArticleReadTypeEnum.PAY_READ.getType())) {
+            // 不指定价格时，默认0.99元
+            article.setPayAmount(req.getPayAmount() == null ? 99 : req.getPayAmount());
+            // 当不指定具体的支付方式时，统一使用native的扫码支付方式
+            article.setPayWay(StringUtils.isBlank(req.getPayWay()) ? ThirdPayWayEnum.WX_NATIVE.getPay() : req.getPayWay());
+        }
+        return article;
+    }
 
     public static ArticleDTO toDto(ArticleDO articleDO) { return null; }
 

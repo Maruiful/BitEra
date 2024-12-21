@@ -172,14 +172,19 @@ public class ArticleRestController {
     /**
      * 发布文章，完成后跳转到详情页
      * - 这里有一个重定向的知识点
-     * - fixme 博文：* [5.请求重定向 | 一灰灰Learning](https://hhui.top/spring-web/02.response/05.190929-springboot%E7%B3%BB%E5%88%97%E6%95%99%E7%A8%8Bweb%E7%AF%87%E4%B9%8B%E9%87%8D%E5%AE%9A%E5%90%91/)
-     *
      * @return
      */
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "post")
     @MdcDot(bizCode = "#req.articleId")
-    public ResVo<Long> post(@RequestBody ArticlePostReq req, HttpServletResponse response) throws IOException { return null; }
+    public ResVo<Long> post(@RequestBody ArticlePostReq req, HttpServletResponse response) throws IOException {
+        Long id = articleWriteService.saveArticle(req, ReqInfoContext.getReqInfo().getUserId());
+        // 如果使用后端重定向，可以使用下面两种策略
+//        return "redirect:/article/detail/" + id;
+//        response.sendRedirect("/article/detail/" + id);
+        // 这里采用前端重定向策略
+        return ResVo.ok(id);
+    }
 
 
     /**
