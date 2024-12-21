@@ -142,7 +142,17 @@ public class ArticleRestController {
      */
     @GetMapping(path = "category/list")
     public ResVo<List<CategoryDTO>> getCategoryList(@RequestParam(name = "categoryId", required = false) Long categoryId,
-                                                    @RequestParam(name = "ignoreNoArticles", required = false) Boolean ignoreNoArticles) { return null; }
+                                                    @RequestParam(name = "ignoreNoArticles", required = false) Boolean ignoreNoArticles) {
+        List<CategoryDTO> list = categoryService.loadAllCategories();
+        if (Objects.equals(Boolean.TRUE, ignoreNoArticles)) {
+            // 查询所有分类的对应的文章数
+            Map<Long, Long> articleCnt = articleService.queryArticleCountsByCategory();
+            // 过滤掉文章数为0的分类
+            list.removeIf(c -> articleCnt.getOrDefault(c.getCategoryId(), 0L) <= 0L);
+        }
+        list.forEach(c -> c.setSelected(c.getCategoryId().equals(categoryId)));
+        return ResVo.ok(list);
+    }
 
 
     /**
