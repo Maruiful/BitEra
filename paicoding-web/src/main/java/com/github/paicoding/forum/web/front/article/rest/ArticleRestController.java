@@ -196,5 +196,8 @@ public class ArticleRestController {
     @Permission(role = UserRole.LOGIN)
     @RequestMapping(path = "delete")
     @MdcDot(bizCode = "#articleId")
-    public ResVo<Boolean> delete(@RequestParam(value = "articleId") Long articleId) { return null; }
+    public ResVo<Boolean> delete(@RequestParam(value = "articleId") Long articleId) {
+        articleWriteService.deleteArticle(articleId, ReqInfoContext.getReqInfo().getUserId());
+        return ResVo.ok(true);
+    }
 }

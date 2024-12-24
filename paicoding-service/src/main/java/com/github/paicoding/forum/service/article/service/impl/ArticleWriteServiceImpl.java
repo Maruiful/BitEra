@@ -180,5 +180,19 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
     }
 
     @Override
-    public void deleteArticle(Long articleId, Long loginUserId) {}
+    public void deleteArticle(Long articleId, Long loginUserId) {
+        ArticleDO dto = articleDao.getById(articleId);
+        if (dto != null && !Objects.equals(dto.getUserId(), loginUserId)) {
+            // 没有权限
+            throw ExceptionUtil.of(StatusEnum.FORBID_ERROR_MIXED, "请确认文章是否属于您!");
+        }
+
+        if (dto != null && dto.getDeleted() != YesOrNoEnum.YES.getCode()) {
+            dto.setDeleted(YesOrNoEnum.YES.getCode());
+            articleDao.updateById(dto);
+
+            // 发布文章删除事件
+            SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.DELETE, dto));
+        }
+    }
 }
