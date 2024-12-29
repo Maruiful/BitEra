@@ -120,7 +120,26 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     public List<ArticleDO> listArticlesByUserId(Long userId, PageParam pageParam)  { return null; }
 
 
-    public List<ArticleDO> listArticlesByCategoryId(Long categoryId, PageParam pageParam)  { return null; }
+    public List<ArticleDO> listArticlesByCategoryId(Long categoryId, PageParam pageParam)  {
+        if (categoryId != null && categoryId <= 0) {
+            // 分类不存在时，表示查所有
+            categoryId = null;
+        }
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode());
+
+        // 如果分页中置顶的四条数据，需要加上官方的查询条件
+        // 说明是查询官方的文章，非置顶的文章，只限制全部分类
+        if (categoryId == null && pageParam.getPageSize() == PageParam.TOP_PAGE_SIZE) {
+            query.eq(ArticleDO::getOfficalStat, OfficalStatEnum.OFFICAL.getCode());
+        }
+
+        Optional.ofNullable(categoryId).ifPresent(cid -> query.eq(ArticleDO::getCategoryId, cid));
+        query.last(PageParam.getLimitSql(pageParam))
+                .orderByDesc(ArticleDO::getToppingStat, ArticleDO::getCreateTime);
+        return baseMapper.selectList(query);
+    }
 
     public Long countArticleByCategoryId(Long categoryId)  { return null; }
 
