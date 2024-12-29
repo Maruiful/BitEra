@@ -31,7 +31,12 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      * @param articleId
      * @return
      */
-    public List<CommentDO> listSubCommentIdMappers(Long articleId, Collection<Long> topCommentIds)  { return null; }
+    public List<CommentDO> listSubCommentIdMappers(Long articleId, Collection<Long> topCommentIds)  {
+        return lambdaQuery()
+                .in(CommentDO::getTopCommentId, topCommentIds)
+                .eq(CommentDO::getArticleId, articleId)
+                .eq(CommentDO::getDeleted, YesOrNoEnum.NO.getCode()).list();
+    }
 
 
     /**
@@ -42,6 +47,12 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      */
     public int commentCount(Long articleId)  { return 0; }
 
-    public CommentDO getHotComment(Long articleId)  { return null; }
+    public CommentDO getHotComment(Long articleId)  {
+        Map<String, Object> map = baseMapper.getHotTopCommentId(articleId);
+        if (CollectionUtils.isEmpty(map)) {
+            return null;
+        }
+        return baseMapper.selectById(Long.parseLong(String.valueOf(map.get("top_comment_id"))));
+    }
 
 }

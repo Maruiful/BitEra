@@ -59,7 +59,24 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param articleId
      * @return
      */
-    public ArticleDTO queryArticleDetail(Long articleId)  { return null; }
+    public ArticleDTO queryArticleDetail(Long articleId)  {
+        // 查询文章记录
+        ArticleDO article = baseMapper.selectById(articleId);
+        if (article == null || Objects.equals(article.getDeleted(), YesOrNoEnum.YES.getCode())) {
+            return null;
+        }
+
+        // 查询文章正文
+        ArticleDTO dto = ArticleConverter.toDto(article);
+        if (showReviewContent(article)) {
+            ArticleDetailDO detail = findLatestDetail(articleId);
+            dto.setContent(detail.getContent());
+        } else {
+            // 对于审核中的文章，只有作者本人才能看到原文
+            dto.setContent("### 文章审核中，请稍后再看");
+        }
+        return dto;
+    }
 
     /**
      * 判断展示审核中的字样，还是展示原文
@@ -67,7 +84,19 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param article 文章实体
      * @return false 表示需要展示审核中的字样 | true 表示展示原文
      */
-    private boolean showReviewContent(ArticleDO article)  { return false; }
+    private boolean showReviewContent(ArticleDO article)  {
+        if (article.getStatus() != PushStatusEnum.REVIEW.getCode()) {
+            return true;
+        }
+
+        BaseUserInfoDTO user = ReqInfoContext.getReqInfo().getUser();
+        if (user == null) {
+            return false;
+        }
+
+        // 作者本人和admin超管可以看到审核内容
+        return user.getUserId().equals(article.getUserId()) || (user.getRole() != null && user.getRole().equalsIgnoreCase(UserRole.ADMIN.name()));
+    }
 
 
     // ------------ article content  ----------------
@@ -229,7 +258,21 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param tagIds
      * @return
      */
-    public List<ArticleDO> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, PageParam pageParam)  { return null; }
+    public List<ArticleDO> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, PageParam pageParam)  {
+        List<ReadCountDO> list = baseMapper.listArticleByCategoryAndTags(categoryId, tagIds, pageParam);
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+
+        List<Long> ids = list.stream().map(ReadCountDO::getDocumentId).collect(Collectors.toList());
+        List<ArticleDO> result = baseMapper.selectBatchIds(ids);
+        result.sort((o1, o2) -> {
+            int i1 = ids.indexOf(o1.getId());
+            int i2 = ids.indexOf(o2.getId());
+            return Integer.compare(i1, i2);
+        });
+        return result;
+    }
 
 
     /**
@@ -238,7 +281,9 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param userId
      * @return
      */
-    public List<YearArticleDTO> listYearArticleByUserId(Long userId)  { return null; }
+    public List<YearArticleDTO> listYearArticleByUserId(Long userId)  {
+        return baseMapper.listYearArticleByUserId(userId);
+    }
 
     /**
      * 抽取样板代码

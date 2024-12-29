@@ -30,6 +30,9 @@ public class CountServiceImpl implements CountService {
     @Autowired
     private ArticleDao articleDao;
 
+    @Autowired
+    private UserFootDao userFootDao;
+
     @Override
     public ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId) { return null; }
 
@@ -37,10 +40,22 @@ public class CountServiceImpl implements CountService {
     public ArticleFootCountDTO queryArticleCountInfoByUserId(Long userId) { return null; }
 
     @Override
-    public Long queryCommentPraiseCount(Long commentId) { return null; }
+    public Long queryCommentPraiseCount(Long commentId) {
+        return userFootDao.countCommentPraise(commentId);
+    }
 
     @Override
-    public UserStatisticInfoDTO queryUserStatisticInfo(Long userId) { return null; }
+    public UserStatisticInfoDTO queryUserStatisticInfo(Long userId) {
+        Map<String, Integer> ans = RedisClient.hGetAll(CountConstants.USER_STATISTIC_INFO + userId, Integer.class);
+        UserStatisticInfoDTO info = new UserStatisticInfoDTO();
+        info.setFollowCount(ans.getOrDefault(CountConstants.FOLLOW_COUNT, 0));
+        info.setArticleCount(ans.getOrDefault(CountConstants.ARTICLE_COUNT, 0));
+        info.setPraiseCount(ans.getOrDefault(CountConstants.PRAISE_COUNT, 0));
+        info.setCollectionCount(ans.getOrDefault(CountConstants.COLLECTION_COUNT, 0));
+        info.setReadCount(ans.getOrDefault(CountConstants.READ_COUNT, 0));
+        info.setFansCount(ans.getOrDefault(CountConstants.FANS_COUNT, 0));
+        return info;
+    }
 
     @Override
     public ArticleFootCountDTO queryArticleStatisticInfo(Long articleId) {

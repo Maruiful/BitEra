@@ -28,7 +28,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     private CategoryDao categoryDao;
     @Override
-    public String queryCategoryName(Long categoryId) { return null; }
+    public String queryCategoryName(Long categoryId) {
+        return categoryCaches.getUnchecked(categoryId).getCategory();
+    }
 
     @Override
     public List<CategoryDTO> loadAllCategories() {

@@ -56,7 +56,14 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param followUserId 关注的用户
      * @return
      */
-    public UserRelationDO getUserRelationByUserId(Long userId, Long followUserId)  { return null; }
+    public UserRelationDO getUserRelationByUserId(Long userId, Long followUserId)  {
+        QueryWrapper<UserRelationDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserRelationDO::getUserId, userId)
+                .eq(UserRelationDO::getFollowUserId, followUserId)
+                .eq(UserRelationDO::getFollowState, FollowStateEnum.FOLLOW.getCode());
+        return baseMapper.selectOne(queryWrapper);
+    }
 
     /**
      * 获取关注记录

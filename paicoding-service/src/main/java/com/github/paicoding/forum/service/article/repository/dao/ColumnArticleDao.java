@@ -34,7 +34,15 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
      * @param articleId
      * @return
      */
-    public ColumnArticleDO selectColumnArticleByArticleId(Long articleId)  { return null; }
+    public ColumnArticleDO selectColumnArticleByArticleId(Long articleId)  {
+        List<ColumnArticleDO> list = lambdaQuery()
+                .eq(ColumnArticleDO::getArticleId, articleId)
+                .list();
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        return list.get(0);
+    }
 
     public ColumnArticleDO selectBySection(Long columnId, Integer sort)  { return null; }
 

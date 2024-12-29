@@ -118,7 +118,9 @@ public class UserFootServiceImpl implements UserFootService {
     public List<SimpleUserInfoDTO> queryArticlePraisedUsers(Long articleId) { return null; }
 
     @Override
-    public UserFootDO queryUserFoot(Long documentId, Integer type, Long userId) { return null; }
+    public UserFootDO queryUserFoot(Long documentId, Integer type, Long userId) {
+        return userFootDao.getByDocumentAndUserId(documentId, type, userId);
+    }
 
     @Override
     public UserFootStatisticDTO getFootCount() { return null; }

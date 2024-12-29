@@ -18,6 +18,8 @@ import com.github.paicoding.forum.service.article.service.ArticleReadService;
 import com.github.paicoding.forum.service.config.service.ConfigService;
 import com.github.paicoding.forum.service.rank.service.UserActivityRankService; 
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,7 +32,13 @@ public class SidebarServiceImpl implements SidebarService {
     public List<SideBarDTO> queryHomeSidebarList() { return null; }
 
     @Override
-    public List<SideBarDTO> queryArticleDetailSidebarList(Long author, Long articleId) { return null; }                                                         
+    public List<SideBarDTO> queryArticleDetailSidebarList(Long author, Long articleId) {
+        List<SideBarDTO> list = new ArrayList<>(2);
+        // 不能直接使用 pdfSideBar()的方式调用，会导致缓存不生效
+        list.add(SpringUtil.getBean(SidebarServiceImpl.class).pdfSideBar());
+        list.add(recommendByAuthor(author, articleId, PageParam.DEFAULT_PAGE_SIZE));
+        return list;
+    }
 
     
     public SideBarDTO pdfSideBar() { return null; }

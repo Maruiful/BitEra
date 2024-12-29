@@ -64,7 +64,13 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param commentId
      * @return
      */
-    public Long countCommentPraise(Long commentId)  { return null; }
+    public Long countCommentPraise(Long commentId)  {
+        return lambdaQuery()
+                .eq(UserFootDO::getDocumentId, commentId)
+                .eq(UserFootDO::getDocumentType, DocumentTypeEnum.COMMENT.getCode())
+                .eq(UserFootDO::getPraiseStat, PraiseStatEnum.PRAISE.getCode())
+                .count();
+    }
 
     public UserFootStatisticDTO getFootCount()  { return null; }
 }

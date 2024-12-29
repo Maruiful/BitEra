@@ -24,10 +24,15 @@ import java.util.stream.Collectors;
 /** */
 @Service
 public class ColumnServiceImpl implements ColumnService {
-    
+
+
+    @Autowired
+    private ColumnArticleDao columnArticleDao;
 
     @Override
-    public ColumnArticleDO getColumnArticleRelation(Long articleId) { return null; }
+    public ColumnArticleDO getColumnArticleRelation(Long articleId) {
+        return columnArticleDao.selectColumnArticleByArticleId(articleId);
+    }
 
     @Override
     public PageListVo<ColumnDTO> listColumn(PageParam pageParam) { return null; }

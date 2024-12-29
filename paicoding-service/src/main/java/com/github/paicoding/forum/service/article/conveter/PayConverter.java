@@ -1,9 +1,14 @@
 package com.github.paicoding.forum.service.article.conveter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticlePayInfoDTO;
 import com.github.paicoding.forum.api.model.vo.user.dto.UserPayCodeDTO;
+import com.github.paicoding.forum.core.util.JsonUtil;
 import com.github.paicoding.forum.service.article.repository.entity.ArticlePayRecordDO;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /** */
@@ -19,7 +24,20 @@ public class PayConverter {
      */
     public static Map<String, String> formatPayCode(String dbCode) { return null; }
 
-    public static Map<String, UserPayCodeDTO> formatPayCodeInfo(String dbCode) { return null; }
+    public static Map<String, UserPayCodeDTO> formatPayCodeInfo(String dbCode) {
+        if (StringUtils.isBlank(dbCode)) {
+            return Collections.emptyMap();
+        }
+
+        JsonNode node = JsonUtil.toNode(dbCode);
+        Map<String, UserPayCodeDTO> result = new HashMap<>();
+        node.fields().forEachRemaining(kv -> {
+            String key = kv.getKey();
+            String value = kv.getValue().asText();
+            result.put(key, new UserPayCodeDTO(genQrCode(value), value));
+        });
+        return result;
+    }
 
 
     public static String genQrCode(String txt) { return null; }

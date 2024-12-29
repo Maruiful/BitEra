@@ -45,7 +45,51 @@ public class SeoInjectService {
      *
      * @param detail
      */
-    public void initColumnSeo(ArticleDetailVo detail)  {}
+    public void initColumnSeo(ArticleDetailVo detail)  {
+        Seo seo = initBasicSeoTag();
+        List<SeoTagVo> list = seo.getOgp();
+        Map<String, Object> jsonLd = seo.getJsonLd();
+
+        String title = detail.getArticle().getTitle();
+        String description = detail.getArticle().getSummary();
+        String authorName = detail.getAuthor().getUserName();
+        String updateTime = DateUtil.time2LocalTime(detail.getArticle().getLastUpdateTime()).toString();
+        String publishedTime = DateUtil.time2LocalTime(detail.getArticle().getCreateTime()).toString();
+        String image = detail.getArticle().getCover();
+
+        list.add(new SeoTagVo("og:title", title));
+        list.add(new SeoTagVo("og:description", detail.getArticle().getSummary()));
+        list.add(new SeoTagVo("og:type", "article"));
+        list.add(new SeoTagVo("og:locale", "zh-CN"));
+        list.add(new SeoTagVo("og:updated_time", updateTime));
+
+        list.add(new SeoTagVo("article:modified_time", updateTime));
+        list.add(new SeoTagVo("article:published_time", publishedTime));
+        list.add(new SeoTagVo("article:tag", detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+        list.add(new SeoTagVo("article:section", detail.getArticle().getCategory().getCategory()));
+        list.add(new SeoTagVo("article:author", authorName));
+
+        list.add(new SeoTagVo("author", authorName));
+        list.add(new SeoTagVo("title", title));
+        list.add(new SeoTagVo("description", description));
+        list.add(new SeoTagVo("keywords", detail.getArticle().getCategory().getCategory() + "," + detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+
+        if (StringUtils.isNotBlank(image)) {
+            list.add(new SeoTagVo("og:image", image));
+            jsonLd.put("image", image);
+        }
+
+        jsonLd.put("headline", title);
+        jsonLd.put("description", description);
+        Map<String, Object> author = new HashMap<>();
+        author.put("@type", "Person");
+        author.put("name", authorName);
+        jsonLd.put("author", author);
+        jsonLd.put("dateModified", updateTime);
+        jsonLd.put("datePublished", publishedTime);
+
+        ReqInfoContext.getReqInfo().setSeo(seo);
+    }
 
     /**
      * 教程详情seo标签
@@ -64,6 +108,18 @@ public class SeoInjectService {
 
     public Seo defaultSeo()  { return null; }
 
-    private Seo initBasicSeoTag()  { return null; }
+    private Seo initBasicSeoTag()  {
+        List<SeoTagVo> list = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>();
+
+        HttpServletRequest request =
+                ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String url = globalViewConfig.getHost() + request.getRequestURI();
+
+        list.add(new SeoTagVo("og:url", url));
+        map.put("url", url);
+
+        return Seo.builder().jsonLd(map).ogp(list).build();
+    }
 
 }

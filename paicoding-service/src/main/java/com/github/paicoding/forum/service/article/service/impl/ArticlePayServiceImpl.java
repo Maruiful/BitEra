@@ -43,6 +43,9 @@ public class ArticlePayServiceImpl implements ArticlePayService {
     @Autowired
     private ArticlePayDao articlePayDao;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public boolean hasPayed(Long article, Long currentUerId) { return false; }
 
@@ -99,5 +102,12 @@ public class ArticlePayServiceImpl implements ArticlePayService {
     public PayConfirmDTO buildPayConfirmInfo(Long payId, ArticlePayRecordDO record) { return null; }
 
     @Override
-    public List<SimpleUserInfoDTO> queryPayUsers(Long articleId) { return null; }
+    public List<SimpleUserInfoDTO> queryPayUsers(Long articleId) {
+        List<Long> users = articlePayDao.querySucceedPayUsersByArticleId(articleId);
+        if (CollectionUtils.isEmpty(users)) {
+            return Collections.emptyList();
+        }
+
+        return userService.batchQuerySimpleUserInfo(users);
+    }
 }

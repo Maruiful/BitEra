@@ -76,7 +76,9 @@ public class ArticleTagDao extends ServiceImpl<ArticleTagMapper, ArticleTagDO> {
      * @param articleId
      * @return
      */
-    public List<TagDTO> queryArticleTagDetails(Long articleId)  { return null; }
+    public List<TagDTO> queryArticleTagDetails(Long articleId)  {
+        return baseMapper.listArticleTagDetails(articleId);
+    }
 
 
     public List<ArticleTagDO> listArticleTags(@Param("articleId") Long articleId) {

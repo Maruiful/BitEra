@@ -6,6 +6,8 @@ import com.github.paicoding.forum.api.model.vo.comment.dto.SubCommentDTO;
 import com.github.paicoding.forum.api.model.vo.comment.dto.TopCommentDTO;
 import com.github.paicoding.forum.service.comment.repository.entity.CommentDO;
 
+import java.util.ArrayList;
+
 /**
  * 评论转换
  * */
@@ -15,7 +17,12 @@ public class CommentConverter {
 
     private static <T extends BaseCommentDTO> void parseDto(CommentDO comment, T sub) {}
 
-    public static TopCommentDTO toTopDto(CommentDO commentDO) { return null; }
+    public static TopCommentDTO toTopDto(CommentDO commentDO) {
+        TopCommentDTO dto = new TopCommentDTO();
+        parseDto(commentDO, dto);
+        dto.setChildComments(new ArrayList<>());
+        return dto;
+    }
 
     public static SubCommentDTO toSubDto(CommentDO comment) { return null; }
 }

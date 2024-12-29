@@ -39,7 +39,13 @@ public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePa
      * @param articleId 文章id
      * @return
      */
-    public List<Long> querySucceedPayUsersByArticleId(Long articleId)  { return null; }
+    public List<Long> querySucceedPayUsersByArticleId(Long articleId)  {
+        List<ArticlePayRecordDO> records = lambdaQuery().select(ArticlePayRecordDO::getPayUserId)
+                .eq(ArticlePayRecordDO::getArticleId, articleId)
+                .eq(ArticlePayRecordDO::getPayStatus, PayStatusEnum.SUCCEED.getStatus())
+                .list();
+        return records.stream().map(ArticlePayRecordDO::getPayUserId).collect(Collectors.toList());
+    }
 
 
     /**

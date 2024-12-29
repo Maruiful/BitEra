@@ -42,5 +42,11 @@ public class UserConverter {
 
     public static UserRelationDO toDO(UserRelationReq req) { return null; }
 
-    public static UserStatisticInfoDTO toUserHomeDTO(UserStatisticInfoDTO userHomeDTO, BaseUserInfoDTO baseUserInfoDTO) { return null; }
+    public static UserStatisticInfoDTO toUserHomeDTO(UserStatisticInfoDTO userHomeDTO, BaseUserInfoDTO baseUserInfoDTO) {
+        if (baseUserInfoDTO == null) {
+            return null;
+        }
+        BeanUtils.copyProperties(baseUserInfoDTO, userHomeDTO);
+        return userHomeDTO;
+    }
 }

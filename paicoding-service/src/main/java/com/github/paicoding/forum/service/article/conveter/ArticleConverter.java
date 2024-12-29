@@ -2,6 +2,7 @@ package com.github.paicoding.forum.service.article.conveter;
 
 import com.github.paicoding.forum.api.model.enums.ArticleReadTypeEnum;
 import com.github.paicoding.forum.api.model.enums.ArticleTypeEnum;
+import com.github.paicoding.forum.api.model.enums.SourceTypeEnum;
 import com.github.paicoding.forum.api.model.enums.YesOrNoEnum;
 import com.github.paicoding.forum.api.model.enums.pay.ThirdPayWayEnum;
 import com.github.paicoding.forum.api.model.vo.article.ArticlePostReq;
@@ -11,6 +12,7 @@ import com.github.paicoding.forum.api.model.vo.article.TagReq;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticleDTO;
 import com.github.paicoding.forum.api.model.vo.article.dto.CategoryDTO;
 import com.github.paicoding.forum.api.model.vo.article.dto.TagDTO;
+import com.github.paicoding.forum.core.util.PriceUtil;
 import com.github.paicoding.forum.service.article.repository.entity.ArticleDO;
 import com.github.paicoding.forum.service.article.repository.entity.CategoryDO;
 import com.github.paicoding.forum.service.article.repository.entity.TagDO;
@@ -51,7 +53,34 @@ public class ArticleConverter {
         return article;
     }
 
-    public static ArticleDTO toDto(ArticleDO articleDO) { return null; }
+    public static ArticleDTO toDto(ArticleDO articleDO) {
+        if (articleDO == null) {
+            return null;
+        }
+        ArticleDTO articleDTO = new ArticleDTO();
+        articleDTO.setAuthor(articleDO.getUserId());
+        articleDTO.setArticleId(articleDO.getId());
+        articleDTO.setArticleType(articleDO.getArticleType());
+        articleDTO.setTitle(articleDO.getTitle());
+        articleDTO.setShortTitle(articleDO.getShortTitle());
+        articleDTO.setSummary(articleDO.getSummary());
+        articleDTO.setCover(articleDO.getPicture());
+        articleDTO.setSourceType(SourceTypeEnum.formCode(articleDO.getSource()).getDesc());
+        articleDTO.setSourceUrl(articleDO.getSourceUrl());
+        articleDTO.setStatus(articleDO.getStatus());
+        articleDTO.setCreateTime(articleDO.getCreateTime().getTime());
+        articleDTO.setLastUpdateTime(articleDO.getUpdateTime().getTime());
+        articleDTO.setOfficalStat(articleDO.getOfficalStat());
+        articleDTO.setToppingStat(articleDO.getToppingStat());
+        articleDTO.setCreamStat(articleDO.getCreamStat());
+        articleDTO.setReadType(articleDO.getReadType());
+        articleDTO.setPayAmount(PriceUtil.toYuanPrice(articleDO.getPayAmount()));
+        articleDTO.setPayWay(articleDO.getPayWay());
+
+        // 设置类目id
+        articleDTO.setCategory(new CategoryDTO(articleDO.getCategoryId(), null));
+        return articleDTO;
+    }
 
     public static List<ArticleDTO> toArticleDtoList(List<ArticleDO> articleDOS) { return null; }
 
