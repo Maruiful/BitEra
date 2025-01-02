@@ -13,7 +13,22 @@ import java.util.List;
 /** */
 public class ColumnConvert {
 
-    public static ColumnDTO toDto(ColumnInfoDO info)  { return null; }
+    public static ColumnDTO toDto(ColumnInfoDO info)  {
+        ColumnDTO dto = new ColumnDTO();
+        dto.setColumnId(info.getId());
+        dto.setColumn(info.getColumnName());
+        dto.setCover(info.getCover());
+        dto.setIntroduction(info.getIntroduction());
+        dto.setState(info.getState());
+        dto.setNums(info.getNums());
+        dto.setAuthor(info.getUserId());
+        dto.setSection(info.getSection());
+        dto.setPublishTime(info.getPublishTime().getTime());
+        dto.setType(info.getType());
+        dto.setFreeStartTime(info.getFreeStartTime().getTime());
+        dto.setFreeEndTime(info.getFreeEndTime().getTime());
+        return dto;
+    }
 
     public static List<ColumnDTO> toDtos(List<ColumnInfoDO> columnInfoDOS)  { return null; }
 

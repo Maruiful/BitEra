@@ -34,14 +34,24 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * @param pageParam
      * @return
      */
-    public List<ColumnInfoDO> listOnlineColumns(PageParam pageParam)  { return null; }
+    public List<ColumnInfoDO> listOnlineColumns(PageParam pageParam)  {
+        LambdaQueryWrapper<ColumnInfoDO> query = Wrappers.lambdaQuery();
+        query.gt(ColumnInfoDO::getState, ColumnStatusEnum.OFFLINE.getCode())
+                .last(PageParam.getLimitSql(pageParam))
+                .orderByAsc(ColumnInfoDO::getSection);
+        return baseMapper.selectList(query);
+    }
 
     /**
      * 统计专栏的文章数
      *
      * @return
      */
-    public int countColumnArticles(Long columnId)  { return 0; }
+    public int countColumnArticles(Long columnId)  {
+        LambdaQueryWrapper<ColumnArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ColumnArticleDO::getColumnId, columnId);
+        return columnArticleMapper.selectCount(query).intValue();
+    }
 
     public Long countColumnArticles()  { return null; }
 
@@ -49,7 +59,9 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * 统计专栏的阅读人数
      * @return
      */
-    public int countColumnReadPeoples(Long columnId)  { return 0; }
+    public int countColumnReadPeoples(Long columnId)  {
+        return columnArticleMapper.countColumnReadUserNums(columnId).intValue();
+    }
 
     /**
      * 根据教程ID查询文章信息列表

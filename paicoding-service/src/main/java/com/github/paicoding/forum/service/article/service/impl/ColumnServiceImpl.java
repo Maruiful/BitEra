@@ -28,6 +28,11 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Autowired
     private ColumnArticleDao columnArticleDao;
+    @Autowired
+    private ColumnDao columnDao;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public ColumnArticleDO getColumnArticleRelation(Long articleId) {
@@ -35,7 +40,11 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public PageListVo<ColumnDTO> listColumn(PageParam pageParam) { return null; }
+    public PageListVo<ColumnDTO> listColumn(PageParam pageParam) {
+        List<ColumnInfoDO> columnList = columnDao.listOnlineColumns(pageParam);
+        List<ColumnDTO> result = columnList.stream().map(this::buildColumnInfo).collect(Collectors.toList());
+        return PageListVo.newVo(result, pageParam.getPageSize());
+    }
 
     @Override
     public ColumnDTO queryBasicColumnInfo(Long columnId) { return null; }
@@ -51,4 +60,34 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     public Long getTutorialCount() { return null; }
+
+    private ColumnDTO buildColumnInfo(ColumnInfoDO info) {
+        return buildColumnInfo(ColumnConvert.toDto(info));
+    }
+
+
+    /**
+     * 构建专栏详情信息
+     *
+     * @param dto
+     * @return
+     */
+    private ColumnDTO buildColumnInfo(ColumnDTO dto) {
+        // 补齐专栏对应的用户信息
+        BaseUserInfoDTO user = userService.queryBasicUserInfo(dto.getAuthor());
+        dto.setAuthorName(user.getUserName());
+        dto.setAuthorAvatar(user.getPhoto());
+        dto.setAuthorProfile(user.getProfile());
+
+        // 统计计数
+        ColumnFootCountDTO countDTO = new ColumnFootCountDTO();
+        // 更新文章数
+        countDTO.setArticleCount(columnDao.countColumnArticles(dto.getColumnId()));
+        // 专栏阅读人数
+        countDTO.setReadCount(columnDao.countColumnReadPeoples(dto.getColumnId()));
+        // 总的章节数
+        countDTO.setTotalNums(dto.getNums());
+        dto.setCount(countDTO);
+        return dto;
+    }
 }
