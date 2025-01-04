@@ -78,7 +78,9 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * @param columnId
      * @return
      */
-    public List<SimpleArticleDTO> listColumnArticles(Long columnId)  { return null; }
+    public List<SimpleArticleDTO> listColumnArticles(Long columnId)  {
+        return columnArticleMapper.listColumnArticles(columnId);
+    }
 
     public ColumnArticleDO getColumnArticleId(long columnId, Integer section)  { return null; }
 
