@@ -47,5 +47,21 @@ public class SidebarServiceImpl implements SidebarService {
     public SideBarDTO recommendByAuthor(Long authorId, Long articleId, long size) { return null; }                                                              
 
     @Override
-    public List<SideBarDTO> queryColumnSidebarList() { return null; }
+    public List<SideBarDTO> queryColumnSidebarList() {
+        List<SideBarDTO> list = new ArrayList<>();
+        list.add(subscribeSideBar());
+        return list;
+    }
+
+    /**
+     * 订阅公众号
+     *
+     * @return
+     */
+    private SideBarDTO subscribeSideBar() {
+        return new SideBarDTO().setTitle("订阅").setSubTitle("楼仔")
+                .setImg("//cdn.tobebetterjavaer.com/paicoding/a768cfc54f59d4a056f79d1c959dcae9.jpg")
+                .setContent("10本校招必刷八股文")
+                .setStyle(SidebarStyleEnum.SUBSCRIBE.getStyle());
+    }
 }

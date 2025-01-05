@@ -62,7 +62,15 @@ public class ColumnViewController {
      * @return
      */
     @GetMapping(path = {"list", "/", "", "home"})
-    public String list(Model model)  { return null; }
+    public String list(Model model)  {
+        PageListVo<ColumnDTO> columns = columnService.listColumn(PageParam.newPageInstance());
+        List<SideBarDTO> sidebars = sidebarService.queryColumnSidebarList();
+        ColumnVo vo = new ColumnVo();
+        vo.setColumns(columns);
+        vo.setSideBarItems(sidebars);
+        model.addAttribute("vo", vo);
+        return "views/column-home/index";
+    }
 
     /**
      * 专栏详情
