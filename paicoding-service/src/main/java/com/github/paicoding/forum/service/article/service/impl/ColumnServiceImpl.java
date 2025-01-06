@@ -47,10 +47,19 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public ColumnDTO queryBasicColumnInfo(Long columnId) { return null; }
+    public ColumnDTO queryBasicColumnInfo(Long columnId) {
+        // 查找专栏信息
+        ColumnInfoDO column = columnDao.getById(columnId);
+        if (column == null) {
+            throw ExceptionUtil.of(StatusEnum.COLUMN_NOT_EXISTS, columnId);
+        }
+        return ColumnConvert.toDto(column);
+    }
 
     @Override
-    public ColumnDTO queryColumnInfo(Long columnId) { return null; }
+    public ColumnDTO queryColumnInfo(Long columnId) {
+        return buildColumnInfo(queryBasicColumnInfo(columnId));
+    }
 
     @Override
     public ColumnArticleDO queryColumnArticle(long columnId, Integer section) { return null; }
