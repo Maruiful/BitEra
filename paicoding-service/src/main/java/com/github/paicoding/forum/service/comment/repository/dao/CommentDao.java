@@ -23,7 +23,14 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      * @param pageParam
      * @return
      */
-    public List<CommentDO> listTopCommentList(Long articleId, PageParam pageParam)  { return null; }
+    public List<CommentDO> listTopCommentList(Long articleId, PageParam pageParam)  {
+        return lambdaQuery()
+                .eq(CommentDO::getTopCommentId, 0)
+                .eq(CommentDO::getArticleId, articleId)
+                .eq(CommentDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .last(PageParam.getLimitSql(pageParam))
+                .orderByDesc(CommentDO::getId).list();
+    }
 
     /**
      * 查询所有的子评论

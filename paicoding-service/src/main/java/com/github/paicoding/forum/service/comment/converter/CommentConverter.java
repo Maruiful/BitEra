@@ -24,5 +24,9 @@ public class CommentConverter {
         return dto;
     }
 
-    public static SubCommentDTO toSubDto(CommentDO comment) { return null; }
+    public static SubCommentDTO toSubDto(CommentDO comment) {
+        SubCommentDTO sub = new SubCommentDTO();
+        parseDto(comment, sub);
+        return sub;
+    }
 }

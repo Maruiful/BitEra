@@ -82,7 +82,9 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
         return columnArticleMapper.listColumnArticles(columnId);
     }
 
-    public ColumnArticleDO getColumnArticleId(long columnId, Integer section)  { return null; }
+    public ColumnArticleDO getColumnArticleId(long columnId, Integer section)  {
+        return columnArticleMapper.getColumnArticle(columnId, section);
+    }
 
     /**
      * 删除专栏

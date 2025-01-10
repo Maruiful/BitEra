@@ -62,7 +62,13 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public ColumnArticleDO queryColumnArticle(long columnId, Integer section) { return null; }
+    public ColumnArticleDO queryColumnArticle(long columnId, Integer section) {
+        ColumnArticleDO article = columnDao.getColumnArticleId(columnId, section);
+        if (article == null) {
+            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, section);
+        }
+        return article;
+    }
 
     @Override
     public List<SimpleArticleDTO> queryColumnArticles(long columnId) {
