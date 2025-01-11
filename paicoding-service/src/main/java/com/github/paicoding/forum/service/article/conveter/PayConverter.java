@@ -1,9 +1,11 @@
 package com.github.paicoding.forum.service.article.conveter;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.paicoding.forum.api.model.enums.pay.ThirdPayWayEnum;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticlePayInfoDTO;
 import com.github.paicoding.forum.api.model.vo.user.dto.UserPayCodeDTO;
 import com.github.paicoding.forum.core.util.JsonUtil;
+import com.github.paicoding.forum.core.util.PriceUtil;
 import com.github.paicoding.forum.service.article.repository.entity.ArticlePayRecordDO;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,7 +16,22 @@ import java.util.Map;
 /** */
 public class PayConverter {
 
-    public static ArticlePayInfoDTO toPay(ArticlePayRecordDO record) { return null; }
+    public static ArticlePayInfoDTO toPay(ArticlePayRecordDO record) {
+        ArticlePayInfoDTO info = new ArticlePayInfoDTO();
+        info.setPayId(record.getId());
+        info.setPayUserId(record.getPayUserId());
+        info.setPayStatus(record.getPayStatus());
+        info.setReceiveUserId(record.getReceiveUserId());
+        info.setArticleId(record.getArticleId());
+        info.setPayAmount(PriceUtil.toYuanPrice(record.getPayAmount()));
+        ThirdPayWayEnum payWay = ThirdPayWayEnum.ofPay(record.getPayWay());
+        if (payWay != null) {
+            info.setPayWay(payWay.getPay());
+            info.setPrePayExpireTime(record.getPrePayExpireTime() == null ? null : record.getPrePayExpireTime().getTime());
+            info.setPrePayId(genQrCode(record.getPrePayId()));
+        }
+        return info;
+    }
 
 
     /**

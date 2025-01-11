@@ -30,7 +30,15 @@ public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePa
      * @param payUserId 支付用户id
      * @return 支付记录
      */
-    public ArticlePayRecordDO queryRecordByArticleId(Long articleId, Long payUserId)  { return null; }
+    public ArticlePayRecordDO queryRecordByArticleId(Long articleId, Long payUserId)  {
+        List<ArticlePayRecordDO> list = lambdaQuery()
+                .eq(ArticlePayRecordDO::getArticleId, articleId)
+                .eq(ArticlePayRecordDO::getPayUserId, payUserId).list();
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        return list.get(0);
+    }
 
 
     /**
