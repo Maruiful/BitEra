@@ -105,7 +105,49 @@ public class ArticlePayServiceImpl implements ArticlePayService {
     }
 
     @Override
-    public boolean updatePaying(Long payId, Long currentUserId, String notes) { return false; }
+    public boolean updatePaying(Long payId, Long currentUserId, String notes) {
+        ArticlePayRecordDO record = articlePayDao.selectForUpdate(payId);
+        if (!record.getPayUserId().equals(currentUserId)) {
+            // 用户不一致，不支持更新
+            throw ExceptionUtil.of(StatusEnum.FORBID_ERROR);
+        }
+
+        if (Objects.equals(record.getPayStatus(), PayStatusEnum.SUCCEED.getStatus()) ||
+                Objects.equals(record.getPayStatus(), PayStatusEnum.FAIL.getStatus())) {
+            // 支付状态幂等
+            return true;
+        }
+
+        // 更新为支付中
+        ThirdPayWayEnum payWay = ThirdPayWayEnum.ofPay(record.getPayWay());
+        if (PayStatusEnum.NOT_PAY.getStatus().equals(record.getPayStatus())) {
+            record.setPayStatus(PayStatusEnum.PAYING.getStatus());
+            record.setUpdateTime(new Date());
+            if (StringUtils.isNotBlank(notes)) {
+                // 更新备注信息
+                record.setNotes(notes);
+            }
+        } else if (StringUtils.isNotBlank(notes) && Objects.equals(notes, record.getNotes())) {
+            // 备注信息不同时，更新并发送邮件通知
+            record.setUpdateTime(new Date());
+            record.setNotes(notes);
+        }
+
+        // 调用具体的支付服务，执行支付中的逻辑；然后回写变更逻辑到db
+        boolean dbChanged = payServiceFactory.getPayService(payWay).paying(record);
+        if (!dbChanged) {
+            return true;
+        }
+        // 保存数据变更
+        boolean ans = articlePayDao.updateById(record);
+        if (!ans) {
+            return false;
+        }
+
+        // 发布支付状态变更消息
+        this.publishPayStatusChangeNotify(record);
+        return true;
+    }
 
     @Override
     public boolean updatePayStatus(Long payId, String verifyCode, PayStatusEnum payStatus,
