@@ -62,7 +62,15 @@ public class CommentRestController {
      */
     @ResponseBody
     @RequestMapping(path = "list")
-    public ResVo<List<TopCommentDTO>> list(Long articleId, Long pageNum, Long pageSize) { return null; }
+    public ResVo<List<TopCommentDTO>> list(Long articleId, Long pageNum, Long pageSize) {
+        if (NumUtil.nullOrZero(articleId)) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "文章id为空");
+        }
+        pageNum = Optional.ofNullable(pageNum).orElse(PageParam.DEFAULT_PAGE_NUM);
+        pageSize = Optional.ofNullable(pageSize).orElse(PageParam.DEFAULT_PAGE_SIZE);
+        List<TopCommentDTO> result = commentReadService.getArticleComments(articleId, PageParam.newPageInstance(pageNum, pageSize));
+        return ResVo.ok(result);
+    }
 
     /**
      * 保存评论
