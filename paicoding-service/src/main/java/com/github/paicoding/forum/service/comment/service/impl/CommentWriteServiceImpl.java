@@ -162,6 +162,35 @@ public class CommentWriteServiceImpl implements CommentWriteService {
         SpringUtil.getBean(CommentWriteService.class).saveComment(save);
     }
 
-    
-    public void deleteComment(Long commentId, Long userId) {}
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteComment(Long commentId, Long userId) {
+        CommentDO commentDO = commentDao.getById(commentId);
+        // 1.校验评论，是否越权，文章是否存在
+        if (commentDO == null) {
+            throw ExceptionUtil.of(StatusEnum.COMMENT_NOT_EXISTS, "评论ID=" + commentId);
+        }
+        if (!Objects.equals(commentDO.getUserId(), userId)) {
+            throw ExceptionUtil.of(StatusEnum.FORBID_ERROR_MIXED, "无权删除评论");
+        }
+        // 获取文章信息
+        ArticleDO article = articleReadService.queryBasicArticle(commentDO.getArticleId());
+        if (article == null) {
+            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, commentDO.getArticleId());
+        }
+
+        // 2.删除评论、足迹
+        commentDO.setDeleted(YesOrNoEnum.YES.getCode());
+        commentDao.updateById(commentDO);
+        CommentDO parentComment = getParentCommentUser(commentDO.getParentCommentId());
+        userFootWriteService.removeCommentFoot(commentDO, article.getUserId(), parentComment == null ? null : parentComment.getUserId());
+
+        // 3. 发布删除评论事件
+        SpringUtil.publishEvent(new NotifyMsgEvent<>(this, NotifyTypeEnum.DELETE_COMMENT, commentDO));
+        if (NumUtil.upZero(commentDO.getParentCommentId())) {
+            // 评论
+            SpringUtil.publishEvent(new NotifyMsgEvent<>(this, NotifyTypeEnum.DELETE_REPLY, commentDO));
+        }
+    }
 }
