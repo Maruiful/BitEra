@@ -103,7 +103,15 @@ public class UserFootServiceImpl implements UserFootService {
     public void favorArticleComment(DocumentTypeEnum documentType, Long documentId, Long authorId, Long userId, OperateTypeEnum operateTypeEnum) {}
 
     @Override
-    public void saveCommentFoot(CommentDO comment, Long articleAuthor, Long parentCommentAuthor) {}
+    public void saveCommentFoot(CommentDO comment, Long articleAuthor, Long parentCommentAuthor) {
+        // 保存文章对应的评论足迹
+        saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, comment.getArticleId(), articleAuthor, comment.getUserId(), OperateTypeEnum.COMMENT);
+        // 如果是子评论，则找到父评论的记录，然后设置为已评
+        if (comment.getParentCommentId() != null && comment.getParentCommentId() != 0) {
+            // 如果需要展示父评论的子评论数量，authorId 需要传父评论的 userId
+            saveOrUpdateUserFoot(DocumentTypeEnum.COMMENT, comment.getParentCommentId(), parentCommentAuthor, comment.getUserId(), OperateTypeEnum.COMMENT);
+        }
+    }
 
     @Override
     public void removeCommentFoot(CommentDO comment, Long articleAuthor, Long parentCommentAuthor) {}

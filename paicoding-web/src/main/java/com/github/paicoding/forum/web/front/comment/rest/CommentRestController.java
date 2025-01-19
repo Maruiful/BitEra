@@ -81,7 +81,33 @@ public class CommentRestController {
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "post")
     @ResponseBody
-    public ResVo<String> save(@RequestBody CommentSaveReq req) { return null; }
+    public ResVo<String> save(@RequestBody CommentSaveReq req) {
+        if (req.getArticleId() == null) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "文章id为空");
+        }
+        ArticleDO article = articleReadService.queryBasicArticle(req.getArticleId());
+        if (article == null) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "文章不存在!");
+        }
+
+        // 保存评论
+        req.setUserId(ReqInfoContext.getReqInfo().getUserId());
+        req.setCommentContent(StringEscapeUtils.escapeHtml3(req.getCommentContent()));
+        commentWriteService.saveComment(req);
+
+        // 返回新的评论信息，用于实时更新详情也的评论列表
+        ArticleDetailVo vo = new ArticleDetailVo();
+        vo.setArticle(ArticleConverter.toDto(article));
+        // 评论信息
+        List<TopCommentDTO> comments = commentReadService.getArticleComments(req.getArticleId(), PageParam.newPageInstance());
+        vo.setComments(comments);
+
+        // 热门评论
+        TopCommentDTO hotComment = commentReadService.queryHotComment(req.getArticleId());
+        vo.setHotComment(hotComment);
+        String content = templateEngineHelper.render("views/article-detail/comment/index", vo);
+        return ResVo.ok(content);
+    }
 
     /**
      * 删除评论
