@@ -132,6 +132,24 @@ public class CommentRestController {
     @Permission(role = UserRole.LOGIN)
     @GetMapping(path = "favor")
     public ResVo<Boolean> favor(@RequestParam(name = "commentId") Long commendId,
-                                @RequestParam(name = "type") Integer type) { return null; }
+                                @RequestParam(name = "type") Integer type) {
+        OperateTypeEnum operate = OperateTypeEnum.fromCode(type);
+        if (operate == OperateTypeEnum.EMPTY) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, type + "非法");
+        }
+
+        // 要求文章必须存在
+        CommentDO comment = commentReadService.queryComment(commendId);
+        if (comment == null) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "评论不存在!");
+        }
+
+        userFootService.favorArticleComment(DocumentTypeEnum.COMMENT,
+                commendId,
+                comment.getUserId(),
+                ReqInfoContext.getReqInfo().getUserId(),
+                operate);
+        return ResVo.ok(true);
+    }
 
 }

@@ -41,7 +41,9 @@ public class CommentReadServiceImpl implements CommentReadService {
     private UserFootService userFootService;
 
     @Override
-    public CommentDO queryComment(Long commentId) { return null; }
+    public CommentDO queryComment(Long commentId) {
+        return commentDao.getById(commentId);
+    }
 
     @Override
     public List<TopCommentDTO> getArticleComments(Long articleId, PageParam page) {

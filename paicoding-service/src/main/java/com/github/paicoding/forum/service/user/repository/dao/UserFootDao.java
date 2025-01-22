@@ -19,7 +19,13 @@ import java.util.Optional;
 /** */
 @Repository
 public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
-    public UserFootDO getByDocumentAndUserId(Long documentId, Integer type, Long userId)  { return null; }
+    public UserFootDO getByDocumentAndUserId(Long documentId, Integer type, Long userId)  {
+        LambdaQueryWrapper<UserFootDO> query = Wrappers.lambdaQuery();
+        query.eq(UserFootDO::getDocumentId, documentId)
+                .eq(UserFootDO::getDocumentType, type)
+                .eq(UserFootDO::getUserId, userId);
+        return baseMapper.selectOne(query);
+    }
 
     public List<SimpleUserInfoDTO> listDocumentPraisedUsers(Long documentId, Integer type, int size)  { return null; }
 
