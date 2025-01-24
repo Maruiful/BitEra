@@ -46,8 +46,22 @@ public class IndexRecommendHelper {
     @Autowired
     private ConfigService configService;
 
-    public IndexVo buildIndexVo(String activeTab)  { return null; }
-
+    public IndexVo buildIndexVo(String activeTab) {
+        IndexVo vo = new IndexVo();
+        CategoryDTO category = categories(activeTab, vo);
+        vo.setCategoryId(category.getCategoryId());
+        vo.setCurrentCategory(category.getCategory());
+        // 并行调度实例，提高响应性能
+        AsyncUtil.concurrentExecutor("首页响应")
+                .async(() -> vo.setArticles(articleList(category.getCategoryId())), "文章列表")
+                .async(() -> vo.setTopArticles(topArticleList(category)), "置顶文章")
+                .async(() -> vo.setHomeCarouselList(homeCarouselList()), "轮播图")
+                .async(() -> vo.setSideBarItems(sidebarService.queryHomeSidebarList()), "侧边栏")
+                .async(() -> vo.setUser(loginInfo()), "用户信息")
+                .allExecuted()
+                .prettyPrint();
+        return vo;
+    }
     public IndexVo buildSearchVo(String key)  { return null; }
 
     /**

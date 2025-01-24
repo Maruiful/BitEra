@@ -233,7 +233,12 @@ public class AsyncUtil {
         }
     }
 
-    public static CompletableFutureBridge concurrentExecutor(String... name)  { return null; }
+    public static CompletableFutureBridge concurrentExecutor(String... name)  {
+        if (name.length > 0) {
+            return new CompletableFutureBridge(AsyncUtil.executorService, name[0]);
+        }
+        return new CompletableFutureBridge();
+    }
 
     /**
      * 开始桥接类

@@ -10,12 +10,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
 
-/** */
+/**
+ * 首页控制器
+ */
 @Controller
 public class IndexController extends BaseViewController {
     @Autowired
     private IndexRecommendHelper indexRecommendHelper;
 
     @GetMapping(path = {"/", "", "/index", "/login"})
-    public String index(Model model, HttpServletRequest request)  { return null; }
+    public String index(Model model, HttpServletRequest request)  {
+        String activeTab = request.getParameter("category");
+        IndexVo vo = indexRecommendHelper.buildIndexVo(activeTab);
+        model.addAttribute("vo", vo);
+        return "views/home/index";
+    }
 }
