@@ -1,6 +1,6 @@
 package com.github.paicoding.forum.service.notify.service.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.beust.jcommander.internal.Sets;
 import com.github.paicoding.forum.api.model.context.ReqInfoContext;
 import com.github.paicoding.forum.api.model.enums.NotifyStatEnum;
 import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
@@ -14,11 +14,20 @@ import com.github.paicoding.forum.service.notify.repository.entity.NotifyMsgDO;
 import com.github.paicoding.forum.service.notify.service.NotifyService;
 import com.github.paicoding.forum.service.user.repository.entity.UserFootDO;
 import com.github.paicoding.forum.service.user.service.UserRelationService;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +43,11 @@ public class NotifyServiceImpl implements NotifyService {
 
     @Autowired
     private UserRelationService userRelationService;
+
+    /**
+     * 记录用户与对应的jwt token之间的缓存关系；用于websocket的广播通知
+     */
+    private LoadingCache<Long, Set<String>> wsUserSessionCache;
 
     public Set<String> load(Long aLong) throws Exception { return null; }
 
@@ -80,7 +94,11 @@ public class NotifyServiceImpl implements NotifyService {
     public void saveArticleNotify(UserFootDO foot, NotifyTypeEnum notifyTypeEnum) {}
 
     @Override
-    public void notifyToUser(Long userId, String msg) {}
+    public void notifyToUser(Long userId, String msg) {
+        wsUserSessionCache.getUnchecked(userId).forEach(s -> {
+            WebSocketResponseUtil.sendMsgToUser(s, NOTIFY_TOPIC, msg);
+        });
+    }
 
     @Override
     public void notifyChannelMaintain(StompHeaderAccessor accessor) {}

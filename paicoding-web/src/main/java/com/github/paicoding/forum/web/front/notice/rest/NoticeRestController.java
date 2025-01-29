@@ -103,7 +103,13 @@ public class NoticeRestController {
      * @param content 发送的内容
      */
     @MessageMapping("/msg/health")
-    public void health(String content, SimpMessageHeaderAccessor headerAccessor)  {}
+    public void health(String content, SimpMessageHeaderAccessor headerAccessor)  {
+        ReqInfoContext.ReqInfo user = (ReqInfoContext.ReqInfo) headerAccessor.getUser();
+        if (user != null) {
+            String response = "ping".equalsIgnoreCase(content) ? "pong" : content;
+            notifyService.notifyToUser(user.getUserId(), response);
+        }
+    }
 
     /**
      * 给自己发送通知消息 -- 用于测试消息通知
