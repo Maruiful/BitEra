@@ -40,7 +40,25 @@ public class NoticeRestController {
         this.notifyService = notifyService;
     }
 
-    private PageListVo<NotifyMsgDTO> listItems(String type, Long page, Long pageSize)  { return null; }
+    /**
+     * 获取消息列表
+     *
+     * @param type
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    private PageListVo<NotifyMsgDTO> listItems(String type, Long page, Long pageSize)  {
+        NotifyTypeEnum typeEnum = NotifyTypeEnum.typeOf(type);
+        if (typeEnum == null) {
+            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "type" + type + "非法");
+        }
+        if (pageSize == null) {
+            pageSize = PageParam.DEFAULT_PAGE_SIZE;
+        }
+        return notifyService.queryUserNotices(ReqInfoContext.getReqInfo().getUserId(),
+                typeEnum, PageParam.newPageInstance(page, pageSize));
+    }
 
     /**
      * 消息通知列表，用于前后端分离的场景

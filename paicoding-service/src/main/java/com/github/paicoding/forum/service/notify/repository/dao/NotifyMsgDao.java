@@ -53,12 +53,27 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param type
      * @return
      */
-    public List<NotifyMsgDTO> listNotifyMsgByUserIdAndType(long userId, NotifyTypeEnum type, PageParam page)  { return null; }
+    public List<NotifyMsgDTO> listNotifyMsgByUserIdAndType(long userId, NotifyTypeEnum type, PageParam page)  {
+        switch (type) {
+            case REPLY:
+            case COMMENT:
+            case COLLECT:
+            case PRAISE:
+                return baseMapper.listArticleRelatedNotices(userId, type.getType(), page);
+            default:
+                return baseMapper.listNormalNotices(userId, type.getType(), page);
+        }
+    }
 
     /**
      * 设置消息为已读
      *
      * @param list
      */
-    public void updateNotifyMsgToRead(List<NotifyMsgDTO> list)  {}
+    public void updateNotifyMsgToRead(List<NotifyMsgDTO> list)  {
+        List<Long> ids = list.stream().filter(s -> s.getState() == NotifyStatEnum.UNREAD.getStat()).map(NotifyMsgDTO::getMsgId).collect(Collectors.toList());
+        if (!ids.isEmpty()) {
+            baseMapper.updateNoticeRead(ids);
+        }
+    }
 }

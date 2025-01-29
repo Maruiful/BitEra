@@ -43,7 +43,10 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param targetUserId 关注者用户id列表
      * @return
      */
-    public List<UserRelationDO> listUserRelations(Long followUserId, Collection<Long> targetUserId)  { return null; }
+    public List<UserRelationDO> listUserRelations(Long followUserId, Collection<Long> targetUserId)  {
+        return lambdaQuery().eq(UserRelationDO::getFollowUserId, followUserId)
+                .in(UserRelationDO::getUserId, targetUserId).list();
+    }
 
     public Long queryUserFollowCount(Long userId)  { return null; }
 
