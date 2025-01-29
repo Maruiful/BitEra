@@ -162,5 +162,7 @@ public class CommentReadServiceImpl implements CommentReadService {
     }
 
     @Override
-    public int queryCommentCount(Long articleId) { return 0; }
+    public int queryCommentCount(Long articleId) {
+        return commentDao.commentCount(articleId);
+    }
 }

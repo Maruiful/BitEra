@@ -30,16 +30,74 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class SitemapServiceImpl implements SitemapService {
-    
+
+    @Value("${view.site.host:https://paicoding.com}")
+    private String host;
+    private static final int SCAN_SIZE = 100;
+
+    private static final String SITE_MAP_CACHE_KEY = "sitemap";
 
     @Resource
-    
+    private ArticleDao articleDao;
+    @Resource
+    private CountService countService;
+
 
     
-    public SiteMapVo getSiteMap() { return null; }
+    public SiteMapVo getSiteMap() {
+        // key = 文章id, value = 最后更新时间
+        Map<String, Long> siteMap = RedisClient.hGetAll(SITE_MAP_CACHE_KEY, Long.class);
+        if (CollectionUtils.isEmpty(siteMap)) {
+            // 首次访问时，没有数据，全量初始化
+            initSiteMap();
+        }
+        siteMap = RedisClient.hGetAll(SITE_MAP_CACHE_KEY, Long.class);
+        SiteMapVo vo = initBasicSite();
+        if (CollectionUtils.isEmpty(siteMap)) {
+            return vo;
+        }
+
+        for (Map.Entry<String, Long> entry : siteMap.entrySet()) {
+            vo.addUrl(new SiteUrlVo(host + "/article/detail/" + entry.getKey(), DateUtil.time2utc(entry.getValue())));
+        }
+        return vo;
+    }
+
+    /**
+     * fixme: 加锁初始化，更推荐的是采用分布式锁
+     */
+    private synchronized void initSiteMap() {
+        long lastId = 0L;
+        RedisClient.del(SITE_MAP_CACHE_KEY);
+        while (true) {
+            List<SimpleArticleDTO> list = articleDao.getBaseMapper().listArticlesOrderById(lastId, SCAN_SIZE);
+            // 刷新文章的统计信息
+            list.forEach(s -> countService.refreshArticleStatisticInfo(s.getId()));
+
+            // 刷新站点地图信息
+            Map<String, Long> map = list.stream().collect(Collectors.toMap(s -> String.valueOf(s.getId()), s -> s.getCreateTime().getTime(), (a, b) -> a));
+            RedisClient.hMSet(SITE_MAP_CACHE_KEY, map);
+            if (list.size() < SCAN_SIZE) {
+                break;
+            }
+            lastId = list.get(list.size() - 1).getId();
+        }
+    }
+
+    private SiteMapVo initBasicSite() {
+        SiteMapVo vo = new SiteMapVo();
+        String time = DateUtil.time2utc(System.currentTimeMillis());
+        vo.addUrl(new SiteUrlVo(host + "/", time));
+        vo.addUrl(new SiteUrlVo(host + "/column", time));
+        vo.addUrl(new SiteUrlVo(host + "/admin-view", time));
+        return vo;
+    }
+
 
     @Override
-    public void refreshSitemap() {}
+    public void refreshSitemap() {
+        initSiteMap();
+    }
 
     
 

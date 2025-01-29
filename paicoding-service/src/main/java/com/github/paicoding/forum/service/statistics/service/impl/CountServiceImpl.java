@@ -33,6 +33,9 @@ public class CountServiceImpl implements CountService {
     @Autowired
     private UserFootDao userFootDao;
 
+    @Autowired
+    private CommentReadService commentReadService;
+
     @Override
     public ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId) { return null; }
 
@@ -94,5 +97,20 @@ public class CountServiceImpl implements CountService {
     
 
 
-    public void refreshArticleStatisticInfo(Long articleId) {}
+    public void refreshArticleStatisticInfo(Long articleId) {
+        ArticleFootCountDTO res = userFootDao.countArticleByArticleId(articleId);
+        if (res == null) {
+            res = new ArticleFootCountDTO();
+        } else {
+            res.setCommentCount(commentReadService.queryCommentCount(articleId));
+        }
+
+        RedisClient.hMSet(CountConstants.ARTICLE_STATISTIC_INFO + articleId,
+                MapUtils.create(CountConstants.COLLECTION_COUNT, res.getCollectionCount(),
+                        CountConstants.PRAISE_COUNT, res.getPraiseCount(),
+                        CountConstants.READ_COUNT, res.getReadCount(),
+                        CountConstants.COMMENT_COUNT, res.getCommentCount()
+                )
+        );
+    }
 }

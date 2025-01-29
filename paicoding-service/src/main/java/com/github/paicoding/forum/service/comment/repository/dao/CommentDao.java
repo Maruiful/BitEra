@@ -52,7 +52,13 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      * @param articleId
      * @return
      */
-    public int commentCount(Long articleId)  { return 0; }
+    public int commentCount(Long articleId)  {
+        QueryWrapper<CommentDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(CommentDO::getArticleId, articleId)
+                .eq(CommentDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return baseMapper.selectCount(queryWrapper).intValue();
+    }
 
     public CommentDO getHotComment(Long articleId)  {
         Map<String, Object> map = baseMapper.getHotTopCommentId(articleId);

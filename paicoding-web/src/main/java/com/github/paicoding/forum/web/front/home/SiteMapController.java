@@ -24,7 +24,9 @@ public class SiteMapController {
 
     @RequestMapping(path = "/sitemap",
             produces = "application/xml;charset=utf-8")
-    public SiteMapVo sitemap()  { return null; }
+    public SiteMapVo sitemap()  {
+        return sitemapService.getSiteMap();
+    }
 
     @RequestMapping(path = "/sitemap.xml",
             produces = "text/xml")
@@ -39,5 +41,8 @@ public class SiteMapController {
     }
 
     @GetMapping(path = "/sitemap/refresh")
-    public Boolean refresh()  { return null; }
+    public Boolean refresh()  {
+        sitemapService.refreshSitemap();
+        return true;
+    }
 }

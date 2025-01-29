@@ -54,7 +54,9 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param articleId
      * @return
      */
-    public ArticleFootCountDTO countArticleByArticleId(Long articleId)  { return null; }
+    public ArticleFootCountDTO countArticleByArticleId(Long articleId)  {
+        return baseMapper.countArticleByArticleId(articleId);
+    }
 
     /**
      * 查询作者的文章统计
