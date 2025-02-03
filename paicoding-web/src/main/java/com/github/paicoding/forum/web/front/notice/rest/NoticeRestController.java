@@ -118,7 +118,10 @@ public class NoticeRestController {
      * @return
      */
     @RequestMapping(path = "notifyToSelf")
-    public ResVo<Boolean> notifyToSelf(String content)  { return null; }
+    public ResVo<Boolean> notifyToSelf(String content)  {
+        notifyService.notifyToUser(ReqInfoContext.getReqInfo().getUserId(), content);
+        return ResVo.ok(true);
+    }
 
     /**
      * 发送广播消息
