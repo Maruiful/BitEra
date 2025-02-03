@@ -130,5 +130,9 @@ public class NoticeRestController {
      * @return
      */
     @RequestMapping(path = "notifyToAll")
-    public ResVo<Boolean> notifyToAll(String content)  { return null; }
+    public ResVo<Boolean> notifyToAll(String content)  {
+        BaseUserInfoDTO user = ReqInfoContext.getReqInfo().getUser();
+        WebSocketResponseUtil.broadcastMsg(NotifyService.NOTIFY_TOPIC, String.format("【%s】发送了一条广播消息: %s", user.getUserName(), content));
+        return ResVo.ok(true);
+    }
 }
