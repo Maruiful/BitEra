@@ -88,7 +88,25 @@ public class NotifyServiceImpl implements NotifyService {
     }
 
     @Override
-    public Map<String, Integer> queryUnreadCounts(long userId) { return null; }
+    public Map<String, Integer> queryUnreadCounts(long userId) {
+        Map<Integer, Integer> map = Collections.emptyMap();
+        if (ReqInfoContext.getReqInfo() != null && NumUtil.upZero(ReqInfoContext.getReqInfo().getMsgNum())) {
+            map = notifyMsgDao.groupCountByUserIdAndStat(userId, NotifyStatEnum.UNREAD.getStat());
+        }
+        // 指定先后顺序
+        Map<String, Integer> ans = new LinkedHashMap<>();
+        initCnt(NotifyTypeEnum.COMMENT, map, ans);
+        initCnt(NotifyTypeEnum.REPLY, map, ans);
+        initCnt(NotifyTypeEnum.PRAISE, map, ans);
+        initCnt(NotifyTypeEnum.COLLECT, map, ans);
+        initCnt(NotifyTypeEnum.FOLLOW, map, ans);
+        initCnt(NotifyTypeEnum.SYSTEM, map, ans);
+        return ans;
+    }
+
+    private void initCnt(NotifyTypeEnum type, Map<Integer, Integer> map, Map<String, Integer> result) {
+        result.put(type.name().toLowerCase(), map.getOrDefault(type.getType(), 0));
+    }
 
     @Override
     public void saveArticleNotify(UserFootDO foot, NotifyTypeEnum notifyTypeEnum) {}

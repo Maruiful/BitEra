@@ -44,7 +44,21 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param userId
      * @return
      */
-    public Map<Integer, Integer> groupCountByUserIdAndStat(long userId, Integer stat)  { return null; }
+    public Map<Integer, Integer> groupCountByUserIdAndStat(long userId, Integer stat)  {
+        QueryWrapper<NotifyMsgDO> wrapper = new QueryWrapper<>();
+        wrapper.select("type, count(*) as cnt");
+        wrapper.eq("notify_user_id", userId);
+        if (stat != null) {
+            wrapper.eq("state", stat);
+        }
+        wrapper.groupBy("type");
+        List<Map<String, Object>> map = listMaps(wrapper);
+        Map<Integer, Integer> result = new HashMap<>();
+        map.forEach(s -> {
+            result.put(Integer.valueOf(s.get("type").toString()), Integer.valueOf(s.get("cnt").toString()));
+        });
+        return result;
+    }
 
     /**
      * 查询用户消息列表
