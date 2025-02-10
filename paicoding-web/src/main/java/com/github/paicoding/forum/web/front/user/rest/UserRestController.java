@@ -52,7 +52,10 @@ public class UserRestController {
      */
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "saveUserRelation")
-    public ResVo<Boolean> saveUserRelation(@RequestBody UserRelationReq req)  { return null; }
+    public ResVo<Boolean> saveUserRelation(@RequestBody UserRelationReq req)  {
+        userRelationService.saveUserRelation(req);
+        return ResVo.ok(true);
+    }
 
     /**
      * 保存用户详情

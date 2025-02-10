@@ -1,5 +1,7 @@
 package com.github.paicoding.forum.service.user.converter;
 
+import com.github.paicoding.forum.api.model.context.ReqInfoContext;
+import com.github.paicoding.forum.api.model.enums.FollowStateEnum;
 import com.github.paicoding.forum.api.model.enums.RoleEnum;
 import com.github.paicoding.forum.api.model.vo.user.UserInfoSaveReq;
 import com.github.paicoding.forum.api.model.vo.user.UserRelationReq;
@@ -40,7 +42,16 @@ public class UserConverter {
 
     public static SimpleUserInfoDTO toSimpleInfo(UserInfoDO info) { return null; }
 
-    public static UserRelationDO toDO(UserRelationReq req) { return null; }
+    public static UserRelationDO toDO(UserRelationReq req) {
+        if (req == null) {
+            return null;
+        }
+        UserRelationDO userRelationDO = new UserRelationDO();
+        userRelationDO.setUserId(req.getUserId());
+        userRelationDO.setFollowUserId(ReqInfoContext.getReqInfo().getUserId());
+        userRelationDO.setFollowState(req.getFollowed() ? FollowStateEnum.FOLLOW.getCode() : FollowStateEnum.CANCEL_FOLLOW.getCode());
+        return userRelationDO;
+    }
 
     public static UserStatisticInfoDTO toUserHomeDTO(UserStatisticInfoDTO userHomeDTO, BaseUserInfoDTO baseUserInfoDTO) {
         if (baseUserInfoDTO == null) {
