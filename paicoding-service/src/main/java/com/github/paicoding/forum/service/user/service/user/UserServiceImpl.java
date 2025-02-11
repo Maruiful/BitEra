@@ -67,7 +67,10 @@ public class UserServiceImpl implements UserService {
     public List<SimpleUserInfoDTO> searchUser(String userName) { return null; } 
 
     @Override
-    public void saveUserInfo(UserInfoSaveReq req) {}
+    public void saveUserInfo(UserInfoSaveReq req) {
+        UserInfoDO userInfoDO = UserConverter.toDO(req);
+        userDao.updateUserInfo(userInfoDO);
+    }
 
     @Override
     public BaseUserInfoDTO getAndUpdateUserIpInfoBySessionId(String session, String clientIp) { return null; }                                                  

@@ -62,7 +62,26 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
 
     public Long getUserCount()  { return null; }
 
-    public void updateUserInfo(UserInfoDO user)  {}
+    public void updateUserInfo(UserInfoDO user)  {
+        UserInfoDO record = getByUserId(user.getUserId());
+        if (record.equals(user)) {
+            return;
+        }
+        if (StringUtils.isEmpty(user.getPhoto())) {
+            user.setPhoto(null);
+        }
+        if (StringUtils.isEmpty(user.getUserName())) {
+            user.setUserName(null);
+        }
+        if (StringUtils.isEmpty(user.getEmail())) {
+            user.setEmail(null);
+        }
+        if (StringUtils.isBlank(user.getPayCode())) {
+            user.setPayCode(null);
+        }
+        user.setId(record.getId());
+        updateById(user);
+    }
 
     public UserDO getUserByUserName(String userName)  {
         LambdaQueryWrapper<UserDO> queryUser = Wrappers.lambdaQuery();

@@ -67,7 +67,14 @@ public class UserRestController {
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "saveUserInfo")
     @Transactional(rollbackFor = Exception.class)
-    public ResVo<Boolean> saveUserInfo(@RequestBody UserInfoSaveReq req)  { return null; }
+    public ResVo<Boolean> saveUserInfo(@RequestBody UserInfoSaveReq req)  {
+        if (req.getUserId() == null || !Objects.equals(req.getUserId(), ReqInfoContext.getReqInfo().getUserId())) {
+            // 不能修改其他用户的信息
+            return ResVo.fail(StatusEnum.FORBID_ERROR_MIXED, "无权修改");
+        }
+        userService.saveUserInfo(req);
+        return ResVo.ok(true);
+    }
 
     /**
      * 用户的文章列表翻页
