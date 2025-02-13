@@ -100,6 +100,13 @@ public class UserRestController {
         return ResVo.ok(new NextPageHtmlVo(html, dto.getHasMore()));
     }
 
+    /**
+     * 获取用户关注列表
+     *
+     * @param userId
+     * @param followSelectType
+     * @return
+     */
     @GetMapping(path = "followList")
     public ResVo<NextPageHtmlVo> followList(@RequestParam(name = "userId") Long userId,
                                             @RequestParam(name = "followSelectType") String followSelectType,

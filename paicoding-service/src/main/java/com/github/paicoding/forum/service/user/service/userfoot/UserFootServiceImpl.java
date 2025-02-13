@@ -174,12 +174,12 @@ public class UserFootServiceImpl implements UserFootService {
 
     @Override
     public List<Long> queryUserReadArticleList(Long userId, PageParam pageParam) {
-        return null;
+        return userFootDao.listReadArticleByUserId(userId, pageParam);
     }
 
     @Override
     public List<Long> queryUserCollectionArticleList(Long userId, PageParam pageParam) {
-        return null;
+        return userFootDao.listCollectedArticlesByUserId(userId, pageParam);
     }
 
     @Override

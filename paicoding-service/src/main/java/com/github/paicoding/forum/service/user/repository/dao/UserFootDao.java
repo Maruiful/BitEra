@@ -36,7 +36,9 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param pageParam
      * @return
      */
-    public List<Long> listCollectedArticlesByUserId(Long userId, PageParam pageParam)  { return null; }
+    public List<Long> listCollectedArticlesByUserId(Long userId, PageParam pageParam)  {
+        return baseMapper.listCollectedArticlesByUserId(userId, pageParam);
+    }
 
 
     /**
@@ -46,7 +48,9 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param pageParam
      * @return
      */
-    public List<Long> listReadArticleByUserId(Long userId, PageParam pageParam)  { return null; }
+    public List<Long> listReadArticleByUserId(Long userId, PageParam pageParam)  {
+        return baseMapper.listReadArticleByUserId(userId, pageParam);
+    }
 
     /**
      * 查询文章计数信息

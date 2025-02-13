@@ -27,7 +27,20 @@ public class PageParam {
 
     public static PageParam newPageInstance(Integer pageNum, Integer pageSize)  { return null; }
 
-    public static PageParam newPageInstance(Long pageNum, Long pageSize)  { return null; }
+    public static PageParam newPageInstance(Long pageNum, Long pageSize)  {
+        if (pageNum == null || pageSize == null) {
+            return null;
+        }
+
+        final PageParam pageParam = new PageParam();
+        pageParam.pageNum = pageNum;
+        pageParam.pageSize = pageSize;
+
+        pageParam.offset = (pageNum - 1) * pageSize;
+        pageParam.limit = pageSize;
+
+        return pageParam;
+    }
 
     public static String getLimitSql(PageParam pageParam)  { return null; }
 

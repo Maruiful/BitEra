@@ -262,7 +262,28 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @return
      */
     @Override
-    public PageListVo<ArticleDTO> queryArticlesByUserAndType(Long userId, PageParam pageParam, HomeSelectEnum select) { return null; }
+    public PageListVo<ArticleDTO> queryArticlesByUserAndType(Long userId, PageParam pageParam, HomeSelectEnum select) {
+        List<ArticleDO> records = null;
+        if (select == HomeSelectEnum.ARTICLE) {
+            // 用户的文章列表
+            records = articleDao.listArticlesByUserId(userId, pageParam);
+        } else if (select == HomeSelectEnum.READ) {
+            // 用户的阅读记录
+            List<Long> articleIds = userFootService.queryUserReadArticleList(userId, pageParam);
+            records = CollectionUtils.isEmpty(articleIds) ? Collections.emptyList() : articleDao.listByIds(articleIds);
+            records = sortByIds(articleIds, records);
+        } else if (select == HomeSelectEnum.COLLECTION) {
+            // 用户的收藏列表
+            List<Long> articleIds = userFootService.queryUserCollectionArticleList(userId, pageParam);
+            records = CollectionUtils.isEmpty(articleIds) ? Collections.emptyList() : articleDao.listByIds(articleIds);
+            records = sortByIds(articleIds, records);
+        }
+
+        if (CollectionUtils.isEmpty(records)) {
+            return PageListVo.emptyVo();
+        }
+        return buildArticleListVo(records, pageParam.getPageSize());
+    }
 
 
     /**
@@ -271,7 +292,16 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @param records
      * @return
      */
-    private List<ArticleDO> sortByIds(List<Long> articleIds, List<ArticleDO> records) { return null; }
+    private List<ArticleDO> sortByIds(List<Long> articleIds, List<ArticleDO> records) {
+        List<ArticleDO> articleDOS = new ArrayList<>();
+        Map<Long, ArticleDO> articleDOMap = records.stream().collect(Collectors.toMap(ArticleDO::getId, t -> t));
+        articleIds.forEach(articleId -> {
+            if (articleDOMap.containsKey(articleId)) {
+                articleDOS.add(articleDOMap.get(articleId));
+            }
+        });
+        return articleDOS;
+    }
 
     /**
      *
@@ -280,7 +310,11 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @return
      */
     @Override
-    public PageListVo<ArticleDTO> buildArticleListVo(List<ArticleDO> records, long pageSize) { return null; }
+    public PageListVo<ArticleDTO> buildArticleListVo(List<ArticleDO> records, long pageSize) {
+        List<ArticleDTO> result = records.stream().map(this::fillArticleRelatedInfo).collect(Collectors.toList());
+        return PageListVo.newVo(result, pageSize);
+    }
+
 
     /**
      * 补全文章的阅读计数、作者、分类、标签等信息
@@ -288,7 +322,20 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @param record
      * @return
      */
-    private ArticleDTO fillArticleRelatedInfo(ArticleDO record) { return null; }
+    private ArticleDTO fillArticleRelatedInfo(ArticleDO record) {
+        ArticleDTO dto = ArticleConverter.toDto(record);
+        // 分类信息
+        dto.getCategory().setCategory(categoryService.queryCategoryName(record.getCategoryId()));
+        // 标签列表
+        dto.setTags(articleTagDao.queryArticleTagDetails(record.getId()));
+        // 阅读计数统计
+        dto.setCount(countService.queryArticleStatisticInfo(record.getId()));
+        // 作者信息
+        BaseUserInfoDTO author = userService.queryBasicUserInfo(dto.getAuthor());
+        dto.setAuthorName(author.getUserName());
+        dto.setAuthorAvatar(author.getPhoto());
+        return dto;
+    }
 
     @Override
     public PageListVo<SimpleArticleDTO> queryHotArticlesForRecommend(PageParam pageParam) { return null; }
