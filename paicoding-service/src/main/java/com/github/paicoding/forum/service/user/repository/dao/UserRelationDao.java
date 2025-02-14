@@ -25,7 +25,9 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param pageParam
      * @return
      */
-    public List<FollowUserInfoDTO> listUserFollows(Long followUserId, PageParam pageParam)  { return null; }
+    public List<FollowUserInfoDTO> listUserFollows(Long followUserId, PageParam pageParam)  {
+        return baseMapper.queryUserFollowList(followUserId, pageParam);
+    }
 
     /**
      * 查询用户的粉丝列表，即关注userId的用户
@@ -34,7 +36,9 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param pageParam
      * @return
      */
-    public List<FollowUserInfoDTO> listUserFans(Long userId, PageParam pageParam)  { return null; }
+    public List<FollowUserInfoDTO> listUserFans(Long userId, PageParam pageParam)  {
+        return baseMapper.queryUserFansList(userId, pageParam);
+    }
 
     /**
      * 查询followUserId与给定的用户列表的关联关旭

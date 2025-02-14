@@ -31,17 +31,51 @@ public class UserRelationServiceImpl implements UserRelationService {
     @Autowired
     private UserRelationDao userRelationDao;
 
-    @Resource
-    
 
     @Override
-    public PageListVo<FollowUserInfoDTO> getUserFollowList(Long userId, PageParam pageParam) { return null; }
+    public PageListVo<FollowUserInfoDTO> getUserFollowList(Long userId, PageParam pageParam) {
+        List<FollowUserInfoDTO> userRelationList = userRelationDao.listUserFollows(userId, pageParam);
+        return PageListVo.newVo(userRelationList, pageParam.getPageSize());
+    }
 
     @Override
-    public PageListVo<FollowUserInfoDTO> getUserFansList(Long userId, PageParam pageParam) { return null; }
+    public PageListVo<FollowUserInfoDTO> getUserFansList(Long userId, PageParam pageParam) {
+        List<FollowUserInfoDTO> userRelationList = userRelationDao.listUserFans(userId, pageParam);
+        return PageListVo.newVo(userRelationList, pageParam.getPageSize());
+    }
 
     @Override
-    public void updateUserFollowRelationId(PageListVo<FollowUserInfoDTO> followList, Long loginUserId) {}
+    public void updateUserFollowRelationId(PageListVo<FollowUserInfoDTO> followList, Long loginUserId) {
+        if (loginUserId == null) {
+            followList.getList().forEach(r -> {
+                r.setRelationId(null);
+                r.setFollowed(false);
+            });
+            return;
+        }
+
+        // 判断登录用户与给定的用户列表的关注关系
+        Set<Long> userIds = followList.getList().stream().map(FollowUserInfoDTO::getUserId).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(userIds)) {
+            return;
+        }
+
+        List<UserRelationDO> relationList = userRelationDao.listUserRelations(loginUserId, userIds);
+        Map<Long, UserRelationDO> relationMap = MapUtils.toMap(relationList, UserRelationDO::getUserId, r -> r);
+        followList.getList().forEach(follow -> {
+            UserRelationDO relation = relationMap.get(follow.getUserId());
+            if (relation == null) {
+                follow.setRelationId(null);
+                follow.setFollowed(false);
+            } else if (Objects.equals(relation.getFollowState(), FollowStateEnum.FOLLOW.getCode())) {
+                follow.setRelationId(relation.getId());
+                follow.setFollowed(true);
+            } else {
+                follow.setRelationId(relation.getId());
+                follow.setFollowed(false);
+            }
+        });
+    }
 
     @Override
     public Set<Long> getFollowedUserId(List<Long> userIds, Long fansUserId) {
