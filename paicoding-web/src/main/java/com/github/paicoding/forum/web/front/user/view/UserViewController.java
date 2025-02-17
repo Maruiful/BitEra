@@ -151,7 +151,30 @@ public class UserViewController extends BaseViewController {
      * @param vo
      * @param userId
      */
-    private void userHomeSelectList(UserHomeVo vo, Long userId)  {}
+    private void userHomeSelectList(UserHomeVo vo, Long userId)  {
+        PageParam pageParam = PageParam.newPageInstance();
+        HomeSelectEnum select = HomeSelectEnum.fromCode(vo.getHomeSelectType());
+        if (select == null) {
+            return;
+        }
+
+        switch (select) {
+            case ARTICLE:
+            case READ:
+            case COLLECTION:
+                PageListVo<ArticleDTO> dto = articleReadService.queryArticlesByUserAndType(userId, pageParam, select);
+                vo.setHomeSelectList(dto);
+                return;
+            case FOLLOW:
+                // 关注用户与被关注用户
+                // 获取选择标签
+                List<TagSelectDTO> followSelectTags = followSelectTags(vo.getFollowSelectType());
+                vo.setFollowSelectTags(followSelectTags);
+                initFollowFansList(vo, userId, pageParam);
+                return;
+            default:
+        }
+    }
 
     private void initFollowFansList(UserHomeVo vo, long userId, PageParam pageParam)  {}
 
