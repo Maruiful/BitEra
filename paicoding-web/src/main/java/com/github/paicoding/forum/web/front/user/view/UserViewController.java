@@ -143,7 +143,17 @@ public class UserViewController extends BaseViewController {
      * @param selectType
      * @return
      */
-    private List<TagSelectDTO> followSelectTags(String selectType)  { return null; }
+    private List<TagSelectDTO> followSelectTags(String selectType)  {
+        List<TagSelectDTO> tags = new ArrayList<>();
+        followSelectTags.forEach(tag -> {
+            TagSelectDTO tagSelectDTO = new TagSelectDTO();
+            tagSelectDTO.setSelectType(tag);
+            tagSelectDTO.setSelectDesc(FollowSelectEnum.fromCode(tag).getDesc());
+            tagSelectDTO.setSelected(selectType.equals(tag));
+            tags.add(tagSelectDTO);
+        });
+        return tags;
+    }
 
     /**
      * 返回选择列表
@@ -176,10 +186,28 @@ public class UserViewController extends BaseViewController {
         }
     }
 
-    private void initFollowFansList(UserHomeVo vo, long userId, PageParam pageParam)  {}
+    private void initFollowFansList(UserHomeVo vo, long userId, PageParam pageParam)  {
+        PageListVo<FollowUserInfoDTO> followList;
+        boolean needUpdateRelation = false;
+        if (vo.getFollowSelectType().equals(FollowTypeEnum.FOLLOW.getCode())) {
+            followList = userRelationService.getUserFollowList(userId, pageParam);
+        } else {
+            // 查询粉丝列表时，只能确定粉丝关注了userId，但是不能反向判断，因此需要再更新下映射关系，判断userId是否有关注这个用户
+            followList = userRelationService.getUserFansList(userId, pageParam);
+            needUpdateRelation = true;
+        }
+
+        Long loginUserId = ReqInfoContext.getReqInfo().getUserId();
+        if (!Objects.equals(loginUserId, userId) || needUpdateRelation) {
+            userRelationService.updateUserFollowRelationId(followList, loginUserId);
+        }
+        vo.setFollowList(followList);
+    }
 
 
     @GetMapping("pay")
     @Permission(role = UserRole.LOGIN)
-    public String pay()  { return null; }
+    public String pay()  {
+        return  "views/user/pay-item";
+    }
 }
