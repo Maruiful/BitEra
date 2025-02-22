@@ -10,6 +10,7 @@ import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;
 import com.github.paicoding.forum.service.user.repository.entity.UserDO;
 import com.github.paicoding.forum.service.user.service.LoginService;
 import com.github.paicoding.forum.service.user.service.UserTransferService;
+import com.github.paicoding.forum.service.user.service.help.UserPwdEncoder;
 import com.github.paicoding.forum.service.user.service.help.UserSessionHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +36,23 @@ public class UserTransferServiceImpl implements UserTransferService {
     @Autowired
     private UserSessionHelper userSessionHelper;
 
+    @Autowired
+    private UserPwdEncoder userPwdEncoder;
+
     @Override
-    public boolean transferUser(String uname, String pwd) { return false; }
+    public boolean transferUser(String uname, String pwd) {
+        UserDO user = userDao.getUserByUserName(uname);
+        if (user == null) {
+            throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userName=" + uname);
+        }
+
+        if (!userPwdEncoder.match(pwd, user.getPassword())) {
+            throw ExceptionUtil.of(StatusEnum.USER_PWD_ERROR);
+        }
+
+        // 将当前登录用户，与目标用户进行置换
+        return transferUser(user);
+    }
 
     @Override
     public boolean transferUser(String starNumber) {
