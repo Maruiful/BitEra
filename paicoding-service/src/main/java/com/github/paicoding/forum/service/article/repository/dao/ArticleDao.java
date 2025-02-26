@@ -51,6 +51,8 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     private ReadCountMapper readCountMapper;
     @Resource
     private ArticleMapper articleMapper;
+    @Resource
+    private ArticleDao articleDao;
 
 
     /**
@@ -204,7 +206,20 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
         return result;
     }
 
-    public List<ArticleDO> listArticlesByBySearchKey(String key, PageParam pageParam)  { return null; }
+    public List<ArticleDO> listArticlesByBySearchKey(String key, PageParam pageParam)  {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .and(!StringUtils.isEmpty(key),
+                        v -> v.like(ArticleDO::getTitle, key)
+                                .or()
+                                .like(ArticleDO::getShortTitle, key)
+                                .or()
+                                .like(ArticleDO::getSummary, key));
+        query.last(PageParam.getLimitSql(pageParam))
+                .orderByDesc(ArticleDO::getId);
+        return baseMapper.selectList(query);
+    }
 
     /**
      * 通过关键词，从标题中找出相似的进行推荐，只返回主键 + 标题

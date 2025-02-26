@@ -251,7 +251,10 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @return
      */
     @Override
-    public PageListVo<ArticleDTO> queryArticlesBySearchKey(String key, PageParam page) { return null; }
+    public PageListVo<ArticleDTO> queryArticlesBySearchKey(String key, PageParam page) {
+        List<ArticleDO> records = articleDao.listArticlesByBySearchKey(key, page);
+        return buildArticleListVo(records, page.getPageSize());
+    }
 
 
     /**
