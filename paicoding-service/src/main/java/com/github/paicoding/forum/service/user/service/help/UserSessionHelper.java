@@ -44,6 +44,8 @@ public class UserSessionHelper {
         private Long expire;
     }
 
+    private JWTVerifier verifier;
+
     private final JwtProperties jwtProperties;
 
     private Algorithm algorithm;
@@ -75,5 +77,25 @@ public class UserSessionHelper {
      * @param session
      * @return
      */
-    public Long getUserIdBySession(String session) { return null; }
+    public Long getUserIdBySession(String session) {
+        // jwt的校验方式，如果token非法或者过期，则直接验签失败
+        try {
+            DecodedJWT decodedJWT = verifier.verify(session);
+            String pay = new String(Base64Utils.decodeFromString(decodedJWT.getPayload()));
+            // jwt验证通过，获取对应的userId
+            String userId = String.valueOf(JsonUtil.toObj(pay, HashMap.class).get("u"));
+
+            // 从redis中获取userId，解决用户登出，后台失效jwt token的问题
+            String user = RedisClient.getStr(session);
+            if (user == null || !Objects.equals(userId, user)) {
+                return null;
+            }
+            return Long.valueOf(user);
+        } catch (Exception e) {
+            log.debug("jwt token校验失败! token: {}, msg: {}", session, e.getMessage());
+            // 如果jwt过期，自动删除用户的cookie；主要是为了解决jwt的有效期与cookie有效期不一致的场景
+            SessionUtil.delCookies(LoginService.SESSION_KEY);
+            return null;
+        }
+    }
 }

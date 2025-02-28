@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.github.paicoding.forum.api.model.context.ReqInfoContext;
 import com.github.paicoding.forum.api.model.enums.FollowStateEnum;
 import com.github.paicoding.forum.api.model.enums.RoleEnum;
+import com.github.paicoding.forum.api.model.enums.user.UserAIStatEnum;
 import com.github.paicoding.forum.api.model.vo.user.UserInfoSaveReq;
 import com.github.paicoding.forum.api.model.vo.user.UserRelationReq;
 import com.github.paicoding.forum.api.model.vo.user.UserSaveReq;
@@ -42,7 +43,16 @@ public class UserConverter {
         return userInfoDO;
     }
 
-    public static BaseUserInfoDTO toDTO(UserInfoDO info, UserAiDO userAiDO) { return null; }
+    public static BaseUserInfoDTO toDTO(UserInfoDO info, UserAiDO userAiDO) {
+        BaseUserInfoDTO user = toDTO(info);
+        if (userAiDO != null) {
+            // 获取星球账号
+            user.setStarStatus(UserAIStatEnum.fromCode(userAiDO.getState()));
+            user.setStarNumber(userAiDO.getStarNumber());
+            user.setExpireTime(userAiDO.getStarExpireTime());
+        }
+        return user;
+    }
 
     public static BaseUserInfoDTO toDTO(UserInfoDO info) {
         if (info == null) {

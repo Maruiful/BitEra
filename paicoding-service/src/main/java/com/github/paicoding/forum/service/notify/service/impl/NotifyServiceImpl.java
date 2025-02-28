@@ -52,7 +52,9 @@ public class NotifyServiceImpl implements NotifyService {
     public Set<String> load(Long aLong) throws Exception { return null; }
 
     @Override
-    public int queryUserNotifyMsgCount(Long userId) { return 0; }
+    public int queryUserNotifyMsgCount(Long userId) {
+        return notifyMsgDao.countByUserIdAndStat(userId, NotifyStatEnum.UNREAD.getStat());
+    }
 
     @Override
     public PageListVo<NotifyMsgDTO> queryUserNotices(Long userId, NotifyTypeEnum type, PageParam page) {

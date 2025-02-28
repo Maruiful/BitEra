@@ -128,5 +128,15 @@ public class GlobalInitService {
         }
     }
 
-    public boolean initLoginUser(String session, ReqInfoContext.ReqInfo reqInfo)  { return false; }
+    public boolean initLoginUser(String session, ReqInfoContext.ReqInfo reqInfo)  {
+        BaseUserInfoDTO user = userService.getAndUpdateUserIpInfoBySessionId(session, null);
+        if (user != null) {
+            reqInfo.setSession(session);
+            reqInfo.setUserId(user.getUserId());
+            reqInfo.setUser(user);
+            reqInfo.setMsgNum(notifyService.queryUserNotifyMsgCount(user.getUserId()));
+            return true;
+        }
+        return false;
+    }
 }

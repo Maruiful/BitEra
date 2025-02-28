@@ -12,5 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = ForumAdviceException.class)
-    public ResVo<String> handleForumAdviceException(ForumAdviceException e)  { return null; }
+    public ResVo<String> handleForumAdviceException(ForumAdviceException e)  {
+        return ResVo.fail(e.getStatus());
+    }
 }

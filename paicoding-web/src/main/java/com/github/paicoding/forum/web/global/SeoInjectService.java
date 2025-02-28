@@ -96,17 +96,115 @@ public class SeoInjectService {
      *
      * @param detail
      */
-    public void initColumnSeo(ColumnArticlesDTO detail, ColumnDTO column)  {}
+    public void initColumnSeo(ColumnArticlesDTO detail, ColumnDTO column)  {
+        Seo seo = initBasicSeoTag();
+        List<SeoTagVo> list = seo.getOgp();
+        Map<String, Object> jsonLd = seo.getJsonLd();
+
+        String title = detail.getArticle().getTitle();
+        String description = detail.getArticle().getSummary();
+        String authorName = column.getAuthorName();
+        String updateTime = DateUtil.time2LocalTime(detail.getArticle().getLastUpdateTime()).toString();
+        String publishedTime = DateUtil.time2LocalTime(detail.getArticle().getCreateTime()).toString();
+        String image = column.getCover();
+
+        list.add(new SeoTagVo("og:title", title));
+        list.add(new SeoTagVo("og:description", description));
+        list.add(new SeoTagVo("og:type", "article"));
+        list.add(new SeoTagVo("og:locale", "zh-CN"));
+
+        list.add(new SeoTagVo("og:updated_time", updateTime));
+        list.add(new SeoTagVo("og:image", image));
+
+        list.add(new SeoTagVo("article:modified_time", updateTime));
+        list.add(new SeoTagVo("article:published_time", publishedTime));
+        list.add(new SeoTagVo("article:tag", detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+        list.add(new SeoTagVo("article:section", column.getColumn()));
+        list.add(new SeoTagVo("article:author", authorName));
+
+        list.add(new SeoTagVo("author", authorName));
+        list.add(new SeoTagVo("title", title));
+        list.add(new SeoTagVo("description", detail.getArticle().getSummary()));
+        list.add(new SeoTagVo("keywords", detail.getArticle().getCategory().getCategory() + "," + detail.getArticle().getTags().stream().map(TagDTO::getTag).collect(Collectors.joining(","))));
+
+
+        jsonLd.put("headline", title);
+        jsonLd.put("description", description);
+        Map<String, Object> author = new HashMap<>();
+        author.put("@type", "Person");
+        author.put("name", authorName);
+        jsonLd.put("author", author);
+        jsonLd.put("dateModified", updateTime);
+        jsonLd.put("datePublished", publishedTime);
+        jsonLd.put("image", image);
+
+        if (ReqInfoContext.getReqInfo() != null) ReqInfoContext.getReqInfo().setSeo(seo);
+    }
 
     /**
      * 用户主页的seo标签
      *
      * @param user
      */
-    public void initUserSeo(UserHomeVo user)  {}
+    public void initUserSeo(UserHomeVo user)  {
+        Seo seo = initBasicSeoTag();
+        List<SeoTagVo> list = seo.getOgp();
+        Map<String, Object> jsonLd = seo.getJsonLd();
+
+        String title = "技术派 | " + user.getUserHome().getUserName() + " 的主页";
+        list.add(new SeoTagVo("og:title", title));
+        list.add(new SeoTagVo("og:description", user.getUserHome().getProfile()));
+        list.add(new SeoTagVo("og:type", "article"));
+        list.add(new SeoTagVo("og:locale", "zh-CN"));
+
+        list.add(new SeoTagVo("article:tag", "后端,前端,Java,Spring,计算机"));
+        list.add(new SeoTagVo("article:section", "主页"));
+        list.add(new SeoTagVo("article:author", user.getUserHome().getUserName()));
+
+        list.add(new SeoTagVo("author", user.getUserHome().getUserName()));
+        list.add(new SeoTagVo("title", title));
+        list.add(new SeoTagVo("description", user.getUserHome().getProfile()));
+        list.add(new SeoTagVo("keywords", KEYWORDS));
+
+        jsonLd.put("headline", title);
+        jsonLd.put("description", user.getUserHome().getProfile());
+        Map<String, Object> author = new HashMap<>();
+        author.put("@type", "Person");
+        author.put("name", user.getUserHome().getUserName());
+        jsonLd.put("author", author);
+
+        if (ReqInfoContext.getReqInfo() != null) ReqInfoContext.getReqInfo().setSeo(seo);
+    }
 
 
-    public Seo defaultSeo()  { return null; }
+    public Seo defaultSeo()  {
+        Seo seo = initBasicSeoTag();
+        List<SeoTagVo> list = seo.getOgp();
+        list.add(new SeoTagVo("og:title", "比特纪元"));
+        list.add(new SeoTagVo("og:description", DES));
+        list.add(new SeoTagVo("og:type", "article"));
+        list.add(new SeoTagVo("og:locale", "zh-CN"));
+
+        list.add(new SeoTagVo("article:tag", "后端,前端,Java,Spring,计算机"));
+        list.add(new SeoTagVo("article:section", "开源社区"));
+        list.add(new SeoTagVo("article:author", "比特纪元"));
+
+        list.add(new SeoTagVo("author", "比特纪元"));
+        list.add(new SeoTagVo("title", "比特纪元"));
+        list.add(new SeoTagVo("description", DES));
+        list.add(new SeoTagVo("keywords", KEYWORDS));
+
+        Map<String, Object> jsonLd = seo.getJsonLd();
+        jsonLd.put("@context", "https://schema.org");
+        jsonLd.put("@type", "Article");
+        jsonLd.put("headline", "比特纪元");
+        jsonLd.put("description", DES);
+
+        if (ReqInfoContext.getReqInfo() != null) {
+            ReqInfoContext.getReqInfo().setSeo(seo);
+        }
+        return seo;
+    }
 
     private Seo initBasicSeoTag()  {
         List<SeoTagVo> list = new ArrayList<>();

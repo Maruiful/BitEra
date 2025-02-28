@@ -12,28 +12,26 @@ import com.github.paicoding.forum.api.model.vo.user.UserZsxqLoginReq;
 import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;        
 import com.github.paicoding.forum.api.model.vo.user.dto.SimpleUserInfoDTO;      
 import com.github.paicoding.forum.api.model.vo.user.dto.UserStatisticInfoDTO;
+import com.github.paicoding.forum.core.util.IpUtil;
 import com.github.paicoding.forum.service.article.repository.dao.ArticleDao;
 import com.github.paicoding.forum.service.statistics.service.CountService;
 import com.github.paicoding.forum.service.user.converter.UserConverter;
 import com.github.paicoding.forum.service.user.repository.dao.UserAiDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserRelationDao;
-import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;
-import com.github.paicoding.forum.service.user.repository.entity.UserDO;        
-import com.github.paicoding.forum.service.user.repository.entity.UserInfoDO;
-import com.github.paicoding.forum.service.user.repository.entity.UserRelationDO;
+import com.github.paicoding.forum.service.user.repository.entity.*;
 import com.github.paicoding.forum.service.user.service.UserAiService;
 import com.github.paicoding.forum.service.user.service.UserService;
+import com.github.paicoding.forum.service.user.service.conf.AiConfig;
 import com.github.paicoding.forum.service.user.service.help.UserPwdEncoder;
+import com.github.paicoding.forum.service.user.service.help.UserSessionHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import javax.annotation.Resource;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +58,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ArticleDao articleDao;
 
+    @Autowired
+    private UserSessionHelper userSessionHelper;
+
+    @Resource
+    private AiConfig aiConfig;
+
     @Override
     public UserDO getWxUser(String wxuuid) { return null; }
 
@@ -73,7 +77,64 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BaseUserInfoDTO getAndUpdateUserIpInfoBySessionId(String session, String clientIp) { return null; }                                                  
+    public BaseUserInfoDTO getAndUpdateUserIpInfoBySessionId(String session, String clientIp) {
+        if (StringUtils.isBlank(session)) {
+            return null;
+        }
+
+        Long userId = userSessionHelper.getUserIdBySession(session);
+        if (userId == null) {
+            return null;
+        }
+
+        // 查询用户信息，并更新最后一次使用的ip
+        UserInfoDO user = userDao.getByUserId(userId);
+        if (user == null) {
+            // 常见于：session中记录的用户被删除了，直接移除缓存中的session，走重新登录流程
+            userSessionHelper.removeSession(session);
+            return null;
+        }
+
+        IpInfo ip = user.getIp();
+        if (clientIp != null && !Objects.equals(ip.getLatestIp(), clientIp)) {
+            // ip不同，需要更新
+            ip.setLatestIp(clientIp);
+            ip.setLatestRegion(IpUtil.getLocationByIp(clientIp).toRegionStr());
+
+            if (ip.getFirstIp() == null) {
+                ip.setFirstIp(clientIp);
+                ip.setFirstRegion(ip.getLatestRegion());
+            }
+            userDao.updateById(user);
+        }
+
+        // 查询 user_ai信息，标注用户是否为星球专属用户
+        UserAiDO userAiDO = userAiDao.getByUserId(userId);
+        this.autoUpdateUserStarState(userAiDO);
+        return UserConverter.toDTO(user, userAiDO);
+    }
+
+    private void autoUpdateUserStarState(UserAiDO userAiDO) {
+        if (userAiDO == null) {
+            return;
+        }
+        if (userAiDO.getStarExpireTime() == null) {
+            // 更新用户星球过期时间
+            if (userAiDO.getState().equals(UserAIStatEnum.FORMAL.getCode())) {
+                // 没有失效时间的星球用户，默认设置为当前时间往后 + 360天（一年）
+                userAiDO.setStarExpireTime(new Date(System.currentTimeMillis() + aiConfig.getMaxNum().getExpireDays() * 24 * 60 * 60 * 1000L));
+                userAiDO.setUpdateTime(new Date());
+                userAiDao.updateById(userAiDO);
+            }
+        } else if (System.currentTimeMillis() >= userAiDO.getStarExpireTime().getTime()) {
+            // 账号已过期
+            if (!userAiDO.getState().equals(UserAIStatEnum.EXPIRED.getCode())) {
+                userAiDO.setState(UserAIStatEnum.EXPIRED.getCode());
+                userAiDO.setUpdateTime(new Date());
+                userAiDao.updateById(userAiDO);
+            }
+        }
+    }
 
     @Override
     public SimpleUserInfoDTO querySimpleUserInfo(Long userId) { return null; }  

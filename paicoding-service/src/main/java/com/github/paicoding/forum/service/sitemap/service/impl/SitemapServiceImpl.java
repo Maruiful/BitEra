@@ -113,5 +113,26 @@ public class SitemapServiceImpl implements SitemapService {
     public void saveVisitInfo(String visitIp, String path) {}
 
     @Override
-    public SiteCntVo querySiteVisitInfo(LocalDate date, String path) { return null; }
+    public SiteCntVo querySiteVisitInfo(LocalDate date, String path) {
+        String globalKey = SitemapConstants.SITE_VISIT_KEY;
+        String day = null, todayKey = globalKey;
+        if (date != null) {
+            day = SitemapConstants.day(date);
+            todayKey = globalKey + "_" + day;
+        }
+
+        String pvField = "pv", uvField = "uv";
+        if (path != null) {
+            // 表示查询对应路径的访问信息
+            pvField += "_" + path;
+            uvField += "_" + path;
+        }
+
+        Map<String, Integer> map = RedisClient.hMGet(todayKey, Arrays.asList(pvField, uvField), Integer.class);
+        SiteCntVo siteInfo = new SiteCntVo();
+        siteInfo.setDay(day);
+        siteInfo.setPv(map.getOrDefault(pvField, 0));
+        siteInfo.setUv(map.getOrDefault(uvField, 0));
+        return siteInfo;
+    }
 }

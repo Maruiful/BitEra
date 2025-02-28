@@ -36,7 +36,12 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param userId
      * @return
      */
-    public int countByUserIdAndStat(long userId, Integer stat)  { return 0; }
+    public int countByUserIdAndStat(long userId, Integer stat)  {
+        return lambdaQuery()
+                .eq(NotifyMsgDO::getNotifyUserId, userId)
+                .eq(stat != null, NotifyMsgDO::getState, stat)
+                .count().intValue();
+    }
 
     /**
      * 查询用户各类型的未读消息数量
