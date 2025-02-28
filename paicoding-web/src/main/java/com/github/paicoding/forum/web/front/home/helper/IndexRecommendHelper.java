@@ -62,7 +62,12 @@ public class IndexRecommendHelper {
                 .prettyPrint();
         return vo;
     }
-    public IndexVo buildSearchVo(String key)  { return null; }
+    public IndexVo buildSearchVo(String key)  {
+        IndexVo vo = new IndexVo();
+        vo.setArticles(articleService.queryArticlesBySearchKey(key, PageParam.newPageInstance()));
+        vo.setSideBarItems(sidebarService.queryHomeSidebarList());
+        return vo;
+    }
 
     /**
      * 轮播图

@@ -266,7 +266,9 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param pageParam
      * @return
      */
-    public List<SimpleArticleDTO> listHotArticles(PageParam pageParam)  { return null; }
+    public List<SimpleArticleDTO> listHotArticles(PageParam pageParam)  {
+        return baseMapper.listArticlesByReadCounts(pageParam);
+    }
 
     /**
      * 作者的热门文章推荐，适用于作者的详情页侧边栏

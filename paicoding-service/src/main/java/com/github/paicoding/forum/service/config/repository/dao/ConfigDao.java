@@ -36,7 +36,15 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      * @param type
      * @return
      */
-    public List<ConfigDTO> listConfigByType(Integer type)  { return null; }
+    public List<ConfigDTO> listConfigByType(Integer type)  {
+        List<ConfigDO> configDOS = lambdaQuery()
+                .eq(ConfigDO::getType, type)
+                .eq(ConfigDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(ConfigDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .orderByAsc(ConfigDO::getRank)
+                .list();
+        return ConfigConverter.toDTOS(configDOS);
+    }
 
     private LambdaQueryChainWrapper<ConfigDO> createConfigQuery(SearchConfigParams params)  { return null; }
 

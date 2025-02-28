@@ -13,10 +13,15 @@ import java.util.List;
  * */
 @Service
 public class ConfigServiceImpl implements ConfigService {
-    
+
+
+    @Autowired
+    private ConfigDao configDao;
 
     @Override
-    public List<ConfigDTO> getConfigList(ConfigTypeEnum configTypeEnum) { return null; }
+    public List<ConfigDTO> getConfigList(ConfigTypeEnum configTypeEnum) {
+        return configDao.listConfigByType(configTypeEnum.getCode());
+    }
 
     @Override
     public void updateVisit(long configId, String extra) {}

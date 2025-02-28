@@ -341,7 +341,10 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
     @Override
-    public PageListVo<SimpleArticleDTO> queryHotArticlesForRecommend(PageParam pageParam) { return null; }
+    public PageListVo<SimpleArticleDTO> queryHotArticlesForRecommend(PageParam pageParam) {
+        List<SimpleArticleDTO> list = articleDao.listHotArticles(pageParam);
+        return PageListVo.newVo(list, pageParam.getPageSize());
+    }
 
     /**
      * 查询对应作者文章数量
