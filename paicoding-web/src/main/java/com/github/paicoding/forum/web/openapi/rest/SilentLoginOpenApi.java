@@ -20,5 +20,12 @@ public class SilentLoginOpenApi {
     }
 
     @GetMapping(path = "loginByToken")
-    public ResVo<OpenApiUserDTO> loginByToken(String token)  { return null; }
+    public ResVo<OpenApiUserDTO> loginByToken(String token)  {
+        OpenApiUserDTO userInfo = openApiSilentLoginService.silentLogin(token);
+        if (userInfo == null) {
+            return ResVo.fail(StatusEnum.FORBID_NOTLOGIN);
+        }
+
+        return ResVo.ok(userInfo);
+    }
 }

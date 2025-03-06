@@ -245,11 +245,17 @@ public class UserServiceImpl implements UserService {
     public void bindUserInfo(UserZsxqLoginReq loginReq) {}
 
     @Override
-    public UserDO getUserDO(Long userId) { return null; }
+    public UserDO getUserDO(Long userId) {
+        return userDao.getUserByUserId(userId);
+    }
 
     @Override
-    public UserInfoDO getUserInfo(Long userId) { return null; }
+    public UserInfoDO getUserInfo(Long userId) {
+        return userDao.getByUserId(userId);
+    }
 
     @Override
-    public UserAiDO getUserAiDO(Long userId) { return null; }
+    public UserAiDO getUserAiDO(Long userId) {
+        return userAiDao.getByUserId(userId);
+    }
 }
