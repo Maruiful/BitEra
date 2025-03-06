@@ -66,7 +66,9 @@ public class AsyncUtil {
     }
 
 
-    public static void execute(Runnable call)  {}
+    public static void execute(Runnable call)  {
+        executorService.execute(call);
+    }
 
     public static <T> Future<T> submit(Callable<T> t) {
         return executorService.submit(t);

@@ -110,7 +110,66 @@ public class SitemapServiceImpl implements SitemapService {
     public void autoRefreshCache() {}
 
     @Override
-    public void saveVisitInfo(String visitIp, String path) {}
+    public void saveVisitInfo(String visitIp, String path) {
+        String globalKey = SitemapConstants.SITE_VISIT_KEY;
+        String day = SitemapConstants.day(LocalDate.now());
+
+        String todayKey = globalKey + "_" + day;
+
+        // 用户的全局访问计数+1
+        Long globalUserVisitCnt = RedisClient.hIncr(globalKey + "_" + visitIp, "pv", 1);
+        // 用户的当日访问计数+1
+        Long todayUserVisitCnt = RedisClient.hIncr(todayKey, "pv_" + visitIp, 1);
+
+        RedisClient.PipelineAction pipelineAction = RedisClient.pipelineAction();
+        if (globalUserVisitCnt == 1) {
+            // 站点新用户
+            // 今日的uv + 1
+            pipelineAction.add(todayKey, "uv"
+                    , (connection, key, field) -> {
+                        connection.hIncrBy(key, field, 1);
+                    });
+            pipelineAction.add(todayKey, "uv_" + path
+                    , (connection, key, field) -> connection.hIncrBy(key, field, 1));
+
+            // 全局站点的uv
+            pipelineAction.add(globalKey, "uv", (connection, key, field) -> connection.hIncrBy(key, field, 1));
+            pipelineAction.add(globalKey, "uv_" + path, (connection, key, field) -> connection.hIncrBy(key, field, 1));
+        } else if (todayUserVisitCnt == 1) {
+            // 判断是今天的首次访问，更新今天的uv+1
+            pipelineAction.add(todayKey, "uv", (connection, key, field) -> connection.hIncrBy(key, field, 1));
+            if (RedisClient.hIncr(todayKey, "pv_" + path + "_" + visitIp, 1) == 1) {
+                // 判断是否为今天首次访问这个资源，若是，则uv+1
+                pipelineAction.add(todayKey, "uv_" + path, (connection, key, field) -> connection.hIncrBy(key, field, 1));
+            }
+
+            // 判断是否是用户的首次访问这个path，若是，则全局的path uv计数需要+1
+            if (RedisClient.hIncr(globalKey + "_" + visitIp, "pv_" + path, 1) == 1) {
+                pipelineAction.add(globalKey, "uv_" + path, (connection, key, field) -> connection.hIncrBy(key, field, 1));
+            }
+        }
+
+
+        // 更新pv 以及 用户的path访问信息
+        // 今天的相关信息 pv
+        pipelineAction.add(todayKey, "pv", (connection, key, field) -> connection.hIncrBy(key, field, 1));
+        pipelineAction.add(todayKey, "pv_" + path, (connection, key, field) -> connection.hIncrBy(key, field, 1));
+        if (todayUserVisitCnt > 1) {
+            // 非当天首次访问，则pv+1; 因为首次访问时，在前面更新uv时，已经计数+1了
+            pipelineAction.add(todayKey, "pv_" + path + "_" + visitIp, (connection, key, field) -> connection.hIncrBy(key, field, 1));
+        }
+
+
+        // 全局的 PV
+        pipelineAction.add(globalKey, "pv", (connection, key, field) -> connection.hIncrBy(key, field, 1));
+        pipelineAction.add(globalKey, "pv" + "_" + path, (connection, key, field) -> connection.hIncrBy(key, field, 1));
+
+        // 保存访问信息
+        pipelineAction.execute();
+        if (log.isDebugEnabled()) {
+            log.info("用户访问信息更新完成! 当前用户总访问: {}，今日访问: {}", globalUserVisitCnt, todayUserVisitCnt);
+        }
+    }
 
     @Override
     public SiteCntVo querySiteVisitInfo(LocalDate date, String path) {

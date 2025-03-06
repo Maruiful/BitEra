@@ -14,5 +14,7 @@ public class MdcUtil {
 
     public static void reset()  {}
 
-    public static void clear()  {}
+    public static void clear() {
+        MDC.clear();
+    }
 }
