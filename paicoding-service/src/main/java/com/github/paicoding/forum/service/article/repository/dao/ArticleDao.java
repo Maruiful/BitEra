@@ -227,7 +227,20 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param key
      * @return
      */
-    public List<ArticleDO> listSimpleArticlesByBySearchKey(String key)  { return null; }
+    public List<ArticleDO> listSimpleArticlesByBySearchKey(String key)  {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .and(!StringUtils.isEmpty(key),
+                        v -> v.like(ArticleDO::getTitle, key)
+                                .or()
+                                .like(ArticleDO::getShortTitle, key)
+                );
+        query.select(ArticleDO::getId, ArticleDO::getTitle, ArticleDO::getShortTitle)
+                .last("limit 10")
+                .orderByDesc(ArticleDO::getId);
+        return baseMapper.selectList(query);
+    }
 
 
     /**
@@ -322,12 +335,17 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     /**
      * 文章列表（用于后台）
      */
-    public List<ArticleAdminDTO> listArticlesByParams(SearchArticleParams params)  { return null; }
+    public List<ArticleAdminDTO> listArticlesByParams(SearchArticleParams params)  {
+        return articleMapper.listArticlesByParams(params,
+                PageParam.newPageInstance(params.getPageNum(), params.getPageSize()));
+    }
 
     /**
      * 文章总数（用于后台）
      */
-    public Long countArticleByParams(SearchArticleParams searchArticleParams)  { return null; }
+    public Long countArticleByParams(SearchArticleParams searchArticleParams)  {
+        return articleMapper.countArticlesByParams(searchArticleParams);
+    }
 
     /**
      * 文章总数（用于后台）
@@ -336,5 +354,8 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      */
     public Long countArticle()  { return null; }
 
-    public List<ArticleDO> selectByIds(List<Integer> ids)  { return null; }
+    public List<ArticleDO> selectByIds(List<Integer> ids)  {
+        List<ArticleDO> articleDOS = baseMapper.selectBatchIds(ids);
+        return articleDOS;
+    }
 }

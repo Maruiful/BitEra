@@ -241,7 +241,45 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @return
      */
     @Override
-    public List<SimpleArticleDTO> querySimpleArticleBySearchKey(String key) {  return null;}
+    public List<SimpleArticleDTO> querySimpleArticleBySearchKey(String key) {
+        // todo 当key为空时，返回热门推荐
+        if (StringUtils.isBlank(key)) {
+            return Collections.emptyList();
+        }
+        key = key.trim();
+        if (!openES) {
+            List<ArticleDO> records = articleDao.listSimpleArticlesByBySearchKey(key);
+            return records.stream().map(s -> new SimpleArticleDTO().setId(s.getId()).setTitle(s.getTitle()))
+                    .collect(Collectors.toList());
+        }
+        // TODO ES整合
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(key,
+                EsFieldConstant.ES_FIELD_TITLE,
+                EsFieldConstant.ES_FIELD_SHORT_TITLE);
+        searchSourceBuilder.query(multiMatchQueryBuilder);
+
+        SearchRequest searchRequest = new SearchRequest(new String[]{EsIndexConstant.ES_INDEX_ARTICLE},
+                searchSourceBuilder);
+        SearchResponse searchResponse = null;
+        try {
+            searchResponse = SpringUtil.getBean(RestHighLevelClient.class).search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("failed to query from es: key", e);
+        }
+        SearchHits hits = searchResponse.getHits();
+        SearchHit[] hitsList = hits.getHits();
+        List<Integer> ids = new ArrayList<>();
+        for (SearchHit documentFields : hitsList) {
+            ids.add(Integer.parseInt(documentFields.getId()));
+        }
+        if (ObjectUtils.isEmpty(ids)) {
+            return null;
+        }
+        List<ArticleDO> records = articleDao.selectByIds(ids);
+        return records.stream().map(s -> new SimpleArticleDTO().setId(s.getId()).setTitle(s.getTitle()))
+                .collect(Collectors.toList());
+    }
 
     /**
      * 搜索文章列表
