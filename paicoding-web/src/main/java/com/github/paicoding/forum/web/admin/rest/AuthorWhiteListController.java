@@ -27,20 +27,22 @@ public class AuthorWhiteListController {
     @GetMapping(path = "get")
     @ApiOperation(value = "白名单列表", notes = "返回作者白名单列表")
     public ResVo<List<BaseUserInfoDTO>> whiteList() {
-        return null;
+        return ResVo.ok(articleWhiteListService.queryAllArticleWhiteListAuthors());
     }
 
     @GetMapping(path = "add")
     @ApiOperation(value = "添加白名单", notes = "将指定作者加入作者白名单列表")
     @ApiImplicitParam(name = "authorId", value = "传入需要添加白名单的作者UserId", required = true, allowEmptyValue = false, example = "1")
     public ResVo<Boolean> addAuthor(@RequestParam("authorId") Long authorId) {
-        return null;
+        articleWhiteListService.addAuthor2ArticleWhitList(authorId);
+        return ResVo.ok(true);
     }
 
     @GetMapping(path = "remove")
     @ApiOperation(value = "删除白名单", notes = "将作者从白名单列表")
     @ApiImplicitParam(name = "authorId", value = "传入需要删除白名单的作者UserId", required = true, allowEmptyValue = false, example = "1")
     public ResVo<Boolean> rmAuthor(@RequestParam("authorId") Long authorId) {
-        return null;
+        articleWhiteListService.removeAuthorFromArticleWhiteList(authorId);
+        return ResVo.ok(true);
     }
 }

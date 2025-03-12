@@ -158,7 +158,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<BaseUserInfoDTO> batchQueryBasicUserInfo(Collection<Long> userIds) { return null; }                                                             
+    public List<BaseUserInfoDTO> batchQueryBasicUserInfo(Collection<Long> userIds) {
+        List<UserInfoDO> users = userDao.getByUserIds(userIds);
+        if (CollectionUtils.isEmpty(users)) {
+            throw ExceptionUtil.of(StatusEnum.USER_NOT_EXISTS, "userId=" + userIds);
+        }
+        return users.stream().map(UserConverter::toDTO).collect(Collectors.toList());
+    }
 
     @Override
     public UserStatisticInfoDTO queryUserInfoWithStatistic(Long userId) {

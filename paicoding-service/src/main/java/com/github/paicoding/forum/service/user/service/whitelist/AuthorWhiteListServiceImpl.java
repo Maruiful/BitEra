@@ -19,17 +19,31 @@ public class AuthorWhiteListServiceImpl implements AuthorWhiteListService {
      */
     private static final String ARTICLE_WHITE_LIST = "auth_article_white_list";
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public boolean authorInArticleWhiteList(Long authorId) {
         return RedisClient.sIsMember(ARTICLE_WHITE_LIST, authorId);
     }
 
     @Override
-    public List<BaseUserInfoDTO> queryAllArticleWhiteListAuthors() { return null; }
+    public List<BaseUserInfoDTO> queryAllArticleWhiteListAuthors() {
+        Set<Long> users = RedisClient.sGetAll(ARTICLE_WHITE_LIST, Long.class);
+        if (CollectionUtils.isEmpty(users)) {
+            return Collections.emptyList();
+        }
+        List<BaseUserInfoDTO> userInfos = userService.batchQueryBasicUserInfo(users);
+        return userInfos;
+    }
 
     @Override
-    public void addAuthor2ArticleWhitList(Long userId) {}
+    public void addAuthor2ArticleWhitList(Long userId) {
+        RedisClient.sPut(ARTICLE_WHITE_LIST, userId);
+    }
 
     @Override
-    public void removeAuthorFromArticleWhiteList(Long userId) {}
+    public void removeAuthorFromArticleWhiteList(Long userId) {
+        RedisClient.sDel(ARTICLE_WHITE_LIST, userId);
+    }
 }
