@@ -106,7 +106,15 @@ public class ArticleConverter {
     }
 
 
-    public static CategoryDTO toDto(CategoryDO category) { return null; }
+    public static CategoryDTO toDto(CategoryDO category) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setCategory(category.getCategoryName());
+        dto.setCategoryId(category.getId());
+        dto.setRank(category.getRank());
+        dto.setStatus(category.getStatus());
+        dto.setSelected(false);
+        return dto;
+    }
 
     public static List<CategoryDTO> toCategoryDtoList(List<CategoryDO> categorys) { return null; }
 

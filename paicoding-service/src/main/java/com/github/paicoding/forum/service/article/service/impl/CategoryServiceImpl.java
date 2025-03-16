@@ -44,7 +44,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void refreshCache() {}
+    public void refreshCache() {
+        List<CategoryDO> list = categoryDao.listAllCategoriesFromDb();
+        categoryCaches.invalidateAll();
+        categoryCaches.cleanUp();
+        list.forEach(s -> categoryCaches.put(s.getId(), ArticleConverter.toDto(s)));
+    }
 
     @Override
     public Long queryCategoryId(String category) { return null; }

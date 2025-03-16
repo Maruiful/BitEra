@@ -23,7 +23,12 @@ public class CategoryDao extends ServiceImpl<CategoryMapper, CategoryDO> {
     /**
      * @return
      */
-    public List<CategoryDO> listAllCategoriesFromDb()  { return null; }
+    public List<CategoryDO> listAllCategoriesFromDb()  {
+        return lambdaQuery()
+                .eq(CategoryDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(CategoryDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .list();
+    }
 
     // 抽一个私有方法，构造查询条件
     private LambdaQueryChainWrapper<CategoryDO> createCategoryQuery(SearchCategoryParams params)  { return null; }
@@ -33,12 +38,24 @@ public class CategoryDao extends ServiceImpl<CategoryMapper, CategoryDO> {
      *
      * @return
      */
-    public List<CategoryDTO> listCategory(SearchCategoryParams params)  { return null; }
+    public List<CategoryDTO> listCategory(SearchCategoryParams params)  {
+        List<CategoryDO> list = createCategoryQuery(params)
+                .orderByDesc(CategoryDO::getUpdateTime)
+                .orderByAsc(CategoryDO::getRank)
+                .last(PageParam.getLimitSql(
+                        PageParam.newPageInstance(params.getPageNum(), params.getPageSize())
+                ))
+                .list();
+        return CategoryStructMapper.INSTANCE.toDTOs(list);
+    }
 
     /**
      * 获取所有 Categorys 总数（分页）
      *
      * @return
      */
-    public Long countCategory(SearchCategoryParams params)  { return null; }
+    public Long countCategory(SearchCategoryParams params)  {
+        return createCategoryQuery(params)
+                .count();
+    }
 }

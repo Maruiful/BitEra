@@ -19,7 +19,7 @@ public interface CategorySettingService {
     /**
      * 获取category列表
      *
-     * @param pageParam
+     * @param params
      * @return
      */
     PageVo<CategoryDTO> getCategoryList(SearchCategoryReq params);

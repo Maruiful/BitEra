@@ -29,14 +29,17 @@ public class CategorySettingRestController {
 
     @Permission(role = UserRole.ADMIN)
     @PostMapping(path = "save")
-    public ResVo<String> save(@RequestBody CategoryReq req) {return null;
+    public ResVo<String> save(@RequestBody CategoryReq req) {
+        categorySettingService.saveCategory(req);
+        return ResVo.ok();
     }
 
 
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "delete")
     public ResVo<String> delete(@RequestParam(name = "categoryId") Integer categoryId) {
-        return null;
+        categorySettingService.deleteCategory(categoryId);
+        return ResVo.ok();
     }
 
 
@@ -44,12 +47,17 @@ public class CategorySettingRestController {
     @GetMapping(path = "operate")
     public ResVo<String> operate(@RequestParam(name = "categoryId") Integer categoryId,
                                  @RequestParam(name = "pushStatus") Integer pushStatus) {
-                                    return null;
+        if (pushStatus != PushStatusEnum.OFFLINE.getCode() && pushStatus!= PushStatusEnum.ONLINE.getCode()) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS);
+        }
+        categorySettingService.operateCategory(categoryId, pushStatus);
+        return ResVo.ok();
     }
 
 
     @PostMapping(path = "list")
     public ResVo<PageVo<CategoryDTO>> list(@RequestBody SearchCategoryReq req) {
-        return null;
+        PageVo<CategoryDTO> categoryDTOPageVo = categorySettingService.getCategoryList(req);
+        return ResVo.ok(categoryDTOPageVo);
     }
 }
