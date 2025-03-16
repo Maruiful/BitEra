@@ -2,10 +2,7 @@ package com.github.paicoding.forum.service.article.helper;
 
 import com.github.paicoding.forum.api.model.vo.article.dto.ColumnArticleGroupDTO;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -35,12 +32,59 @@ public class TreeBuilder {
      * @param list 原始列表数据
      * @return 树结构的根节点列表
      */
-    public static List<ColumnArticleGroupDTO> buildTree(List<ColumnArticleGroupDTO> list) { return null; }
+    public static List<ColumnArticleGroupDTO> buildTree(List<ColumnArticleGroupDTO> list) {
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 创建Map存储所有节点，key为groupId，value为节点对象
+        Map<Long, ColumnArticleGroupDTO> nodeMap = new HashMap<>();
+        for (ColumnArticleGroupDTO node : list) {
+            nodeMap.put(node.getGroupId(), node);
+        }
+
+        // 存储根节点列表
+        List<ColumnArticleGroupDTO> rootNodes = new ArrayList<>();
+
+        // 构建树结构
+        for (ColumnArticleGroupDTO node : list) {
+            Long parentGroupId = node.getParentGroupId();
+
+            // 如果parentGroupId为null或不存在于nodeMap中，则为根节点
+            if (parentGroupId == null || parentGroupId == 0 || !nodeMap.containsKey(parentGroupId)) {
+                rootNodes.add(node);
+            } else {
+                // 找到父节点，并将当前节点添加到父节点的children中
+                ColumnArticleGroupDTO parentNode = nodeMap.get(parentGroupId);
+                if (parentNode.getChildren() == null) {
+                    parentNode.setChildren(new ArrayList<>());
+                }
+                parentNode.getChildren().add(node);
+            }
+        }
+
+        // 对所有节点的子节点按section升序排序
+        sortChildrenBySection(nodeMap.values());
+
+        // 对根节点按section升序排序
+        rootNodes.sort(Comparator.comparing(ColumnArticleGroupDTO::getSection));
+
+        return rootNodes;
+    }
 
     /**
      * 递归对所有节点的子节点按section排序
      *
      * @param nodes 节点集合
      */
-    private static void sortChildrenBySection(Collection<ColumnArticleGroupDTO> nodes) {}
+    private static void sortChildrenBySection(Collection<ColumnArticleGroupDTO> nodes) {
+        for (ColumnArticleGroupDTO node : nodes) {
+            if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+                // 按section升序排序
+                node.getChildren().sort(Comparator.comparing(ColumnArticleGroupDTO::getSection));
+                // 递归处理子节点
+                sortChildrenBySection(node.getChildren());
+            }
+        }
+    }
 }

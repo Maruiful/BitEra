@@ -44,18 +44,52 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
         return list.get(0);
     }
 
-    public ColumnArticleDO selectBySection(Long columnId, Integer sort)  { return null; }
+    public ColumnArticleDO selectBySection(Long columnId, Integer sort)  {
+        return lambdaQuery()
+                .eq(ColumnArticleDO::getColumnId, columnId)
+                .eq(ColumnArticleDO::getSection, sort)
+                .one();
+    }
 
 
     public ColumnArticleDO selectOneByGroupId(Long groupId)  { return null; }
 
-    public void updateColumnGroupId(Long groupId, Long columnId)  {}
+    public void updateColumnGroupId(Long groupId, Long columnId)  {
+        lambdaUpdate()
+                .eq(ColumnArticleDO::getColumnId, columnId)
+                .set(ColumnArticleDO::getGroupId, groupId)
+                .update();
+    }
 
-    public ColumnArticleDO selectColumnArticle(Long columnId, Long articleId)  { return null; }
+    public ColumnArticleDO selectColumnArticle(Long columnId, Long articleId)  {
+        return lambdaQuery()
+                .eq(ColumnArticleDO::getColumnId, columnId)
+                .eq(ColumnArticleDO::getArticleId, articleId)
+                .one();
+    }
 
-    public void updateColumnArticleSection(Long id, Integer section)  {}
+    public void updateColumnArticleSection(Long id, Integer section)  {
+        lambdaUpdate().eq(ColumnArticleDO::getId, id)
+                .set(ColumnArticleDO::getSection, section)
+                .update();
+    }
 
-    public void updateColumnArticleSection(Long columnId, Long articleId, Long groupId, Integer section)  {}
+    public void updateColumnArticleSection(Long columnId, Long articleId, Long groupId, Integer section)  {
+        lambdaUpdate()
+                .eq(ColumnArticleDO::getColumnId, columnId)
+                .eq(ColumnArticleDO::getArticleId, articleId)
+                .set(ColumnArticleDO::getSection, section)
+                .set(ColumnArticleDO::getGroupId, groupId)
+                .update();
+    }
 
-    public void updateColumnArticleGESectionToAdd(Long columnId, Long groupId, Integer section, Integer add)  {}
+    public void updateColumnArticleGESectionToAdd(Long columnId, Long groupId, Integer section, Integer add) {
+        lambdaUpdate()
+                .eq(ColumnArticleDO::getColumnId, columnId)
+                .eq(ColumnArticleDO::getGroupId, groupId)
+                .ge(ColumnArticleDO::getSection, section)
+                .setSql("section = section + " + add)
+                .update();
+    }
+
 }

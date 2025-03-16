@@ -26,7 +26,13 @@ public class ColumnArticleGroupDao extends ServiceImpl<ColumnArticleGroupMapper,
      * @param columnId 专栏
      * @return
      */
-    public List<ColumnArticleGroupDO> selectByColumnId(Long columnId)  { return null; }
+    public List<ColumnArticleGroupDO> selectByColumnId(Long columnId)  {
+        return lambdaQuery()
+                .eq(ColumnArticleGroupDO::getColumnId, columnId)
+                .eq(ColumnArticleGroupDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .orderByAsc(ColumnArticleGroupDO::getSection)
+                .list();
+    }
 
     /**
      * 根据父分组进行查询
@@ -43,5 +49,12 @@ public class ColumnArticleGroupDao extends ServiceImpl<ColumnArticleGroupMapper,
      * @param parentGroupId
      * @return
      */
-    public List<ColumnArticleGroupDO> selectColumnGroupsBySameParent(Long columnId, Long parentGroupId)  { return null; }
+    public List<ColumnArticleGroupDO> selectColumnGroupsBySameParent(Long columnId, Long parentGroupId)  {
+        return lambdaQuery()
+                .eq(ColumnArticleGroupDO::getColumnId, columnId)
+                .eq(ColumnArticleGroupDO::getParentGroupId, parentGroupId)
+                .eq(ColumnArticleGroupDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .orderByAsc(ColumnArticleGroupDO::getSection)
+                .list();
+    }
 }

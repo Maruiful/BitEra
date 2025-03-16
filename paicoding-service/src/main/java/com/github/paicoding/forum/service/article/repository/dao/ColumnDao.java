@@ -68,9 +68,16 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * @return
      */
     public List<ColumnArticleDTO> listColumnArticlesDetail(SearchColumnArticleParams params,
-                                                           PageParam pageParam)  { return null; }
+                                                           PageParam pageParam)  {
+        return columnArticleMapper.listColumnArticlesByColumnIdArticleName(params.getColumnId(),
+                params.getArticleTitle(),
+                pageParam);
+    }
 
-    public Integer countColumnArticles(SearchColumnArticleParams params)  { return null; }
+    public Integer countColumnArticles(SearchColumnArticleParams params)  {
+        return columnArticleMapper.countColumnArticlesByColumnIdArticleName(params.getColumnId(),
+                params.getArticleTitle()).intValue();
+    }
 
     /**
      * 根据教程ID查询文章ID列表
@@ -111,7 +118,15 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
     /**
      * 查询教程
      */
-    public List<ColumnInfoDO> listColumnsByParams(SearchColumnParams params, PageParam pageParam)  { return null; }
+    public List<ColumnInfoDO> listColumnsByParams(SearchColumnParams params, PageParam pageParam)  {
+        LambdaQueryWrapper<ColumnInfoDO> query = Wrappers.lambdaQuery();
+        // 加上判空条件
+        query.like(StringUtils.isNotBlank(params.getColumn()), ColumnInfoDO::getColumnName, params.getColumn());
+        query.last(PageParam.getLimitSql(pageParam))
+                .orderByAsc(ColumnInfoDO::getSection)
+                .orderByDesc(ColumnInfoDO::getUpdateTime);
+        return baseMapper.selectList(query);
+    }
 
     /**
      * 查询教程总数
