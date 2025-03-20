@@ -28,20 +28,27 @@ public class ConfigSettingrRestController {
 
     @Permission(role = UserRole.ADMIN)
     @PostMapping(path = "save")
-    public ResVo<String> save(@RequestBody ConfigReq configReq) {return null;
+    public ResVo<String> save(@RequestBody ConfigReq configReq) {
+        configSettingService.saveConfig(configReq);
+        return ResVo.ok();
     }
 
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "delete")
     public ResVo<String> delete(@RequestParam(name = "configId") Integer configId) {
-        return null;
+        configSettingService.deleteConfig(configId);
+        return ResVo.ok();
     }
 
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "operate")
     public ResVo<String> operate(@RequestParam(name = "configId") Integer configId,
                                  @RequestParam(name = "pushStatus") Integer pushStatus) {
-        return null;
+        if (pushStatus != PushStatusEnum.OFFLINE.getCode() && pushStatus!= PushStatusEnum.ONLINE.getCode()) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS);
+        }
+        configSettingService.operateConfig(configId, pushStatus);
+        return ResVo.ok();
     }
 
     /**
@@ -51,6 +58,7 @@ public class ConfigSettingrRestController {
      */
     @PostMapping(path = "list")
     public ResVo<PageVo<ConfigDTO>> list(@RequestBody SearchConfigReq req) {
-        return null;
+        PageVo<ConfigDTO> bannerDTOPageVo = configSettingService.getConfigList(req);
+        return ResVo.ok(bannerDTOPageVo);
     }
 }

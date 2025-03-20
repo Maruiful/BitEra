@@ -46,14 +46,27 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
         return ConfigConverter.toDTOS(configDOS);
     }
 
-    private LambdaQueryChainWrapper<ConfigDO> createConfigQuery(SearchConfigParams params)  { return null; }
+    private LambdaQueryChainWrapper<ConfigDO> createConfigQuery(SearchConfigParams params)  {
+        return lambdaQuery()
+                .eq(ConfigDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .like(StringUtils.isNotBlank(params.getName()), ConfigDO::getName, params.getName())
+                .eq(params.getType() != null && params.getType() != -1, ConfigDO::getType, params.getType());
+    }
 
     /**
      * 获取所有 Banner 列表（分页）
      *
      * @return
      */
-    public List<ConfigDTO> listBanner(SearchConfigParams params)  { return null; }
+    public List<ConfigDTO> listBanner(SearchConfigParams params)  {
+        List<ConfigDO> configDOS = createConfigQuery(params)
+                .orderByDesc(ConfigDO::getUpdateTime)
+                .orderByAsc(ConfigDO::getRank)
+                .last(PageParam.getLimitSql(
+                        PageParam.newPageInstance(params.getPageNum(), params.getPageSize())))
+                .list();
+        return ConfigStructMapper.INSTANCE.toDTOS(configDOS);
+    }
 
     /**
      * 获取所有 Banner 总数（分页）
