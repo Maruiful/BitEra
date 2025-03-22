@@ -94,15 +94,29 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      */
     public void updatePdfConfigVisitNum(long configId, String extra)  {}
 
-    public List<GlobalConfigDO> listGlobalConfig(SearchGlobalConfigParams params)  { return null; }
+    public List<GlobalConfigDO> listGlobalConfig(SearchGlobalConfigParams params)  {
+        LambdaQueryWrapper<GlobalConfigDO> query = buildQuery(params);
+        query.select(GlobalConfigDO::getId,
+                GlobalConfigDO::getKey,
+                GlobalConfigDO::getValue,
+                GlobalConfigDO::getComment);
+        return globalConfigMapper.selectList(query);
+    }
 
-    public Long countGlobalConfig(SearchGlobalConfigParams params)  { return null; }
+    public Long countGlobalConfig(SearchGlobalConfigParams params)  {
+        return globalConfigMapper.selectCount(buildQuery(params));
+    }
 
     private LambdaQueryWrapper<GlobalConfigDO> buildQuery(SearchGlobalConfigParams params)  { return null; }
 
-    public void save(GlobalConfigDO globalConfigDO)  {}
+    public void save(GlobalConfigDO globalConfigDO)  {
+        globalConfigMapper.insert(globalConfigDO);
+    }
 
-    public void updateById(GlobalConfigDO globalConfigDO)  {}
+    public void updateById(GlobalConfigDO globalConfigDO)  {
+        globalConfigDO.setUpdateTime(new Date());
+        globalConfigMapper.updateById(globalConfigDO);
+    }
 
     /**
      * 根据id查询全局配置
@@ -110,7 +124,14 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      * @param id
      * @return
      */
-    public GlobalConfigDO getGlobalConfigById(Long id)  { return null; }
+    public GlobalConfigDO getGlobalConfigById(Long id)  {
+        // 查询的时候 deleted 为 0
+        LambdaQueryWrapper<GlobalConfigDO> query = Wrappers.lambdaQuery();
+        query.select(GlobalConfigDO::getId, GlobalConfigDO::getKey, GlobalConfigDO::getValue, GlobalConfigDO::getComment)
+                .eq(GlobalConfigDO::getId, id)
+                .eq(GlobalConfigDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return globalConfigMapper.selectOne(query);
+    }
 
     /**
      * 根据key查询全局配置
@@ -120,5 +141,8 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      */
     public GlobalConfigDO getGlobalConfigByKey(String key)  { return null; }
 
-    public void delete(GlobalConfigDO globalConfigDO)  {}
+    public void delete(GlobalConfigDO globalConfigDO)  {
+        globalConfigDO.setDeleted(YesOrNoEnum.YES.getCode());
+        globalConfigMapper.updateById(globalConfigDO);
+    }
 }

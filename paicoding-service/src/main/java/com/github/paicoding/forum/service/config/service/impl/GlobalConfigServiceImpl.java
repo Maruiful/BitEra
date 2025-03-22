@@ -25,16 +25,46 @@ import java.util.List;
  * */
 @Service
 public class GlobalConfigServiceImpl implements GlobalConfigService {
-    
+
+
+    @Autowired
+    private ConfigDao configDao;
 
     @Override
-    public PageVo<GlobalConfigDTO> getList(SearchGlobalConfigReq req) { return null; }
+    public PageVo<GlobalConfigDTO> getList(SearchGlobalConfigReq req) {
+        ConfigStructMapper mapper = ConfigStructMapper.INSTANCE;
+        // 转换
+        SearchGlobalConfigParams params = mapper.toSearchGlobalParams(req);
+        // 查询
+        List<GlobalConfigDO> list = configDao.listGlobalConfig(params);
+        // 总数
+        Long total = configDao.countGlobalConfig(params);
+
+        return PageVo.build(mapper.toGlobalDTOS(list), params.getPageSize(), params.getPageNum(), total);
+    }
 
     @Override
-    public void save(GlobalConfigReq req) {}
+    public void save(GlobalConfigReq req) {
+        GlobalConfigDO globalConfigDO = ConfigStructMapper.INSTANCE.toGlobalDO(req);
+        // id 不为空
+        if (NumUtil.nullOrZero(globalConfigDO.getId())) {
+            configDao.save(globalConfigDO);
+        } else {
+            configDao.updateById(globalConfigDO);
+        }
 
+        // 配置更新之后，主动触发配置的动态加载
+        SpringUtil.publishEvent(new ConfigRefreshEvent(this, req.getKeywords(), req.getValue()));
+    }
     @Override
-    public void delete(Long id) {}
+    public void delete(Long id) {
+        GlobalConfigDO globalConfigDO = configDao.getGlobalConfigById(id);
+        if (globalConfigDO != null) {
+            configDao.delete(globalConfigDO);
+        } else {
+            throw ExceptionUtil.of(StatusEnum.RECORDS_NOT_EXISTS, "记录不存在");
+        }
+    }
 
     @Override
     public void addSensitiveWhiteWord(String word) {}
