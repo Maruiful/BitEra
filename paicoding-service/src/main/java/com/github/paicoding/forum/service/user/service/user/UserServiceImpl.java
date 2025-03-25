@@ -213,7 +213,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long getUserCount() { return null; }
+    public Long getUserCount() {
+        return this.userDao.getUserCount();
+    }
 
 
     @Override

@@ -84,5 +84,7 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
                 .count();
     }
 
-    public UserFootStatisticDTO getFootCount()  { return null; }
+    public UserFootStatisticDTO getFootCount()  {
+        return baseMapper.getFootCount();
+    }
 }

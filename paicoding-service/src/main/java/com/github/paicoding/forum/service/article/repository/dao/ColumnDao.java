@@ -53,7 +53,9 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
         return columnArticleMapper.selectCount(query).intValue();
     }
 
-    public Long countColumnArticles()  { return null; }
+    public Long countColumnArticles()  {
+        return columnArticleMapper.selectCount(Wrappers.emptyWrapper());
+    }
 
     /**
      * 统计专栏的阅读人数

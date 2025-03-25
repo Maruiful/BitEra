@@ -19,7 +19,10 @@ import java.util.List;
 @Slf4j
 @Service
 public class RequestCountServiceImpl implements RequestCountService {
-    
+
+
+    @Autowired
+    private RequestCountDao requestCountDao;
 
     @Override
     public RequestCountDO getRequestCount(String host) { return null; }
@@ -31,10 +34,14 @@ public class RequestCountServiceImpl implements RequestCountService {
     public void incrementCount(Long id) {}
 
     @Override
-    public Long getPvTotalCount() { return null; }
+    public Long getPvTotalCount() {
+        return requestCountDao.getPvTotalCount();
+    }
 
     @Override
-    public List<StatisticsDayDTO> getPvUvDayList(Integer day) { return null; }
+    public List<StatisticsDayDTO> getPvUvDayList(Integer day) {
+        return requestCountDao.getPvUvDayList(day);
+    }
 
     @Override
     public long count() { return 0; }

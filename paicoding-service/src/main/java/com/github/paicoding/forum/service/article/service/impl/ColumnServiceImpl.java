@@ -87,7 +87,9 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public Long getTutorialCount() { return null; }
+    public Long getTutorialCount() {
+        return this.columnDao.countColumnArticles();
+    }
 
     private ColumnDTO buildColumnInfo(ColumnInfoDO info) {
         return buildColumnInfo(ColumnConvert.toDto(info));

@@ -194,6 +194,6 @@ public class UserFootServiceImpl implements UserFootService {
 
     @Override
     public UserFootStatisticDTO getFootCount() {
-        return null;
+        return userFootDao.getFootCount();
     }
 }

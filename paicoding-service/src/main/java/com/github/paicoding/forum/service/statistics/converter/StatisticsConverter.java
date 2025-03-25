@@ -6,6 +6,7 @@ import com.github.paicoding.forum.service.statistics.repository.entity.RequestCo
 import com.github.paicoding.forum.service.statistics.repository.entity.StatisticsDayExcelDO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StatisticsConverter {
     public static StatisticsDayExcelDO convertToExcelDO(StatisticsDayDTO dto) { return null; }
@@ -14,5 +15,9 @@ public class StatisticsConverter {
 
     public static List<RequestCountExcelDO> convertToRequestCountExcelDOList(List<RequestCountDO> requestCountDOList) { return null; }
 
-    public static List<StatisticsDayExcelDO> convertToExcelDOList(List<StatisticsDayDTO> dtoList) { return null; }
+    public static List<StatisticsDayExcelDO> convertToExcelDOList(List<StatisticsDayDTO> dtoList) {
+        return dtoList.stream()
+                .map(StatisticsConverter::convertToExcelDO)
+                .collect(Collectors.toList());
+    }
 }

@@ -352,7 +352,11 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      *
      * @return
      */
-    public Long countArticle()  { return null; }
+    public Long countArticle()  {
+        return lambdaQuery()
+                .eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .count();
+    }
 
     public List<ArticleDO> selectByIds(List<Integer> ids)  {
         List<ArticleDO> articleDOS = baseMapper.selectBatchIds(ids);

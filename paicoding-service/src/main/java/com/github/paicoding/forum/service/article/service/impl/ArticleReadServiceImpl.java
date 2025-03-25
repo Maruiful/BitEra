@@ -399,5 +399,7 @@ public class ArticleReadServiceImpl implements ArticleReadService {
      * @return
      */
     @Override
-    public Long getArticleCount() { return null; }
+    public Long getArticleCount() {
+        return articleDao.countArticle();
+    }
 }
