@@ -19,7 +19,6 @@ public interface TagSettingService {
     /**
      * 获取tag列表
      *
-     * @param pageParam
      * @return
      */
     PageVo<TagDTO> getTagList(SearchTagReq req);

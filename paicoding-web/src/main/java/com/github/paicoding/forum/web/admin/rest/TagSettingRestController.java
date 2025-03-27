@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 标签后台
- * */
+ *
+ */
 @RestController
 @Permission(role = UserRole.LOGIN)
 @Api(value = "文章标签管理控制器", tags = "标签管理")
@@ -28,24 +29,32 @@ public class TagSettingRestController {
 
     @Permission(role = UserRole.ADMIN)
     @PostMapping(path = "save")
-    public ResVo<String> save(@RequestBody TagReq req) {return null;
+    public ResVo<String> save(@RequestBody TagReq req) {
+        tagSettingService.saveTag(req);
+        return ResVo.ok();
     }
 
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "delete")
     public ResVo<String> delete(@RequestParam(name = "tagId") Integer tagId) {
-        return null;
+        tagSettingService.deleteTag(tagId);
+        return ResVo.ok();
     }
 
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "operate")
     public ResVo<String> operate(@RequestParam(name = "tagId") Integer tagId,
                                  @RequestParam(name = "pushStatus") Integer pushStatus) {
-            return null;
+        if (pushStatus != PushStatusEnum.OFFLINE.getCode() && pushStatus!= PushStatusEnum.ONLINE.getCode()) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS);
+        }
+        tagSettingService.operateTag(tagId, pushStatus);
+        return ResVo.ok();
     }
 
     @PostMapping(path = "list")
     public ResVo<PageVo<TagDTO>> list(@RequestBody SearchTagReq req) {
-        return null;
+        PageVo<TagDTO> tagDTOPageVo = tagSettingService.getTagList(req);
+        return ResVo.ok(tagDTOPageVo);
     }
 }
