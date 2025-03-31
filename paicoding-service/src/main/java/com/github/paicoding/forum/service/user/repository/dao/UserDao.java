@@ -41,7 +41,15 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
      * @param userName
      * @return
      */
-    public List<UserInfoDO> getByUserNameLike(String userName)  { return null; }
+    public List<UserInfoDO> getByUserNameLike(String userName)  {
+        LambdaQueryWrapper<UserInfoDO> query = Wrappers.lambdaQuery();
+        query.select(UserInfoDO::getUserId, UserInfoDO::getUserName, UserInfoDO::getPhoto, UserInfoDO::getProfile)
+                .and(!StringUtils.isEmpty(userName),
+                        v -> v.like(UserInfoDO::getUserName, userName)
+                )
+                .eq(UserInfoDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return baseMapper.selectList(query);
+    }
 
     public void saveUser(UserDO user) {
         if (user.getId() == null) {

@@ -68,7 +68,19 @@ public class UserServiceImpl implements UserService {
     public UserDO getWxUser(String wxuuid) { return null; }
 
     @Override
-    public List<SimpleUserInfoDTO> searchUser(String userName) { return null; } 
+    public List<SimpleUserInfoDTO> searchUser(String userName) {
+        List<UserInfoDO> users = userDao.getByUserNameLike(userName);
+        if (CollectionUtils.isEmpty(users)) {
+            return Collections.emptyList();
+        }
+        return users.stream().map(s -> new SimpleUserInfoDTO()
+                        .setUserId(s.getUserId())
+                        .setName(s.getUserName())
+                        .setAvatar(s.getPhoto())
+                        .setProfile(s.getProfile())
+                )
+                .collect(Collectors.toList());
+    }
 
     @Override
     public void saveUserInfo(UserInfoSaveReq req) {
