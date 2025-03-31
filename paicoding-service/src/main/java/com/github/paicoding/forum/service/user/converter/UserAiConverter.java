@@ -9,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 /** */
 public class UserAiConverter {
 
-    public static UserAiDO initAi(Long userId) { return null; }
+    public static UserAiDO initAi(Long userId) {
+        return initAi(userId, null);
+    }
 
     public static UserAiDO initAi(Long userId, String starNumber) {
         UserAiDO userAiDO = new UserAiDO();

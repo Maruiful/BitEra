@@ -9,7 +9,6 @@ import com.github.paicoding.forum.api.model.vo.user.dto.ZsxqUserInfoDTO;
 import java.util.List;
 
 /**
- * 微信搜索「沉默王二」，回复 Java
  * */
 public interface ZsxqWhiteListService {
     PageVo<ZsxqUserInfoDTO> getList(SearchZsxqUserReq req);

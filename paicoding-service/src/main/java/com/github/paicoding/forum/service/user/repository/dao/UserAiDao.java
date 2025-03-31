@@ -125,9 +125,14 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
         this.saveOrUpdate(ai);
     }
 
-    public List<ZsxqUserInfoDTO> listZsxqUsersByParams(SearchZsxqWhiteParams params)  { return null; }
+    public List<ZsxqUserInfoDTO> listZsxqUsersByParams(SearchZsxqWhiteParams params)  {
+        return userAiMapper.listZsxqUsersByParams(params,
+                PageParam.newPageInstance(params.getPageNum(), params.getPageSize()));
+    }
 
-    public Long countZsxqUserByParams(SearchZsxqWhiteParams params)  { return null; }
+    public Long countZsxqUserByParams(SearchZsxqWhiteParams params)  {
+        return userAiMapper.countZsxqUsersByParams(params);
+    }
 
     public void batchUpdateState(List<Long> ids, Integer code)  {}
 
