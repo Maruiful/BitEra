@@ -38,10 +38,45 @@ public class ImageServiceImpl implements ImageService {
     @Autowired
     private ImageUploader imageUploader;
 
+    /**
+     * 外网图片转存缓存
+     */
+    private Cache<String, String> imgReplaceCache = CacheBuilder
+            .newBuilder()
+            .maximumSize(300)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
+
 
     @Override
     public String saveImg(HttpServletRequest request) {
-        return null;
+        MultipartFile file = null;
+        if (request instanceof MultipartHttpServletRequest) {
+            file = ((MultipartHttpServletRequest) request).getFile("image");
+        }
+        if (file == null) {
+            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "缺少需要上传的图片");
+        }
+
+        // 目前只支持 jpg, png, webp 等静态图片格式
+        String fileType = validateStaticImg(file.getContentType());
+        if (fileType == null) {
+            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "图片只支持png,jpg,gif");
+        }
+
+        try {
+            // 先获取图像摘要，根据摘要确定缓存中是否已经包含图像。
+            String digest = calculateSHA256(file.getInputStream());
+            String ans = imgReplaceCache.getIfPresent(digest);
+            if (StringUtils.isBlank(ans)) {
+                ans = imageUploader.upload(file.getInputStream(), fileType);
+                imgReplaceCache.put(digest, ans);
+            }
+            return ans;
+        } catch (IOException | NoSuchAlgorithmException e) {
+            log.error("Parse img from httpRequest to BufferedImage error! e:", e);
+            throw ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED);
+        }
     }
 
     @Override
@@ -122,5 +157,60 @@ public class ImageServiceImpl implements ImageService {
 
     public ByteArrayInputStream toByteArrayInputStream(InputStream inputStream) throws IOException {
         return null;
+    }
+
+    /**
+     * 图片格式校验
+     *
+     * @param mime
+     * @return
+     */
+    private String validateStaticImg(String mime) {
+        if ("svg".equalsIgnoreCase(mime)) {
+            // fixme 上传文件保存到服务器本地时，做好安全保护, 避免上传了要给攻击性的脚本
+            return "svg";
+        }
+
+        if (mime.contains(MediaType.ImageJpg.getExt())) {
+            mime = mime.replace("jpg", "jpeg");
+        }
+        for (MediaType type : ImageUploader.STATIC_IMG_TYPE) {
+            if (type.getMime().equals(mime)) {
+                return type.getExt();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 图片摘要生成
+     *
+     * @param inputStream
+     * @return
+     */
+    private String calculateSHA256(InputStream inputStream) throws NoSuchAlgorithmException, IOException {
+
+        inputStream = toByteArrayInputStream(inputStream);
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+
+        // 读取 InputStream 并更新到 MessageDigest
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            md.update(buffer, 0, bytesRead);
+        }
+
+        // 获取摘要并将其转换为十六进制字符串
+        byte[] digest = md.digest();
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : digest) {
+            hexString.append(String.format("%02x", b));
+        }
+        inputStream.reset();
+        return hexString.toString();
+    }
+
+    private String buildUploadFailImgUrl(String img) {
+        return img.contains("saveError") ? img : img + "?&cause=saveError!";
     }
 }

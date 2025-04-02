@@ -21,7 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 图片服务，要求登录之后才允许操作
- * */
+ *
+ */
 @Permission(role = UserRole.LOGIN)
 @RequestMapping(path = {"image/", "admin/image/", "api/admin/image/",})
 @RestController
@@ -38,7 +39,17 @@ public class ImageRestController {
      */
 
     @RequestMapping(path = "upload")
-    public ResVo<ImageVo> upload(HttpServletRequest request)  { return null; }
+    public ResVo<ImageVo> upload(HttpServletRequest request) {
+        ImageVo imageVo = new ImageVo();
+        try {
+            String imagePath = imageService.saveImg(request);
+            imageVo.setImagePath(imagePath);
+        } catch (Exception e) {
+            log.error("save upload file error!", e);
+            return ResVo.fail(StatusEnum.UPLOAD_PIC_FAILED);
+        }
+        return ResVo.ok(imageVo);
+    }
 
     /**
      * 二维码识别
@@ -47,7 +58,16 @@ public class ImageRestController {
      * @return 识别的内容
      */
     @RequestMapping(path = "qrscan")
-    public ResVo<String> qrscan(HttpServletRequest request) throws Exception  { return null; }
+    public ResVo<String> qrscan(HttpServletRequest request) throws Exception {
+        MultipartFile file = null;
+        if (request instanceof MultipartHttpServletRequest) {
+            file = ((MultipartHttpServletRequest) request).getFile("image");
+        }
+        if (file != null) {
+            return ResVo.ok(QrCodeDeWrapper.decode(ImageIO.read(file.getInputStream())));
+        }
+        return ResVo.ok("nill");
+    }
 
     /**
      * 转存图片
@@ -57,6 +77,13 @@ public class ImageRestController {
      */
     @RequestMapping(path = "save")
     public ResVo<ImageVo> save(@RequestParam(name = "img", defaultValue = "") String imgUrl) {
-       return null;
+        ImageVo imageVo = new ImageVo();
+        if (StringUtils.isBlank(imgUrl)) {
+            return ResVo.ok(imageVo);
+        }
+
+        String url = imageService.saveImg(imgUrl);
+        imageVo.setImagePath(url);
+        return ResVo.ok(imageVo);
     }
 }
