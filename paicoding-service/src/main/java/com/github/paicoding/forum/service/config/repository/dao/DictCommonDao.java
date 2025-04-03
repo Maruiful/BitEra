@@ -17,5 +17,8 @@ public class DictCommonDao extends ServiceImpl<DictCommonMapper, DictCommonDO> {
      * 获取所有字典列表
      * @return
      */
-    public List<DictCommonDTO> getDictList()  { return null; }
+    public List<DictCommonDTO> getDictList()  {
+        List<DictCommonDO> list = lambdaQuery().list();
+        return DictCommonConverter.toDTOS(list);
+    }
 }

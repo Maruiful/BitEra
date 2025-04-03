@@ -16,7 +16,8 @@ import java.util.Map;
 
 /**
  * 通用
- * */
+ *
+ */
 @RestController
 @Slf4j
 @Permission(role = UserRole.LOGIN)
@@ -30,6 +31,8 @@ public class DictCommonController {
     @ResponseBody
     @GetMapping(path = "/dict")
     public ResVo<Map<String, Object>> list() {
-       return null;
+        log.debug("获取字典");
+        Map<String, Object> bannerDTOPageVo = dictCommonService.getDict();
+        return ResVo.ok(bannerDTOPageVo);
     }
 }
