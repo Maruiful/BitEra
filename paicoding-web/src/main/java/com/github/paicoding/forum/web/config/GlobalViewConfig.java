@@ -4,7 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/** */
+/**
+ */
 @Data
 @ConfigurationProperties(prefix = "view.site")
 @Component
@@ -80,5 +81,10 @@ public class GlobalViewConfig {
     // 需要支付的可阅读数
     private String needPayArticleReadCount;
 
-    public String getOss()  { return null; }
+    public String getOss() {
+        if (oss == null) {
+            this.oss = "";
+        }
+        return this.oss;
+    }
 }

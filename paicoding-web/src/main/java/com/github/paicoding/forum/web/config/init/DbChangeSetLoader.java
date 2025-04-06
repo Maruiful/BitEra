@@ -13,9 +13,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** */
+/**
+ */
 public class DbChangeSetLoader {
-    public static XMLReader getInstance() throws Exception  { return null; }
+    public static XMLReader getInstance() throws Exception {
+        // javax.xml.parsers.SAXParserFactory 原生api获取factory
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        // javax.xml.parsers.SAXParser 原生api获取parse
+        SAXParser saxParser = factory.newSAXParser();
+        // 获取xml
+        return saxParser.getXMLReader();
+    }
 
     public static List<ClassPathResource> loadDbChangeSetResources(String source) {
         try {
@@ -53,10 +61,18 @@ public class DbChangeSetLoader {
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException  {}
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            if (tag.equals(qName)) {
+                sets.add(attributes.getValue(attr));
+            }
+        }
 
-        public List<String> getSets()  { return null; }
+        public List<String> getSets() {
+            return sets;
+        }
 
-        public void reset()  {}
+        public void reset() {
+            sets.clear();
+        }
     }
 }

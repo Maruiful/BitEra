@@ -29,13 +29,34 @@ import java.util.function.Supplier;
 
 /**
  * 用户足迹Service
+ *
  */
 @Service
 public class UserFootServiceImpl implements UserFootService {
+    private final UserFootDao userFootDao;
 
     @Autowired
-    private UserFootDao userFootDao;
+    private ArticleReadService articleReadService;
 
+    @Autowired
+    private CommentReadService commentReadService;
+
+    @Autowired
+    private RabbitmqService rabbitmqService;
+
+    public UserFootServiceImpl(UserFootDao userFootDao) {
+        this.userFootDao = userFootDao;
+    }
+
+    /**
+     * 保存或更新状态信息
+     *
+     * @param documentType    文档类型：博文 + 评论
+     * @param documentId      文档id
+     * @param authorId        作者
+     * @param userId          操作人
+     * @param operateTypeEnum 操作类型：点赞，评论，收藏等
+     */
     @Override
     public UserFootDO saveOrUpdateUserFoot(DocumentTypeEnum documentType, Long documentId, Long authorId, Long userId, OperateTypeEnum operateTypeEnum) {
         // 查询是否有该足迹；有则更新，没有则插入
@@ -53,50 +74,6 @@ public class UserFootServiceImpl implements UserFootService {
             userFootDao.updateById(readUserFootDO);
         }
         return readUserFootDO;
-    }
-
-
-    private boolean setUserFootStat(UserFootDO userFootDO, OperateTypeEnum operate) {
-        switch (operate) {
-            case READ:
-                // 设置为已读
-                userFootDO.setReadStat(1);
-                // 需要更新时间，用于浏览记录
-                return true;
-            case PRAISE:
-            case CANCEL_PRAISE:
-                return compareAndUpdate(userFootDO::getPraiseStat, userFootDO::setPraiseStat, operate.getDbStatCode());
-            case COLLECTION:
-            case CANCEL_COLLECTION:
-                return compareAndUpdate(userFootDO::getCollectionStat, userFootDO::setCollectionStat, operate.getDbStatCode());
-            case COMMENT:
-            case DELETE_COMMENT:
-                return compareAndUpdate(userFootDO::getCommentStat, userFootDO::setCommentStat, operate.getDbStatCode());
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * 相同则直接返回false不用更新；不同则更新,返回true
-     *
-     * @param supplier
-     * @param consumer
-     * @param input
-     * @param <T>
-     * @return
-     */
-    private <T> boolean compareAndUpdate(Supplier<T> supplier, Consumer<T> consumer, T input) {
-        if (Objects.equals(supplier.get(), input)) {
-            return false;
-        }
-        consumer.accept(input);
-        return true;
-    }
-
-
-    private static @Nullable UserFootDO getUserFootDO() {
-        return null;
     }
 
     /**
@@ -170,6 +147,50 @@ public class UserFootServiceImpl implements UserFootService {
 
     @Override
     public void removeCommentFoot(CommentDO comment, Long articleAuthor, Long parentCommentAuthor) {
+        saveOrUpdateUserFoot(DocumentTypeEnum.ARTICLE, comment.getArticleId(), articleAuthor, comment.getUserId(), OperateTypeEnum.DELETE_COMMENT);
+        if (comment.getParentCommentId() != null) {
+            // 如果需要展示父评论的子评论数量，authorId 需要传父评论的 userId
+            saveOrUpdateUserFoot(DocumentTypeEnum.COMMENT, comment.getParentCommentId(), parentCommentAuthor, comment.getUserId(), OperateTypeEnum.DELETE_COMMENT);
+        }
+    }
+
+
+    private boolean setUserFootStat(UserFootDO userFootDO, OperateTypeEnum operate) {
+        switch (operate) {
+            case READ:
+                // 设置为已读
+                userFootDO.setReadStat(1);
+                // 需要更新时间，用于浏览记录
+                return true;
+            case PRAISE:
+            case CANCEL_PRAISE:
+                return compareAndUpdate(userFootDO::getPraiseStat, userFootDO::setPraiseStat, operate.getDbStatCode());
+            case COLLECTION:
+            case CANCEL_COLLECTION:
+                return compareAndUpdate(userFootDO::getCollectionStat, userFootDO::setCollectionStat, operate.getDbStatCode());
+            case COMMENT:
+            case DELETE_COMMENT:
+                return compareAndUpdate(userFootDO::getCommentStat, userFootDO::setCommentStat, operate.getDbStatCode());
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 相同则直接返回false不用更新；不同则更新,返回true
+     *
+     * @param supplier
+     * @param consumer
+     * @param input
+     * @param <T>
+     * @return
+     */
+    private <T> boolean compareAndUpdate(Supplier<T> supplier, Consumer<T> consumer, T input) {
+        if (Objects.equals(supplier.get(), input)) {
+            return false;
+        }
+        consumer.accept(input);
+        return true;
     }
 
     @Override
@@ -184,7 +205,7 @@ public class UserFootServiceImpl implements UserFootService {
 
     @Override
     public List<SimpleUserInfoDTO> queryArticlePraisedUsers(Long articleId) {
-        return null;
+        return userFootDao.listDocumentPraisedUsers(articleId, DocumentTypeEnum.ARTICLE.getCode(), 10);
     }
 
     @Override
@@ -196,4 +217,5 @@ public class UserFootServiceImpl implements UserFootService {
     public UserFootStatisticDTO getFootCount() {
         return userFootDao.getFootCount();
     }
+
 }
