@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * 业务异常
- * */
+ */
 public class ForumException extends RuntimeException {
     @Getter
     private Status status;

@@ -9,19 +9,20 @@ import java.security.Principal;
 
 /**
  * 请求上下文，携带用户身份相关信息
- * */
+ *
+ */
 public class ReqInfoContext {
     private static TransmittableThreadLocal<ReqInfo> contexts = new TransmittableThreadLocal<>();
 
-    public static void addReqInfo(ReqInfo reqInfo)  {
+    public static void addReqInfo(ReqInfo reqInfo) {
         contexts.set(reqInfo);
     }
 
-    public static void clear()  {
+    public static void clear() {
         contexts.remove();
     }
 
-    public static ReqInfo getReqInfo()  {
+    public static ReqInfo getReqInfo() {
         return contexts.get();
     }
 
@@ -84,7 +85,7 @@ public class ReqInfoContext {
         private String chatId;
 
         @Override
-        public String getName()  {
+        public String getName() {
             return session;
         }
     }

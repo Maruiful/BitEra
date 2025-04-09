@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 配置类型枚举
- * 
+ *
  */
 @Getter
 public enum ConfigTagEnum {

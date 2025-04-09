@@ -6,7 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** */
+/**
+ */
 public class ArticleUtil {
     private static final Integer MAX_SUMMARY_CHECK_TXT_LEN = 2000;
     private static final Integer SUMMARY_LEN = 256;

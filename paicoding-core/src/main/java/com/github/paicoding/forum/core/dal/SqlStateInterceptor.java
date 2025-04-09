@@ -29,7 +29,8 @@ import java.util.regex.Matcher;
 
 /**
  * mybatis拦截器。输出sql执行情况
- * */
+ *
+ */
 @Slf4j
 @Intercepts({@Signature(type = StatementHandler.class, method = "query", args = {Statement.class, ResultHandler.class}), @Signature(type = StatementHandler.class, method = "update", args = {Statement.class})})
 public class SqlStateInterceptor implements Interceptor {
@@ -75,7 +76,23 @@ public class SqlStateInterceptor implements Interceptor {
      * @param statementHandler
      * @return
      */
-    private String buildSql(StatementHandler statementHandler)  { return null; }
+    private String buildSql(StatementHandler statementHandler) {
+        BoundSql boundSql = statementHandler.getBoundSql();
+        Configuration configuration = null;
+        if (statementHandler.getParameterHandler() instanceof DefaultParameterHandler) {
+            DefaultParameterHandler handler = (DefaultParameterHandler) statementHandler.getParameterHandler();
+            configuration = (Configuration) ReflectionUtils.getFieldVal(handler, "configuration", false);
+        } else if (statementHandler.getParameterHandler() instanceof MybatisParameterHandler) {
+            MybatisParameterHandler paramHandler = (MybatisParameterHandler) statementHandler.getParameterHandler();
+            configuration = ((MappedStatement) ReflectionUtils.getFieldVal(paramHandler, "mappedStatement", false)).getConfiguration();
+        }
+
+        if (configuration == null) {
+            return boundSql.getSql();
+        }
+
+        return getSql(boundSql, configuration);
+    }
 
 
     /**
@@ -119,7 +136,18 @@ public class SqlStateInterceptor implements Interceptor {
         return sql;
     }
 
-    public String getParameter(Object parameter)  { return null; }
+    public String getParameter(Object parameter) {
+        if (parameter instanceof String) {
+            return "'" + parameter + "'";
+        } else if (parameter instanceof Date) {
+            // 日期格式化
+            return "'" + DateUtil.format(DateUtil.DB_FORMAT, ((Date) parameter).getTime()) + "'";
+        } else if (parameter instanceof java.util.Date) {
+            // 日期格式化
+            return "'" + DateUtil.format(DateUtil.DB_FORMAT, ((java.util.Date) parameter).getTime()) + "'";
+        }
+        return parameter.toString();
+    }
 
     /**
      * 替换连续的空白
@@ -154,8 +182,11 @@ public class SqlStateInterceptor implements Interceptor {
     }
 
     @Override
-    public Object plugin(Object o)  { return null; }
+    public Object plugin(Object o) {
+        return Plugin.wrap(o, this);
+    }
 
     @Override
-    public void setProperties(Properties properties)  {}
+    public void setProperties(Properties properties) {
+    }
 }

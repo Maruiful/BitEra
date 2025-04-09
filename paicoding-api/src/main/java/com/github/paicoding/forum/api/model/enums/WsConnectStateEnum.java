@@ -2,7 +2,8 @@ package com.github.paicoding.forum.api.model.enums;
 
 /**
  * websocket 连接 状态
- * */
+ *
+ */
 public enum WsConnectStateEnum {
     // 初始化
     INIT,

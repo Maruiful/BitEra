@@ -20,7 +20,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
-/** */
+/**
+ */
 @Slf4j
 @Aspect
 @Component
@@ -29,7 +30,8 @@ public class MdcAspect implements ApplicationContextAware {
     private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
     @Pointcut("@annotation(MdcDot) || @within(MdcDot)")
-    public void getLogAnnotation()  {}
+    public void getLogAnnotation() {
+    }
 
     @Around("getLogAnnotation()")
     public Object handle(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -49,12 +51,41 @@ public class MdcAspect implements ApplicationContextAware {
         }
     }
 
-    private boolean addMdcCode(ProceedingJoinPoint joinPoint)  { return false; }
+    private boolean addMdcCode(ProceedingJoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        MdcDot dot = method.getAnnotation(MdcDot.class);
+        if (dot == null) {
+            dot = (MdcDot) joinPoint.getSignature().getDeclaringType().getAnnotation(MdcDot.class);
+        }
 
-    private String loadBizCode(String key, ProceedingJoinPoint joinPoint)  { return null; }
+        if (dot != null) {
+            MdcUtil.add("bizCode", loadBizCode(dot.bizCode(), joinPoint));
+            return true;
+        }
+        return false;
+    }
+
+    private String loadBizCode(String key, ProceedingJoinPoint joinPoint) {
+        if (StringUtils.isBlank(key)) {
+            return "";
+        }
+
+        StandardEvaluationContext context = new StandardEvaluationContext();
+
+        context.setBeanResolver(new BeanFactoryResolver(applicationContext));
+        String[] params = parameterNameDiscoverer.getParameterNames(((MethodSignature) joinPoint.getSignature()).getMethod());
+        Object[] args = joinPoint.getArgs();
+        for (int i = 0; i < args.length; i++) {
+            context.setVariable(params[i], args[i]);
+        }
+        return parser.parseExpression(key).getValue(context, String.class);
+    }
 
     private ApplicationContext applicationContext;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException  {}
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

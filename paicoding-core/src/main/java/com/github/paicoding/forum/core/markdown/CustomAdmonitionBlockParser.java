@@ -33,22 +33,65 @@ public class CustomAdmonitionBlockParser extends AbstractBlockParser {
         this.block = new AdmonitionBlock();
     }
 
-    private int getContentIndent()  { return 0; }
+    private int getContentIndent() {
+        return contentIndent;
+    }
 
     @Override
-    public Block getBlock()  { return null; }
+    public Block getBlock() {
+        return block;
+    }
 
     @Override
-    public boolean isContainer()  { return false; }
+    public boolean isContainer() {
+        return true;
+    }
 
     @Override
-    public boolean canContain(ParserState state, BlockParser blockParser, final Block block)  { return false; }
+    public boolean canContain(ParserState state, BlockParser blockParser, final Block block) {
+        return true;
+    }
 
     @Override
-    public BlockContinue tryContinue(ParserState state)  { return null; }
+    public BlockContinue tryContinue(ParserState state) {
+        // 获取当前行内容
+        BasedSequence line = state.getLine();
+        final int nonSpaceIndex = state.getNextNonSpaceIndex();
+
+        // 判断是否是终止符 "!!!"
+        if (isOver) {
+            return BlockContinue.none();
+        }
+
+        if (line.startsWith("!!!") || line.startsWith("???") || line.startsWith(":::")) {
+            isOver = true;// 停止解析
+        }
+
+        // 如果当前行是空行，则继续解析，同时标记块中出现过空行
+        if (state.isBlank()) {
+            hadBlankLine = true;
+            return BlockContinue.atIndex(nonSpaceIndex);
+        }
+
+        // 如果允许懒惰继续（lazy continuation），且未遇到空行
+        if (!hadBlankLine && options.allowLazyContinuation) {
+            return BlockContinue.atIndex(nonSpaceIndex);
+        }
+
+        // 如果缩进足够，则继续解析当前行
+        if (state.getIndent() >= options.contentIndent) {
+            int contentIndent = state.getColumn() + options.contentIndent;
+            return BlockContinue.atColumn(contentIndent);
+        }
+
+        // 默认情况，继续解析当前行
+        return BlockContinue.atIndex(nonSpaceIndex);
+    }
 
     @Override
-    public void closeBlock(ParserState state)  {}
+    public void closeBlock(ParserState state) {
+        block.setCharsFromContent();
+    }
 
     public static class Factory implements CustomBlockParserFactory {
         @Nullable
@@ -69,11 +112,16 @@ public class CustomAdmonitionBlockParser extends AbstractBlockParser {
         }
 
         @Override
-        public boolean affectsGlobalScope()  { return false; }
+        public boolean affectsGlobalScope() {
+            return false;
+        }
 
         @NotNull
         @Override
-        public BlockParserFactory apply(@NotNull DataHolder options)  { return null; }
+        public BlockParserFactory apply(@NotNull DataHolder options) {
+            return new CustomAdmonitionBlockParser
+                    .BlockFactory(options);
+        }
     }
 
     static class AdmonitionLeadInHandler implements SpecialLeadInHandler {
@@ -81,10 +129,23 @@ public class CustomAdmonitionBlockParser extends AbstractBlockParser {
                 .AdmonitionLeadInHandler();
 
         @Override
-        public boolean escape(@NotNull BasedSequence sequence, @Nullable DataHolder options, @NotNull Consumer<CharSequence> consumer)  { return false; }
+        public boolean escape(@NotNull BasedSequence sequence, @Nullable DataHolder options, @NotNull Consumer<CharSequence> consumer) {
+            if ((sequence.length() == 3 || sequence.length() == 4 && sequence.charAt(3) == '+') && (sequence.startsWith("???") || sequence.startsWith("!!!") || sequence.startsWith(":::"))) {
+                consumer.accept("\\");
+                consumer.accept(sequence);
+                return true;
+            }
+            return false;
+        }
 
         @Override
-        public boolean unEscape(@NotNull BasedSequence sequence, @Nullable DataHolder options, @NotNull Consumer<CharSequence> consumer)  { return false; }
+        public boolean unEscape(@NotNull BasedSequence sequence, @Nullable DataHolder options, @NotNull Consumer<CharSequence> consumer) {
+            if ((sequence.length() == 4 || sequence.length() == 5 && sequence.charAt(4) == '+') && (sequence.startsWith("\\???") || sequence.startsWith("\\!!!") || sequence.startsWith("\\:::"))) {
+                consumer.accept(sequence.subSequence(1));
+                return true;
+            }
+            return false;
+        }
     }
 
     static boolean isMarker(

@@ -20,7 +20,8 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * 异步执行
- * */
+ *
+ */
 @Slf4j
 @Aspect
 @Component
@@ -61,12 +62,28 @@ public class AsyncExecuteAspect implements ApplicationContextAware {
         }
     }
 
-    private Object defaultRespWhenTimeOut(ProceedingJoinPoint joinPoint, AsyncExecute asyncExecute)  { return null; }
+    private Object defaultRespWhenTimeOut(ProceedingJoinPoint joinPoint, AsyncExecute asyncExecute) {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        context.setBeanResolver(new BeanFactoryResolver(this.applicationContext));
+
+        // 超时，使用自定义的返回策略进行返回
+        MethodSignature methodSignature = ((MethodSignature) joinPoint.getSignature());
+        String[] parameterNames = methodSignature.getParameterNames();
+        Object[] args = joinPoint.getArgs();
+        for (int i = 0; i < parameterNames.length; i++) {
+            context.setVariable(parameterNames[i], args[i]);
+        }
+        log.info("{} 执行超时，返回兜底结果!", methodSignature.getMethod().getName());
+        return parser.parseExpression(asyncExecute.timeOutRsp()).getValue(context);
+    }
 
 
     private ExpressionParser parser;
     private ApplicationContext applicationContext;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException  {}
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.parser = new SpelExpressionParser();
+        this.applicationContext = applicationContext;
+    }
 }

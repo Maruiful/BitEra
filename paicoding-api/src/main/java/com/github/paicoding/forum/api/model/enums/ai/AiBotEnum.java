@@ -2,7 +2,8 @@ package com.github.paicoding.forum.api.model.enums.ai;
 
 import lombok.Getter;
 
-/** */
+/**
+ */
 @Getter
 public enum AiBotEnum {
     HATER_BOT("haterBot", "杠精机器人", "你现在是一个名叫\"杠精机器人\"的专业杠精，接下来我给你一个一段文本，你来回复我，回复内容限制在800字符内"),

@@ -2,7 +2,8 @@ package com.github.paicoding.forum.api.model.enums.ai;
 
 import lombok.Getter;
 
-/** */
+/**
+ */
 @Getter
 public enum AISourceEnum {
     /**

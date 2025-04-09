@@ -3,8 +3,7 @@ package com.github.paicoding.forum.api.model.enums;
 import lombok.Getter;
 
 /**
- * 
- * */
+ */
 @Getter
 public enum ChatSocketStateEnum {
     // code desc

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * RabbitMQ配置文件
- * * @since 2023/5/10
+ *
  */
 @Setter
 @Getter

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 评论状态枚举
- * 
+ *
  */
 @Getter
 public enum CommentStatEnum {

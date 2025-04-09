@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 操作类型
- * *
+ *
  */
 @Getter
 public enum OperateTypeEnum {

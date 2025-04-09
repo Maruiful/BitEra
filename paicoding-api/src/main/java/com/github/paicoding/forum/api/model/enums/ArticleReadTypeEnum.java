@@ -6,7 +6,8 @@ import java.util.Objects;
 
 /**
  * 文章阅读类型枚举
- * */
+ *
+ */
 @Getter
 public enum ArticleReadTypeEnum {
     NORMAL(0, "直接阅读"),

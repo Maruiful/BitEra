@@ -37,5 +37,10 @@ public class ImageProperties {
 
     private OssProperties oss;
 
-    public String buildImgUrl(String url)  { return null; }
+    public String buildImgUrl(String url)  {
+        if (!url.startsWith(cdnHost)) {
+            return cdnHost + url;
+        }
+        return url;
+    }
 }

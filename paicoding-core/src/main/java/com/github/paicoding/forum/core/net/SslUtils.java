@@ -5,7 +5,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
- * SSL工具类
  */
 public class SslUtils {
     private static void trustAllHttpsCertificates() throws Exception {

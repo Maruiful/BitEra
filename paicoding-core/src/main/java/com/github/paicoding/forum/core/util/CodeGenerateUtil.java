@@ -6,7 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-/** */
+/**
+ */
 public class CodeGenerateUtil {
     public static final Integer CODE_LEN = 3;
 
@@ -31,5 +32,12 @@ public class CodeGenerateUtil {
         }
     }
 
-    public static boolean isVerifyCode(String content)  { return false; }
+    public static boolean isVerifyCode(String content) {
+        if (!NumberUtils.isDigits(content) || content.length() != CodeGenerateUtil.CODE_LEN) {
+            return false;
+        }
+
+        int num = Integer.parseInt(content);
+        return num < 100 || num > 200;
+    }
 }

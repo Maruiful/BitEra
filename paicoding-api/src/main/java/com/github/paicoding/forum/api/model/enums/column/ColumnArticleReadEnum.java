@@ -8,7 +8,8 @@ import java.util.Map;
 
 /**
  * 专栏文章的阅读类型
- * */
+ *
+ */
 @AllArgsConstructor
 @Getter
 public enum ColumnArticleReadEnum {

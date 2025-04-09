@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 加精状态枚举
- * 
+ *
  */
 @Getter
 public enum CreamStatEnum {

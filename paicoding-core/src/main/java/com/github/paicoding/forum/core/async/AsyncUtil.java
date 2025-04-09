@@ -31,7 +31,8 @@ import java.util.function.Supplier;
 
 /**
  * 异步工具类
- * */
+ *
+ */
 @Slf4j
 public class AsyncUtil {
     private static final TransmittableThreadLocal<CompletableFutureBridge> THREAD_LOCAL = new TransmittableThreadLocal<>();
@@ -39,7 +40,15 @@ public class AsyncUtil {
         private final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
         private final AtomicInteger threadNumber = new AtomicInteger(1);
 
-        public Thread newThread(Runnable r)  { return null; }
+        public Thread newThread(Runnable r) {
+            Thread thread = this.defaultFactory.newThread(r);
+            if (!thread.isDaemon()) {
+                thread.setDaemon(true);
+            }
+
+            thread.setName("paicoding-" + this.threadNumber.getAndIncrement());
+            return thread;
+        }
     };
     private static ExecutorService executorService;
     private static SimpleTimeLimiter simpleTimeLimiter;
@@ -48,7 +57,25 @@ public class AsyncUtil {
         initExecutorService(Runtime.getRuntime().availableProcessors() * 2, 50);
     }
 
-    public static void initExecutorService(int core, int max)  {}
+    public static void initExecutorService(int core, int max) {
+        // 异步工具类的默认线程池构建, 参数选择原则:
+        //  1. 技术派不存在cpu密集型任务，大部分操作都设计到 redis/mysql 等io操作
+        //  2. 统一的异步封装工具，这里的线程池是一个公共的执行仓库，不希望被其他的线程执行影响，因此队列长度为0, 核心线程数满就创建线程执行，超过最大线程，就直接当前线程执行
+        //  3. 同样因为属于通用工具类，再加上技术派的异步使用的情况实际上并不是非常饱和的，因此空闲线程直接回收掉即可；大部分场景下，cpu * 2的线程数即可满足要求了
+        max = Math.max(core, max);
+        executorService = new ExecutorBuilder()
+                .setCorePoolSize(core)
+                .setMaxPoolSize(max)
+                .setKeepAliveTime(0)
+                .setKeepAliveTime(0, TimeUnit.SECONDS)
+                .setWorkQueue(new SynchronousQueue<Runnable>())
+                .setHandler(new ThreadPoolExecutor.CallerRunsPolicy())
+                .setThreadFactory(THREAD_FACTORY)
+                .buildFinalizable();
+        // 包装一下线程池，避免出现上下文复用场景
+        executorService = TtlExecutors.getTtlExecutorService(executorService);
+        simpleTimeLimiter = SimpleTimeLimiter.create(executorService);
+    }
 
 
     /**
@@ -66,7 +93,7 @@ public class AsyncUtil {
     }
 
 
-    public static void execute(Runnable call)  {
+    public static void execute(Runnable call) {
         executorService.execute(call);
     }
 
@@ -75,9 +102,18 @@ public class AsyncUtil {
     }
 
 
-    public static boolean sleep(Number timeout, TimeUnit timeUnit)  { return false; }
+    public static boolean sleep(Number timeout, TimeUnit timeUnit) {
+        try {
+            timeUnit.sleep(timeout.longValue());
+            return true;
+        } catch (InterruptedException var3) {
+            return false;
+        }
+    }
 
-    public static boolean sleep(Number millis)  { return false; }
+    public static boolean sleep(Number millis) {
+        return millis == null ? true : sleep(millis.longValue());
+    }
 
     public static boolean sleep(long millis) {
         if (millis > 0L) {
@@ -144,7 +180,10 @@ public class AsyncUtil {
          * @param name 耗时标识
          * @return
          */
-        public CompletableFutureBridge async(Runnable run, String name)  { return null; }
+        public CompletableFutureBridge async(Runnable run, String name) {
+            list.add(CompletableFuture.runAsync(runWithTime(run, name), this.executorService));
+            return this;
+        }
 
         /**
          * 同步执行，无返回结果
@@ -153,7 +192,10 @@ public class AsyncUtil {
          * @param name 耗时标识
          * @return
          */
-        public CompletableFutureBridge sync(Runnable run, String name)  { return null; }
+        public CompletableFutureBridge sync(Runnable run, String name) {
+            runWithTime(run, name).run();
+            return this;
+        }
 
         private Runnable runWithTime(Runnable run, String name) {
             return () -> {
@@ -177,11 +219,27 @@ public class AsyncUtil {
             };
         }
 
-        public CompletableFutureBridge allExecuted()  { return null; }
+        public CompletableFutureBridge allExecuted() {
+            if (!CollectionUtils.isEmpty(list)) {
+                CompletableFuture.allOf(ArrayUtil.toArray(list, CompletableFuture.class)).join();
+            }
+            this.markOver = true;
+            endRecord(this.taskName);
+            return this;
+        }
 
-        private void startRecord(String name)  {}
+        private void startRecord(String name) {
+            cost.put(name, System.currentTimeMillis());
+        }
 
-        private void endRecord(String name)  {}
+        private void endRecord(String name) {
+            long now = System.currentTimeMillis();
+            long last = cost.getOrDefault(name, now);
+            if (last >= now / 1000) {
+                // 之前存储的是时间戳，因此我们需要更新成执行耗时 ms单位
+                cost.put(name, now - last);
+            }
+        }
 
         public void prettyPrint() {
             if (EnvUtil.isPro()) {
@@ -235,7 +293,7 @@ public class AsyncUtil {
         }
     }
 
-    public static CompletableFutureBridge concurrentExecutor(String... name)  {
+    public static CompletableFutureBridge concurrentExecutor(String... name) {
         if (name.length > 0) {
             return new CompletableFutureBridge(AsyncUtil.executorService, name[0]);
         }
@@ -249,17 +307,25 @@ public class AsyncUtil {
      * @param name            标记名
      * @return 桥接类
      */
-    public static CompletableFutureBridge startBridge(ExecutorService executorService, String name)  { return null; }
+    public static CompletableFutureBridge startBridge(ExecutorService executorService, String name) {
+        CompletableFutureBridge bridge = new CompletableFutureBridge(executorService, name);
+        THREAD_LOCAL.set(bridge);
+        return bridge;
+    }
 
     /**
      * 获取计时桥接类
      *
      * @return 桥接类
      */
-    public static CompletableFutureBridge getBridge()  { return null; }
+    public static CompletableFutureBridge getBridge() {
+        return THREAD_LOCAL.get();
+    }
 
     /**
      * 释放统计
      */
-    public static void release()  {}
+    public static void release() {
+        THREAD_LOCAL.remove();
+    }
 }

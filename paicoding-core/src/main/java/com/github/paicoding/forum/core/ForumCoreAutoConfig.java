@@ -17,7 +17,6 @@ import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 基础核心配置类
  */
 @Configuration
 @EnableConfigurationProperties(ProxyProperties.class)

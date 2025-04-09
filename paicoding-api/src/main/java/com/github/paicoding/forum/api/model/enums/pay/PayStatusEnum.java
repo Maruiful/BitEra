@@ -6,7 +6,8 @@ import java.util.Objects;
 
 /**
  * 支付状态
- * */
+ *
+ */
 @Getter
 public enum PayStatusEnum {
 

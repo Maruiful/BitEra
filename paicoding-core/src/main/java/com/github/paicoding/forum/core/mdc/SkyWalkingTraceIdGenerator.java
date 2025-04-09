@@ -8,7 +8,8 @@ import java.util.UUID;
  * SkyWalking的traceId生成策略
  * <p>
  * 源码：<a href="https://github.com/apache/skywalking-java/blob/ddc68e27e2764ca6299f04ef21a5d864bf660deb/apm-sniffer/apm-agent-core/src/main/java/org/apache/skywalking/apm/agent/core/context/ids/GlobalIdGenerator.java"/>
- * */
+ *
+ */
 public class SkyWalkingTraceIdGenerator {
     private static final String PROCESS_ID = UUID.randomUUID().toString().replaceAll("-", "");
     private static final ThreadLocal<IDContext> THREAD_ID_SEQUENCE = ThreadLocal.withInitial(
@@ -29,7 +30,13 @@ public class SkyWalkingTraceIdGenerator {
      *
      * @return unique id to represent a trace or segment
      */
-    public static String generate()  { return null; }
+    public static String generate() {
+        return Joiner.on(".").join(
+                PROCESS_ID,
+                String.valueOf(Thread.currentThread().getId()),
+                String.valueOf(THREAD_ID_SEQUENCE.get().nextSeq())
+        );
+    }
 
     private static class IDContext {
         private static final int MAX_SEQ = 10_000;
@@ -45,7 +52,9 @@ public class SkyWalkingTraceIdGenerator {
             this.threadSeq = threadSeq;
         }
 
-        private long nextSeq()  { return 0; }
+        private long nextSeq() {
+            return timestamp() * 10000 + nextThreadSeq();
+        }
 
         private long timestamp() {
             long currentTimeMillis = System.currentTimeMillis();
@@ -63,6 +72,11 @@ public class SkyWalkingTraceIdGenerator {
             }
         }
 
-        private short nextThreadSeq()  { return 0; }
+        private short nextThreadSeq() {
+            if (threadSeq == MAX_SEQ) {
+                threadSeq = 0;
+            }
+            return threadSeq++;
+        }
     }
 }

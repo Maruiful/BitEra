@@ -5,7 +5,8 @@ import lombok.Getter;
 
 /**
  * 活跃排行榜时间周期
- * */
+ *
+ */
 @AllArgsConstructor
 @Getter
 public enum ActivityRankTimeEnum {

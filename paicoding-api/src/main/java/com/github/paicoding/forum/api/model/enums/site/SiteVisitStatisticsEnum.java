@@ -5,7 +5,8 @@ import lombok.Getter;
 
 /**
  * 站点统计类型枚举
- * */
+ *
+ */
 @AllArgsConstructor
 @Getter
 public enum SiteVisitStatisticsEnum {

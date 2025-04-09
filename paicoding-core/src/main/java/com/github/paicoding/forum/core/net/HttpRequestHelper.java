@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 请求工具类
  *
- *
  */
 @Slf4j
 public class HttpRequestHelper {
