@@ -48,5 +48,16 @@ public class ArticleReadViewServiceExtend {
         return article.getContent();
     }
 
-    private String mark(ArticleDTO article, Supplier<Boolean> condition, Supplier<String> percent)  { return null; }
+    private String mark(ArticleDTO article, Supplier<Boolean> condition, Supplier<String> percent)  {
+        if (condition.get()) {
+            // 可以阅读
+            article.setCanRead(true);
+            return article.getContent();
+        } else {
+            // 不能阅读
+            article.setCanRead(false);
+            return article.getContent()
+                    .substring(0, (int) (article.getContent().length() * Float.parseFloat(percent.get()) / 100));
+        }
+    }
 }
