@@ -78,7 +78,14 @@ public class ArticlePayRestController {
         return (ResponseEntity<ResVo<Boolean>>) payServiceFactory.getPayService(ThirdPayWayEnum.EMAIL)
                 .payCallback(request, new Function<PayCallbackBo, Boolean>() {
                     @Override
-                    public Boolean apply(PayCallbackBo transaction)  { return null; }
+                    public Boolean apply(PayCallbackBo transaction) {
+                        log.info("个人收款码支付回调执行业务逻辑 {}", transaction);
+                        return articlePayService.updatePayStatus(transaction.getPayId(),
+                                transaction.getOutTradeNo(),
+                                transaction.getPayStatus(),
+                                transaction.getSuccessTime(),
+                                transaction.getThirdTransactionId());
+                    }
                 });
     }
 }
