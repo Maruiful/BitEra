@@ -28,7 +28,8 @@ import java.util.stream.Collectors;
 
 /**
  * 首页推荐相关
- * */
+ *
+ */
 @Component
 public class IndexRecommendHelper {
     @Autowired
@@ -62,7 +63,8 @@ public class IndexRecommendHelper {
                 .prettyPrint();
         return vo;
     }
-    public IndexVo buildSearchVo(String key)  {
+
+    public IndexVo buildSearchVo(String key) {
         IndexVo vo = new IndexVo();
         vo.setArticles(articleService.queryArticlesBySearchKey(key, PageParam.newPageInstance()));
         vo.setSideBarItems(sidebarService.queryHomeSidebarList());
@@ -74,17 +76,43 @@ public class IndexRecommendHelper {
      *
      * @return
      */
-    private List<CarouseDTO> homeCarouselList()  { return null; }
+    private List<CarouseDTO> homeCarouselList() {
+        List<ConfigDTO> configList = configService.getConfigList(ConfigTypeEnum.HOME_PAGE);
+        return configList.stream()
+                .map(configDTO -> new CarouseDTO()
+                        .setName(configDTO.getName())
+                        .setImgUrl(configDTO.getBannerUrl())
+                        .setActionUrl(configDTO.getJumpUrl()))
+                .collect(Collectors.toList());
+    }
 
     /**
      * 文章列表
      */
-    private PageListVo<ArticleDTO> articleList(Long categoryId)  { return null; }
+    private PageListVo<ArticleDTO> articleList(Long categoryId) {
+        return articleService.queryArticlesByCategory(categoryId, PageParam.newPageInstance());
+    }
 
     /**
      * 置顶top 文章列表
      */
-    private List<ArticleDTO> topArticleList(CategoryDTO category)  { return null; }
+    private List<ArticleDTO> topArticleList(CategoryDTO category) {
+        List<ArticleDTO> topArticles = articleService.queryTopArticlesByCategory(category.getCategoryId() == 0 ? null : category.getCategoryId());
+        if (topArticles.size() < PageParam.TOP_PAGE_SIZE) {
+            // 当分类下文章数小于置顶数时，为了避免显示问题，直接不展示
+            topArticles.clear();
+            return topArticles;
+        }
+
+        // 查询分类对应的头图列表
+        List<String> topPicList = CommonConstants.HOMEPAGE_TOP_PIC_MAP.getOrDefault(category.getCategory(),
+                CommonConstants.HOMEPAGE_TOP_PIC_MAP.get(CommonConstants.CATEGORY_ALL));
+
+        // 替换头图，下面做了一个数组越界的保护，避免当topPageSize数量变大，但是默认的cover图没有相应增大导致数组越界异常
+        AtomicInteger index = new AtomicInteger(0);
+        topArticles.forEach(s -> s.setCover(topPicList.get(index.getAndIncrement() % topPicList.size())));
+        return topArticles;
+    }
 
     /**
      * 返回分类列表
@@ -123,5 +151,10 @@ public class IndexRecommendHelper {
     }
 
 
-    private UserStatisticInfoDTO loginInfo()  { return null; }
+    private UserStatisticInfoDTO loginInfo() {
+        if (ReqInfoContext.getReqInfo() != null && ReqInfoContext.getReqInfo().getUserId() != null) {
+            return userService.queryUserInfoWithStatistic(ReqInfoContext.getReqInfo().getUserId());
+        }
+        return null;
+    }
 }
