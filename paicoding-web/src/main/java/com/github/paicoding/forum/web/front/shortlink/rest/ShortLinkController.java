@@ -39,7 +39,11 @@ public class ShortLinkController {
      * @return 创建的短链接信息
      */
     @PostMapping("/url")
-    public ResVo<ShortLinkVO> createShortLink(@RequestBody ShortLinkReq shortLinkReq) throws NoSuchAlgorithmException  { return null; }
+    public ResVo<ShortLinkVO> createShortLink(@RequestBody ShortLinkReq shortLinkReq) throws NoSuchAlgorithmException {
+        String userId = (null == ReqInfoContext.getReqInfo().getUser()) ? "" : ReqInfoContext.getReqInfo().getUser().getUserId().toString();
+        ShortLinkDTO shortLinkDTO = new ShortLinkDTO(shortLinkReq.getOriginalUrl(), userId, "");
+        return ResVo.ok(shortLinkService.createShortLink(shortLinkDTO));
+    }
 
     /**
      * 根据短链接获取原始长链接
@@ -47,7 +51,10 @@ public class ShortLinkController {
      * @param shortCode 短链接
      */
     @GetMapping("/{shortCode}")
-    public void getOriginalLink(@PathVariable String shortCode, HttpServletResponse response) throws IOException  {}
+    public void getOriginalLink(@PathVariable String shortCode, HttpServletResponse response) throws IOException {
+        ShortLinkVO shortLinkVO = shortLinkService.getOriginalLink(shortCode);
+        response.sendRedirect(shortLinkVO.getOriginalUrl());
+    }
 
     @GetMapping("/gen")
     public void generateQrCode(@RequestParam String content, @RequestParam(required = false) Integer size, HttpServletResponse response) throws Exception {
@@ -59,5 +66,13 @@ public class ShortLinkController {
         ImageIO.write(img, "png", response.getOutputStream());
     }
 
-    private QrResource getDefaultLogo()  { return null; }
+    private QrResource getDefaultLogo() {
+        BufferedImage img;
+        try {
+            img = ImageLoadUtil.getImageByPath(SpringUtil.getConfigOrElse("view.site.websiteFaviconIconUrl", "https://paicoding.com/img/icon.png"));
+        } catch (Exception e) {
+            return null;
+        }
+        return new QrResource().setImg(img);
+    }
 }
