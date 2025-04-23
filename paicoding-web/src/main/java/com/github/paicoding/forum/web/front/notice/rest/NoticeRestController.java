@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 消息通知
- * **/
+ *
+ **/
 @Permission(role = UserRole.LOGIN)
 @RestController
 @RequestMapping(path = "notice/api")
@@ -40,15 +41,7 @@ public class NoticeRestController {
         this.notifyService = notifyService;
     }
 
-    /**
-     * 获取消息列表
-     *
-     * @param type
-     * @param page
-     * @param pageSize
-     * @return
-     */
-    private PageListVo<NotifyMsgDTO> listItems(String type, Long page, Long pageSize)  {
+    private PageListVo<NotifyMsgDTO> listItems(String type, Long page, Long pageSize) {
         NotifyTypeEnum typeEnum = NotifyTypeEnum.typeOf(type);
         if (typeEnum == null) {
             throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "type" + type + "非法");
@@ -58,6 +51,7 @@ public class NoticeRestController {
         }
         return notifyService.queryUserNotices(ReqInfoContext.getReqInfo().getUserId(),
                 typeEnum, PageParam.newPageInstance(page, pageSize));
+
     }
 
     /**
@@ -103,7 +97,7 @@ public class NoticeRestController {
      * @param content 发送的内容
      */
     @MessageMapping("/msg/health")
-    public void health(String content, SimpMessageHeaderAccessor headerAccessor)  {
+    public void health(String content, SimpMessageHeaderAccessor headerAccessor) {
         ReqInfoContext.ReqInfo user = (ReqInfoContext.ReqInfo) headerAccessor.getUser();
         if (user != null) {
             String response = "ping".equalsIgnoreCase(content) ? "pong" : content;
@@ -118,7 +112,7 @@ public class NoticeRestController {
      * @return
      */
     @RequestMapping(path = "notifyToSelf")
-    public ResVo<Boolean> notifyToSelf(String content)  {
+    public ResVo<Boolean> notifyToSelf(String content) {
         notifyService.notifyToUser(ReqInfoContext.getReqInfo().getUserId(), content);
         return ResVo.ok(true);
     }
@@ -130,7 +124,7 @@ public class NoticeRestController {
      * @return
      */
     @RequestMapping(path = "notifyToAll")
-    public ResVo<Boolean> notifyToAll(String content)  {
+    public ResVo<Boolean> notifyToAll(String content) {
         BaseUserInfoDTO user = ReqInfoContext.getReqInfo().getUser();
         WebSocketResponseUtil.broadcastMsg(NotifyService.NOTIFY_TOPIC, String.format("【%s】发送了一条广播消息: %s", user.getUserName(), content));
         return ResVo.ok(true);

@@ -19,16 +19,37 @@ import java.util.Map;
 
 /**
  * v1. 简单版本聊天： 长连接的登录校验拦截器
- * */
+ *
+ */
 @Slf4j
 public class SimpleWsAuthInterceptor extends HttpSessionHandshakeInterceptor implements ChannelInterceptor {
 
     @Override
-    public boolean preReceive(MessageChannel channel)  { return false; }
+    public boolean preReceive(MessageChannel channel) {
+        return ChannelInterceptor.super.preReceive(channel);
+    }
 
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception  { return false; }
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+        String session = ((ServletServerHttpRequest) request).getServletRequest().getParameter("session");
+        ReqInfoContext.ReqInfo reqInfo = new ReqInfoContext.ReqInfo();
+        SpringUtil.getBean(GlobalInitService.class).initLoginUser(session, reqInfo);
+        ReqInfoContext.addReqInfo(reqInfo);
+        if (reqInfo.getUserId() == null) {
+            // 未登录，拒绝链接
+            log.info("用户未登录，拒绝聊天! ");
+            response.setStatusCode(HttpStatus.FORBIDDEN);
+            return false;
+        }
+        log.info("{} 开始了聊天!", reqInfo);
+        MdcUtil.addTraceId();
+        return super.beforeHandshake(request, response, wsHandler, attributes);
+    }
 
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception ex)  {}
+    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception ex) {
+        ReqInfoContext.clear();
+        MdcUtil.clear();
+        super.afterHandshake(request, response, wsHandler, ex);
+    }
 }

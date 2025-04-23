@@ -27,7 +27,8 @@ import java.util.Map;
 
 /**
  * STOMP协议的ChatGpt聊天通讯实现方式
- * */
+ *
+ */
 @Slf4j
 @RestController
 public class ChatRestController {
@@ -51,14 +52,30 @@ public class ChatRestController {
     public void chat(String msg,
                      @DestinationVariable("session") String session,
                      @Header("simpSessionAttributes") Map<String, Object> attrs,
-                     SimpMessageHeaderAccessor accessor) {}
+                     SimpMessageHeaderAccessor accessor) {
+        String aiType = (String) attrs.get(WsAnswerHelper.AI_SOURCE_PARAM);
+        WebSocketResponseUtil.execute(accessor, () -> {
+            log.info("{} 用户开始了对话: {} - {}", ReqInfoContext.getReqInfo().getUser(), aiType, msg);
+            AISourceEnum source = aiType == null ? null : AISourceEnum.valueOf(aiType);
+            answerHelper.sendMsgToUser(source, session, msg);
+        });
+    }
 
     @MessageMapping({"/chat/{session}/{chatId}"})
     public void chat(String msg,
                      @DestinationVariable("session") String session,
                      @DestinationVariable("chatId") String chatId,
                      @Header("simpSessionAttributes") Map<String, Object> attrs,
-                     SimpMessageHeaderAccessor accessor) {}
+                     SimpMessageHeaderAccessor accessor) {
+        String aiType = (String) attrs.get(WsAnswerHelper.AI_SOURCE_PARAM);
+        WebSocketResponseUtil.execute(accessor, () -> {
+            // 设置会话id
+            ReqInfoContext.getReqInfo().setChatId(chatId);
+            log.info("{} 用户开始了对话: {} - {}", ReqInfoContext.getReqInfo().getUser(), aiType, msg);
+            AISourceEnum source = aiType == null ? null : AISourceEnum.valueOf(aiType);
+            answerHelper.sendMsgToUser(source, session, msg);
+        });
+    }
 
     /**
      * 查询用户的对话记录
@@ -67,7 +84,14 @@ public class ChatRestController {
      */
     @Permission(role = UserRole.LOGIN)
     @GetMapping(path = "/chat/api/listSession")
-    public ResVo<List<ChatSessionItemVo>> listChatSessions(String aiType) { return null; }
+    public ResVo<List<ChatSessionItemVo>> listChatSessions(String aiType) {
+        AISourceEnum source = aiType == null ? null : AISourceEnum.valueOf(aiType);
+        if (source == null) {
+            return ResVo.ok(Collections.emptyList());
+        }
+
+        return ResVo.ok(chatHistoryService.listChatSessions(source, ReqInfoContext.getReqInfo().getUserId()));
+    }
 
 
     /**
@@ -79,7 +103,16 @@ public class ChatRestController {
      */
     @Permission(role = UserRole.LOGIN)
     @GetMapping(path = "/chat/api/syncHistory")
-    public ResVo<Boolean> syncChatSessionHistory(String aiType, String chatId) { return null; }
+    public ResVo<Boolean> syncChatSessionHistory(String aiType, String chatId) {
+        AISourceEnum source = aiType == null ? null : AISourceEnum.valueOf(aiType);
+        if (source == null) {
+            return ResVo.ok(false);
+        }
+
+        ReqInfoContext.getReqInfo().setChatId(chatId);
+        SpringUtil.getBean(WsAnswerHelper.class).sendMsgHistoryToUser(ReqInfoContext.getReqInfo().getSession(), source);
+        return ResVo.ok(true);
+    }
 
     @Permission(role = UserRole.LOGIN)
     @GetMapping(path = "/chat/api/updateSession")
@@ -87,5 +120,16 @@ public class ChatRestController {
             @RequestParam String aiType,
             @RequestParam String chatId,
             @RequestParam(name = "title", required = false) String title,
-            @RequestParam(name = "deleted", required = false) Boolean deleted) { return null; }
+            @RequestParam(name = "deleted", required = false) Boolean deleted) {
+        AISourceEnum source = aiType == null ? null : AISourceEnum.valueOf(aiType);
+        if (source == null) {
+            return ResVo.ok(false);
+        }
+
+        if (BooleanUtils.isTrue(deleted)) {
+            return ResVo.ok(chatHistoryService.removeChatSession(source, chatId, ReqInfoContext.getReqInfo().getUserId()));
+        } else {
+            return ResVo.ok(chatHistoryService.updateChatSessionName(source, chatId, title, ReqInfoContext.getReqInfo().getUserId()));
+        }
+    }
 }

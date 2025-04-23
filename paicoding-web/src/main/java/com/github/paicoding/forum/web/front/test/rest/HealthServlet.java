@@ -7,10 +7,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-/** */
+/**
+ */
 @WebServlet(urlPatterns = "/check")
 public class HealthServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException  {}
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        PrintWriter writer = resp.getWriter();
+        writer.write("ok");
+        writer.flush();
+        writer.close();
+    }
 }

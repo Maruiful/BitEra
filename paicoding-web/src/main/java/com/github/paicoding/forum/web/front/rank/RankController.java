@@ -15,7 +15,8 @@ import java.util.List;
 
 /**
  * 排行榜
- * */
+ *
+ */
 @Controller
 public class RankController {
     @Autowired

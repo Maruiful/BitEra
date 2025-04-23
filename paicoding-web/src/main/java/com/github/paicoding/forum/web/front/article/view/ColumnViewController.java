@@ -35,7 +35,8 @@ import java.util.Objects;
 
 /**
  * 专栏入口
- * */
+ *
+ */
 @Controller
 @RequestMapping(path = "column")
 public class ColumnViewController {
@@ -62,7 +63,7 @@ public class ColumnViewController {
      * @return
      */
     @GetMapping(path = {"list", "/", "", "home"})
-    public String list(Model model)  {
+    public String list(Model model) {
         PageListVo<ColumnDTO> columns = columnService.listColumn(PageParam.newPageInstance());
         List<SideBarDTO> sidebars = sidebarService.queryColumnSidebarList();
         ColumnVo vo = new ColumnVo();

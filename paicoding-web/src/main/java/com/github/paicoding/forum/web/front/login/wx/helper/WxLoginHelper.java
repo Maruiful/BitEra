@@ -18,7 +18,8 @@ import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-/** */
+/**
+ */
 @Slf4j
 @Component
 public class WxLoginHelper {
@@ -44,7 +45,9 @@ public class WxLoginHelper {
         this.wxLoginQrGenIntegration = wxLoginQrGenIntegration;
         verifyCodeCache = CacheBuilder.newBuilder().maximumSize(300).expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, SseEmitter>() {
             @Override
-            public SseEmitter load(String s) throws Exception  { return null; }
+            public SseEmitter load(String s) throws Exception {
+                throw new NoVlaInGuavaException("no val: " + s);
+            }
         });
 
         deviceCodeCache = CacheBuilder.newBuilder().maximumSize(300).expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, String>() {
@@ -96,7 +99,7 @@ public class WxLoginHelper {
         return sseEmitter;
     }
 
-    public String resend() throws IOException  {
+    public String resend() throws IOException {
         // 获取旧的验证码，注意不使用 getUnchecked, 避免重新生成一个验证码
         String deviceId = ReqInfoContext.getReqInfo().getDeviceId();
         String oldCode = deviceCodeCache.getIfPresent(deviceId);

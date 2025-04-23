@@ -15,7 +15,9 @@ import java.nio.charset.Charset;
 
 /**
  * 生成 sitemap.xml
- * */
+ *
+
+ */
 @RestController
 public class SiteMapController {
     private XmlMapper xmlMapper = new XmlMapper();
@@ -24,7 +26,7 @@ public class SiteMapController {
 
     @RequestMapping(path = "/sitemap",
             produces = "application/xml;charset=utf-8")
-    public SiteMapVo sitemap()  {
+    public SiteMapVo sitemap() {
         return sitemapService.getSiteMap();
     }
 
@@ -41,7 +43,7 @@ public class SiteMapController {
     }
 
     @GetMapping(path = "/sitemap/refresh")
-    public Boolean refresh()  {
+    public Boolean refresh() {
         sitemapService.refreshSitemap();
         return true;
     }

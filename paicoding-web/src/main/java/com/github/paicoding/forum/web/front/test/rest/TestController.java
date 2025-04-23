@@ -66,7 +66,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 用于一些功能测试的入口，默认都使用从库，不支持修改数据
- * */
+ *
+ */
 @Slf4j
 @DsAno(MasterSlaveDsEnum.SLAVE)
 @RestController
@@ -82,18 +83,43 @@ public class TestController {
      */
     @Permission(role = UserRole.ADMIN)
     @RequestMapping(path = "email")
-    public ResVo<String> email(EmailReqVo req)  { return null; }
+    public ResVo<String> email(EmailReqVo req) {
+        if (StringUtils.isBlank(req.getTo()) || req.getTo().indexOf("@") <= 0) {
+            return ResVo.fail(Status.newStatus(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "非法的邮箱接收人"));
+        }
+        if (StringUtils.isBlank(req.getTitle())) {
+            req.setTitle("技术派的测试邮件发送");
+        }
+        if (StringUtils.isBlank(req.getContent())) {
+            req.setContent("技术派的测试发送内容");
+        } else {
+            // 测试邮件内容，不支持发送邮件正文，避免出现垃圾情况
+            req.setContent(StringEscapeUtils.escapeHtml4(req.getContent()));
+        }
+
+        boolean ans = EmailUtil.sendMail(req.getTitle(), req.getTo(), req.getContent());
+        log.info("测试邮件发送，计数：{}，发送内容：{}", cnt.addAndGet(1), req);
+        return ResVo.ok(String.valueOf(ans));
+    }
 
     @RequestMapping(path = "alarm")
-    public ResVo<String> alarm(String content)  { return null; }
+    public ResVo<String> alarm(String content) {
+        content = StringEscapeUtils.escapeHtml4(content);
+        log.error("测试异常报警: {}", content);
+        return ResVo.ok("移除日志接收完成！");
+    }
 
     @RequestMapping(path = "testControllerAdvice")
     @ResponseBody
-    public String testControllerAdvice()  { return null; }
+    public String testControllerAdvice() {
+        throw new ForumAdviceException(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "测试ControllerAdvice异常");
+    }
 
     @RequestMapping(path = "exception")
     @ResponseBody
-    public String unexpect()  { return null; }
+    public String unexpect() {
+        throw new RuntimeException("非预期异常");
+    }
 
     /**
      * 测试 Knife4j
@@ -101,15 +127,23 @@ public class TestController {
      * @return
      */
     @RequestMapping(value = "/testKnife4j", method = RequestMethod.POST)
-    public String testKnife4j()  { return null; }
+    public String testKnife4j() {
+        return "沉默王二又帅又丑";
+    }
 
     // POST 请求，使用 HttpServletRequest 获取请求参数
     @PostMapping(path = "testPost")
-    public String testPost(HttpServletRequest request)  { return null; }
+    public String testPost(HttpServletRequest request) {
+        String name = request.getParameter("name");
+        String age = request.getParameter("age");
+        return "name=" + name + ", age=" + age;
+    }
 
     // POST 请求，使用 HttpServletRequest 获取请求参数，使用 JSON 把参数转为字符串
     @PostMapping(path = "testPostJson")
-    public String testPostJson(HttpServletRequest request)  { return null; }
+    public String testPostJson(HttpServletRequest request) {
+        return JsonUtil.toStr(request.getParameterMap());
+    }
 
     // POST 请求，使用 HttpServletRequest 获取 JSON 请求参数
     @PostMapping(path = "testPostJson2")
@@ -165,7 +199,11 @@ public class TestController {
      * @return
      */
     @GetMapping(path = "ds/read")
-    public String readOnly()  { return null; }
+    public String readOnly() {
+        // 保存请求计数
+        statisticsSettingService.saveRequestCount(ReqInfoContext.getReqInfo().getClientIp());
+        return "使用从库：更新成功!";
+    }
 
     /**
      * 只读测试，如果有更新就会报错
@@ -173,12 +211,27 @@ public class TestController {
      * @return
      */
     @GetMapping(path = "ds/write2")
-    public String write2()  { return null; }
+    public String write2() {
+        log.info("------------------- 业务逻辑进入 ----------------------------");
+        long old = statisticsSettingService.getStatisticsCount().getPvCount();
+        DsSelectExecutor.execute(MasterSlaveDsEnum.MASTER, () -> statisticsSettingService.saveRequestCount(ReqInfoContext.getReqInfo()
+                .getClientIp()));
+        // 保存请求计数
+        long n = statisticsSettingService.getStatisticsCount().getPvCount();
+        log.info("------------------- 业务逻辑结束 ----------------------------");
+        return "编程式切换主库：更新成功! old=" + old + " new=" + n;
+    }
 
 
     @DsAno(MasterSlaveDsEnum.MASTER)
     @GetMapping(path = "ds/write")
-    public String write()  { return null; }
+    public String write() {
+        // 保存请求计数
+        long old = statisticsSettingService.getStatisticsCount().getPvCount();
+        statisticsSettingService.saveRequestCount(ReqInfoContext.getReqInfo().getClientIp());
+        long n = statisticsSettingService.getStatisticsCount().getPvCount();
+        return "使用主库：更新成功! old=" + old + " new=" + n;
+    }
 
 
     /**
@@ -206,7 +259,16 @@ public class TestController {
         return JsonUtil.toStr(bean);
     }
 
-    private String printProxyFields(Object proxy)  { return null; }
+    private String printProxyFields(Object proxy) {
+        Class clz = ProxyUtils.getUserClass(proxy);
+        Field[] fields = clz.getDeclaredFields();
+        JSONObject obj = new JSONObject();
+        for (Field f : fields) {
+            f.setAccessible(true);
+            obj.put(f.getName(), ReflectionUtils.getField(f, proxy));
+        }
+        return obj.toString();
+    }
 
 
     /**
@@ -216,7 +278,11 @@ public class TestController {
      */
     @Permission(role = UserRole.ADMIN)
     @GetMapping("refresh/config")
-    public String refreshConfig()  { return null; }
+    public String refreshConfig() {
+        DynamicConfigContainer configContainer = SpringUtil.getBean(DynamicConfigContainer.class);
+        configContainer.forceRefresh();
+        return JsonUtil.toStr(configContainer.getCache());
+    }
 
     /**
      * 更新启用的AI模型
@@ -226,7 +292,11 @@ public class TestController {
      */
     @Permission(role = UserRole.ADMIN)
     @GetMapping("ai/update")
-    public AISourceEnum updateAi(String ai)  { return null; }
+    public AISourceEnum updateAi(String ai) {
+        ChatFacade chatFacade = SpringUtil.getBean(ChatFacade.class);
+        chatFacade.refreshAiSourceCache(AISourceEnum.valueOf(ai));
+        return chatFacade.getRecommendAiSource();
+    }
 
     @Autowired
     private SensitiveService sensitiveService;
@@ -238,7 +308,9 @@ public class TestController {
      * @return
      */
     @GetMapping(path = "sensitive/check")
-    public List<String> sensitiveWords(String txt)  { return null; }
+    public List<String> sensitiveWords(String txt) {
+        return sensitiveService.findAll(txt);
+    }
 
 
     /**
@@ -247,7 +319,9 @@ public class TestController {
      * @return
      */
     @GetMapping(path = "sensitive/all")
-    public Map<String, Integer> showAllHitSensitiveWords()  { return null; }
+    public Map<String, Integer> showAllHitSensitiveWords() {
+        return sensitiveService.getHitSensitiveWords();
+    }
 
 
     /**
@@ -258,18 +332,26 @@ public class TestController {
      */
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "sensitive/addAllowWord")
-    public String addSensitiveAllowWord(String word)  { return null; }
+    public String addSensitiveAllowWord(String word) {
+        SpringUtil.getBean(GlobalConfigService.class).addSensitiveWhiteWord(word);
+        return "ok";
+    }
 
 
     @Autowired
     private CountServiceImpl countServiceImpl;
 
     @GetMapping(path = "autoRefreshUserInfo")
-    public String autoRefreshUserInfo()  { return null; }
+    public String autoRefreshUserInfo() {
+        countServiceImpl.autoRefreshAllUserStatisticInfo();
+        return "ok";
+    }
 
     // 前端把一些数据发送到这里并打印出来
     @PostMapping(path = "loadmore")
-    public void testLoadMore(@RequestBody String loadmore)  {}
+    public void testLoadMore(@RequestBody String loadmore) {
+        log.info("loadmore: {}", loadmore);
+    }
 
     @Permission(role = UserRole.LOGIN)
     @GetMapping(path = "h5pay")

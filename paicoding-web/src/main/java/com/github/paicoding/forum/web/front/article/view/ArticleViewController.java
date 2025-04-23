@@ -51,7 +51,8 @@ import java.util.Objects;
  * ---
  *  - 返回视图 view
  *  - 返回json数据
- * */
+ *
+ */
 @Controller
 @RequestMapping(path = "article")
 public class ArticleViewController extends BaseViewController {
@@ -120,6 +121,8 @@ public class ArticleViewController extends BaseViewController {
     /**
      * 文章详情页
      * - 参数解析知识点
+     * - fixme * [1.Get请求参数解析姿势汇总 | 一灰灰Learning](https://hhui.top/spring-web/01.request/01.190824-springboot%E7%B3%BB%E5%88%97%E6%95%99%E7%A8%8Bweb%E7%AF%87%E4%B9%8Bget%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB/)
+     *
      * @param articleId
      * @return
      */

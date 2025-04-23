@@ -25,7 +25,8 @@ import java.util.Objects;
 
 /**
  * 知识星球登录
- * */
+ *
+ */
 @RestController
 @Slf4j
 public class ZsxqLoginController {

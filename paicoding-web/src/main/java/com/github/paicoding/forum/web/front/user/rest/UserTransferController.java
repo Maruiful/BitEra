@@ -17,7 +17,8 @@ import java.io.IOException;
 
 /**
  * 用户账号迁移
- * */
+ *
+ */
 @Permission(role = UserRole.LOGIN)
 @RestController
 @RequestMapping("/user/api/transfer")
@@ -45,7 +46,7 @@ public class UserTransferController {
     }
 
     @RequestMapping("/zsxq")
-    public void transferByZsxq(HttpServletResponse response) throws IOException  {
+    public void transferByZsxq(HttpServletResponse response) throws IOException {
         String url = zsxqHelper.buildZsxqLoginUrl(ZsxqHelper.EXTRA_TAG_USER_TRANSFER);
         response.sendRedirect(url);
     }

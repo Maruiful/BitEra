@@ -8,7 +8,8 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
-/** */
+/**
+ */
 @Data
 @ApiModel(value="专栏信息")
 public class SearchColumnVo implements Serializable {

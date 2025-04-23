@@ -18,7 +18,8 @@ import org.springframework.stereotype.Component;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 
-/** */
+/**
+ */
 @Slf4j
 @Component
 public class WxLoginQrGenIntegration {
@@ -36,7 +37,7 @@ public class WxLoginQrGenIntegration {
         this.wxLoginProperties = wxLoginProperties;
     }
 
-    public LoginQrTypeEnum getLoginQrType()  {
+    public LoginQrTypeEnum getLoginQrType() {
         return LoginQrTypeEnum.valueOf(wxLoginProperties.getLoginQrType());
     }
 
@@ -45,7 +46,7 @@ public class WxLoginQrGenIntegration {
      *
      * @return
      */
-    public String genLoginQrImg(String code)  {
+    public String genLoginQrImg(String code) {
         LoginQrTypeEnum type = getLoginQrType();
         if (type == LoginQrTypeEnum.SERVICE_ACCOUNT) {
             // 服务号登录，首先获取带链接的二维码信息
@@ -90,7 +91,7 @@ public class WxLoginQrGenIntegration {
      *
      * @return true 有效；false 失效
      */
-    private boolean checkAccessToken()  {
+    private boolean checkAccessToken() {
         return accessToken != null && accessToken.expireTimestamp > System.currentTimeMillis() + 60_000L;
     }
 
@@ -112,7 +113,7 @@ public class WxLoginQrGenIntegration {
      * @return
      * @see <a href="https://developers.weixin.qq.com/doc/service/api/qrcode/qrcodes/api_createqrcode.html"/>
      */
-    private String genServiceAccountLoginQrCode(String code)  {
+    private String genServiceAccountLoginQrCode(String code) {
         String url = WX_GEN_QR_URL + getAccessToken();
         Map<String, Object> params = MapUtils.create("expire_seconds", 300, "action_name", "QR_SCENE");
         params.put("action_info", MapUtils.create("scene", MapUtils.create("scene_id", code, "scene_str", "paiLogin#" + code)));

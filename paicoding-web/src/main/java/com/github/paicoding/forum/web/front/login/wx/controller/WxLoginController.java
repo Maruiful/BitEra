@@ -19,7 +19,8 @@ import java.io.IOException;
 
 /**
  * 公众号登陆的长连接控制器
- * **/
+ *
+ **/
 @Controller
 @Slf4j
 public class WxLoginController extends BaseViewController {
@@ -34,14 +35,13 @@ public class WxLoginController extends BaseViewController {
     @MdcDot
     @ResponseBody
     @GetMapping(path = "subscribe", produces = {org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE})
-    public SseEmitter subscribe(String deviceId) throws IOException  {
+    public SseEmitter subscribe(String deviceId) throws IOException {
         return qrLoginHelper.subscribe();
     }
 
-
     @GetMapping(path = "/login/fetch")
     @ResponseBody
-    public String resendCode(String deviceId) throws IOException  {
+    public String resendCode(String deviceId) throws IOException {
         return qrLoginHelper.resend();
     }
 
@@ -54,7 +54,7 @@ public class WxLoginController extends BaseViewController {
     @MdcDot
     @GetMapping(path = "/login/refresh")
     @ResponseBody
-    public ResVo<WxLoginVo> refresh(String deviceId) throws IOException  {
+    public ResVo<WxLoginVo> refresh(String deviceId) throws IOException {
         WxLoginVo vo = new WxLoginVo();
         String code = qrLoginHelper.refreshCode();
         if (StringUtils.isBlank(code)) {

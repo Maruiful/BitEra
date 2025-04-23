@@ -38,7 +38,8 @@ import java.util.Objects;
 
 /**
  * 用户注册、取消，登录、登出
- * **/
+ *
+ **/
 @Controller
 @RequestMapping(path = "user")
 @Slf4j
@@ -143,7 +144,7 @@ public class UserViewController extends BaseViewController {
      * @param selectType
      * @return
      */
-    private List<TagSelectDTO> followSelectTags(String selectType)  {
+    private List<TagSelectDTO> followSelectTags(String selectType) {
         List<TagSelectDTO> tags = new ArrayList<>();
         followSelectTags.forEach(tag -> {
             TagSelectDTO tagSelectDTO = new TagSelectDTO();
@@ -161,7 +162,7 @@ public class UserViewController extends BaseViewController {
      * @param vo
      * @param userId
      */
-    private void userHomeSelectList(UserHomeVo vo, Long userId)  {
+    private void userHomeSelectList(UserHomeVo vo, Long userId) {
         PageParam pageParam = PageParam.newPageInstance();
         HomeSelectEnum select = HomeSelectEnum.fromCode(vo.getHomeSelectType());
         if (select == null) {
@@ -186,7 +187,7 @@ public class UserViewController extends BaseViewController {
         }
     }
 
-    private void initFollowFansList(UserHomeVo vo, long userId, PageParam pageParam)  {
+    private void initFollowFansList(UserHomeVo vo, long userId, PageParam pageParam) {
         PageListVo<FollowUserInfoDTO> followList;
         boolean needUpdateRelation = false;
         if (vo.getFollowSelectType().equals(FollowTypeEnum.FOLLOW.getCode())) {
@@ -207,7 +208,7 @@ public class UserViewController extends BaseViewController {
 
     @GetMapping("pay")
     @Permission(role = UserRole.LOGIN)
-    public String pay()  {
+    public String pay() {
         return  "views/user/pay-item";
     }
 }

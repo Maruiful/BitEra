@@ -49,7 +49,8 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * 返回json格式数据
- * */
+ *
+ */
 @Slf4j
 @RequestMapping(path = "article/api")
 @RestController
@@ -79,6 +80,8 @@ public class ArticleRestController {
     /**
      * 文章详情页
      * - 参数解析知识点
+     * - fixme * [1.Get请求参数解析姿势汇总 | 一灰灰Learning](https://hhui.top/spring-web/01.request/01.190824-springboot%E7%B3%BB%E5%88%97%E6%95%99%E7%A8%8Bweb%E7%AF%87%E4%B9%8Bget%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB/)
+     *
      * @param articleId
      * @return
      */
@@ -110,7 +113,13 @@ public class ArticleRestController {
     @MdcDot(bizCode = "#articleId")
     public ResVo<NextPageHtmlVo> recommend(@RequestParam(value = "articleId") Long articleId,
                                            @RequestParam(name = "page") Long page,
-                                           @RequestParam(name = "size", required = false) Long size) { return null; }
+                                           @RequestParam(name = "size", required = false) Long size) {
+        size = Optional.ofNullable(size).orElse(PageParam.DEFAULT_PAGE_SIZE);
+        size = Math.min(size, PageParam.DEFAULT_PAGE_SIZE);
+        PageListVo<ArticleDTO> articles = articleRecommendService.relatedRecommend(articleId, PageParam.newPageInstance(page, size));
+        String html = templateEngineHelper.renderToVo("views/article-detail/article/list", "articles", articles);
+        return ResVo.ok(new NextPageHtmlVo(html, articles.getHasMore()));
+    }
 
     /**
      * 查询所有的标签
@@ -166,12 +175,31 @@ public class ArticleRestController {
     @GetMapping(path = "favor")
     @MdcDot(bizCode = "#articleId")
     public ResVo<Boolean> favor(@RequestParam(name = "articleId") Long articleId,
-                                @RequestParam(name = "type") Integer type) throws IOException, TimeoutException { return null; }
+                                @RequestParam(name = "type") Integer type) throws IOException, TimeoutException {
+        OperateTypeEnum operate = OperateTypeEnum.fromCode(type);
+        if (operate == OperateTypeEnum.EMPTY) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, type + "非法");
+        }
+
+        // 要求文章必须存在
+        ArticleDO article = articleReadService.queryBasicArticle(articleId);
+        if (article == null) {
+            return ResVo.fail(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "文章不存在!");
+        }
+
+        // 更新用户与文章的点赞/收藏状态
+        userFootService.favorArticleComment(DocumentTypeEnum.ARTICLE, articleId, article.getUserId(),
+                ReqInfoContext.getReqInfo().getUserId(),
+                operate);
+        return ResVo.ok(true);
+    }
 
 
     /**
      * 发布文章，完成后跳转到详情页
      * - 这里有一个重定向的知识点
+     * - fixme 博文：* [5.请求重定向 | 一灰灰Learning](https://hhui.top/spring-web/02.response/05.190929-springboot%E7%B3%BB%E5%88%97%E6%95%99%E7%A8%8Bweb%E7%AF%87%E4%B9%8B%E9%87%8D%E5%AE%9A%E5%90%91/)
+     *
      * @return
      */
     @Permission(role = UserRole.LOGIN)

@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * 文章列表视图
- * */
+ *
+ */
 @RequestMapping(path = "article")
 @Controller
 public class ArticleListViewController extends BaseViewController {

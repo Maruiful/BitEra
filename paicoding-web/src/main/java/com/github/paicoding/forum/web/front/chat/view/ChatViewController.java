@@ -7,5 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(path = "chat")
 public class ChatViewController {
     @RequestMapping(path = {"", "/", "home"})
-    public String index()  { return null; }
+    public String index() {
+        return "views/chat-home/index";
+    }
 }

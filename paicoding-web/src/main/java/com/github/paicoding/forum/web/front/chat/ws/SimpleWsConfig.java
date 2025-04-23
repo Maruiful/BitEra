@@ -8,13 +8,20 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 /**
  * v1.0 基础版本的websocket长连接相关配置
- * */
+ *
+ */
 //@Configuration
 //@EnableWebSocket
 public class SimpleWsConfig implements WebSocketConfigurer {
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry)  {}
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(chatWebSocketHandler(), "/chatgpt")
+                .setAllowedOrigins("*")
+                .addInterceptors(new SimpleWsAuthInterceptor());
+    }
 
     @Bean
-    public WebSocketHandler chatWebSocketHandler()  { return null; }
+    public WebSocketHandler chatWebSocketHandler() {
+        return new SimpleChatgptHandler();
+    }
 }

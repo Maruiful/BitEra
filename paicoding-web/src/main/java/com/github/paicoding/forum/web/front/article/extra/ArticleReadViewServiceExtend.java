@@ -15,7 +15,8 @@ import java.util.function.Supplier;
 /**
  * 文章阅读的扩展服务支撑
  * - 用于控制文章阅读模式
- * */
+ *
+ */
 @Service
 public class ArticleReadViewServiceExtend {
     @Autowired
@@ -48,7 +49,7 @@ public class ArticleReadViewServiceExtend {
         return article.getContent();
     }
 
-    private String mark(ArticleDTO article, Supplier<Boolean> condition, Supplier<String> percent)  {
+    private String mark(ArticleDTO article, Supplier<Boolean> condition, Supplier<String> percent) {
         if (condition.get()) {
             // 可以阅读
             article.setCanRead(true);

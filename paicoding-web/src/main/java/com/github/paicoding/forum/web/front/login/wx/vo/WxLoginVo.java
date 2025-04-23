@@ -2,7 +2,8 @@ package com.github.paicoding.forum.web.front.login.wx.vo;
 
 import lombok.Data;
 
-/** */
+/**
+ */
 @Data
 public class WxLoginVo {
     /**

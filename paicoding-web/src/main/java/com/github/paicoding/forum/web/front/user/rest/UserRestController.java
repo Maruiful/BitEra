@@ -24,7 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.Objects;
 
-/** */
+/**
+ */
 @RestController
 @RequestMapping(path = "user/api")
 public class UserRestController {
@@ -52,7 +53,7 @@ public class UserRestController {
      */
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "saveUserRelation")
-    public ResVo<Boolean> saveUserRelation(@RequestBody UserRelationReq req)  {
+    public ResVo<Boolean> saveUserRelation(@RequestBody UserRelationReq req) {
         userRelationService.saveUserRelation(req);
         return ResVo.ok(true);
     }
@@ -67,7 +68,7 @@ public class UserRestController {
     @Permission(role = UserRole.LOGIN)
     @PostMapping(path = "saveUserInfo")
     @Transactional(rollbackFor = Exception.class)
-    public ResVo<Boolean> saveUserInfo(@RequestBody UserInfoSaveReq req)  {
+    public ResVo<Boolean> saveUserInfo(@RequestBody UserInfoSaveReq req) {
         if (req.getUserId() == null || !Objects.equals(req.getUserId(), ReqInfoContext.getReqInfo().getUserId())) {
             // 不能修改其他用户的信息
             return ResVo.fail(StatusEnum.FORBID_ERROR_MIXED, "无权修改");
@@ -100,13 +101,6 @@ public class UserRestController {
         return ResVo.ok(new NextPageHtmlVo(html, dto.getHasMore()));
     }
 
-    /**
-     * 获取用户关注列表
-     *
-     * @param userId
-     * @param followSelectType
-     * @return
-     */
     @GetMapping(path = "followList")
     public ResVo<NextPageHtmlVo> followList(@RequestParam(name = "userId") Long userId,
                                             @RequestParam(name = "followSelectType") String followSelectType,

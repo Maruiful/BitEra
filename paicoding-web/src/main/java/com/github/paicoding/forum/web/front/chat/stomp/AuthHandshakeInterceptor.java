@@ -18,7 +18,8 @@ import java.util.Map;
 
 /**
  * 握手拦截器, 用于身份验证识别
- * */
+ *
+ */
 @Slf4j
 public class AuthHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
@@ -33,10 +34,32 @@ public class AuthHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
      * @throws Exception
      */
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception  { return false; }
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+        log.debug("准备开始握手了!");
+        String session = SessionUtil.findCookieByName(request, LoginService.SESSION_KEY);
+        ReqInfoContext.ReqInfo reqInfo = new ReqInfoContext.ReqInfo();
+        SpringUtil.getBean(GlobalInitService.class).initLoginUser(session, reqInfo);
 
-    private String initAiSource(String path)  { return null; }
+        if (reqInfo.getUser() == null) {
+            log.debug("websocket 握手失败，请登录之后再试");
+            return false;
+        }
+
+        // 将用户信息写入到属性中
+        attributes.put(MdcUtil.TRACE_ID_KEY, SelfTraceIdGenerator.generate());
+        attributes.put(LoginService.SESSION_KEY, reqInfo);
+        attributes.put(WsAnswerHelper.AI_SOURCE_PARAM, initAiSource(request.getURI().getPath()));
+        return true;
+    }
+
+    private String initAiSource(String path) {
+        int index = path.lastIndexOf("/");
+        return path.substring(index + 1);
+    }
 
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception ex)  {}
+    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception ex) {
+        log.debug("握手成功了!!!");
+        super.afterHandshake(request, response, wsHandler, ex);
+    }
 }

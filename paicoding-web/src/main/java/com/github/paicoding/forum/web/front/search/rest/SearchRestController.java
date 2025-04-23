@@ -20,7 +20,8 @@ import java.util.List;
 
 /**
  * 推荐服务接口
- * */
+ *
+ */
 @RequestMapping(path = "search/api")
 @RestController
 public class SearchRestController extends BaseViewController {
