@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.enums.login;
 
 import lombok.Getter;
 
-/**
- * 微信公众号登录二维码类型
- * */
 @Getter
 public enum LoginQrTypeEnum {
 

@@ -205,7 +205,25 @@ public class ZhipuIntegration {
         return true;
     }
 
-    public static Flowable<ChatMessageAccumulator> mapStreamToAccumulator(Flowable<ModelData> flowable)  { return null; }
+    public static Flowable<ChatMessageAccumulator> mapStreamToAccumulator(Flowable<ModelData> flowable) {
+        return flowable.map(chunk -> {
+            return new ChatMessageAccumulator(chunk.getChoices().get(0).getDelta(), null, chunk.getChoices().get(0), chunk.getUsage(), chunk.getCreated(), chunk.getId());
+        });
+    }
 
-    private List<ChatMessage> toMsg(ChatItemVo item)  { return null; }
+    private List<ChatMessage> toMsg(ChatItemVo item) {
+        List<ChatMessage> list = new ArrayList<>(2);
+        if (item.getQuestion().startsWith(ChatConstants.PROMPT_TAG)) {
+            // 提示词消息
+            list.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), item.getQuestion().substring(ChatConstants.PROMPT_TAG.length())));
+            return list;
+        }
+
+        // 用户问答
+        list.add(new ChatMessage(ChatMessageRole.USER.value(), item.getQuestion()));
+        if (StringUtils.isNotBlank(item.getAnswer())) {
+            list.add(new ChatMessage(ChatMessageRole.ASSISTANT.value(), item.getAnswer()));
+        }
+        return list;
+    }
 }

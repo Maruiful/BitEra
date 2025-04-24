@@ -16,10 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Map;
 
-/**
- * 消息通知
- *
- **/
 @Controller
 @Permission(role = UserRole.LOGIN)
 @RequestMapping(path = "notice")

@@ -26,10 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-/**
- * 首页推荐相关
- *
- */
 @Component
 public class IndexRecommendHelper {
     @Autowired

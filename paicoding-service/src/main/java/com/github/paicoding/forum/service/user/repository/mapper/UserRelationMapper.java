@@ -8,9 +8,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * 用户关系mapper接口
- * */
 public interface UserRelationMapper extends BaseMapper<UserRelationDO> {
 
     /**

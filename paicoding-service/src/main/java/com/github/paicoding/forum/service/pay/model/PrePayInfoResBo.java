@@ -4,7 +4,6 @@ import com.github.paicoding.forum.api.model.enums.pay.ThirdPayWayEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-/** */
 @Data
 @Accessors(chain = true)
 public class PrePayInfoResBo {

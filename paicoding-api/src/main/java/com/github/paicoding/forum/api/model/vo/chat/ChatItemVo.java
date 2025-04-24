@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-/**
- * 一次qa的聊天记录
- * */
 @Data
 @Accessors(chain = true)
 public class ChatItemVo implements Serializable, Cloneable {

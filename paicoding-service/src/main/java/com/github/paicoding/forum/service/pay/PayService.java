@@ -10,9 +10,6 @@ import org.springframework.http.ResponseEntity;
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
 
-/**
- * 
- * */
 public interface PayService {
 
     boolean support(ThirdPayWayEnum payWay);

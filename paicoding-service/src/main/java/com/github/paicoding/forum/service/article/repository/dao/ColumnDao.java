@@ -21,7 +21,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/** */
 @Repository
 public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
 
@@ -34,7 +33,7 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * @param pageParam
      * @return
      */
-    public List<ColumnInfoDO> listOnlineColumns(PageParam pageParam)  {
+    public List<ColumnInfoDO> listOnlineColumns(PageParam pageParam) {
         LambdaQueryWrapper<ColumnInfoDO> query = Wrappers.lambdaQuery();
         query.gt(ColumnInfoDO::getState, ColumnStatusEnum.OFFLINE.getCode())
                 .last(PageParam.getLimitSql(pageParam))
@@ -47,13 +46,13 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      *
      * @return
      */
-    public int countColumnArticles(Long columnId)  {
+    public int countColumnArticles(Long columnId) {
         LambdaQueryWrapper<ColumnArticleDO> query = Wrappers.lambdaQuery();
         query.eq(ColumnArticleDO::getColumnId, columnId);
         return columnArticleMapper.selectCount(query).intValue();
     }
 
-    public Long countColumnArticles()  {
+    public Long countColumnArticles() {
         return columnArticleMapper.selectCount(Wrappers.emptyWrapper());
     }
 
@@ -61,7 +60,7 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * 统计专栏的阅读人数
      * @return
      */
-    public int countColumnReadPeoples(Long columnId)  {
+    public int countColumnReadPeoples(Long columnId) {
         return columnArticleMapper.countColumnReadUserNums(columnId).intValue();
     }
 
@@ -70,13 +69,13 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * @return
      */
     public List<ColumnArticleDTO> listColumnArticlesDetail(SearchColumnArticleParams params,
-                                                           PageParam pageParam)  {
+                                                           PageParam pageParam) {
         return columnArticleMapper.listColumnArticlesByColumnIdArticleName(params.getColumnId(),
                 params.getArticleTitle(),
                 pageParam);
     }
 
-    public Integer countColumnArticles(SearchColumnArticleParams params)  {
+    public Integer countColumnArticles(SearchColumnArticleParams params) {
         return columnArticleMapper.countColumnArticlesByColumnIdArticleName(params.getColumnId(),
                 params.getArticleTitle()).intValue();
     }
@@ -87,11 +86,11 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
      * @param columnId
      * @return
      */
-    public List<SimpleArticleDTO> listColumnArticles(Long columnId)  {
+    public List<SimpleArticleDTO> listColumnArticles(Long columnId) {
         return columnArticleMapper.listColumnArticles(columnId);
     }
 
-    public ColumnArticleDO getColumnArticleId(long columnId, Integer section)  {
+    public ColumnArticleDO getColumnArticleId(long columnId, Integer section) {
         return columnArticleMapper.getColumnArticle(columnId, section);
     }
 
@@ -120,7 +119,7 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
     /**
      * 查询教程
      */
-    public List<ColumnInfoDO> listColumnsByParams(SearchColumnParams params, PageParam pageParam)  {
+    public List<ColumnInfoDO> listColumnsByParams(SearchColumnParams params, PageParam pageParam) {
         LambdaQueryWrapper<ColumnInfoDO> query = Wrappers.lambdaQuery();
         // 加上判空条件
         query.like(StringUtils.isNotBlank(params.getColumn()), ColumnInfoDO::getColumnName, params.getColumn());
@@ -128,10 +127,15 @@ public class ColumnDao extends ServiceImpl<ColumnInfoMapper, ColumnInfoDO> {
                 .orderByAsc(ColumnInfoDO::getSection)
                 .orderByDesc(ColumnInfoDO::getUpdateTime);
         return baseMapper.selectList(query);
+
     }
 
     /**
      * 查询教程总数
      */
-    public Integer countColumnsByParams(SearchColumnParams params)  { return null; }
+    public Integer countColumnsByParams(SearchColumnParams params) {
+        LambdaQueryWrapper<ColumnInfoDO> query = Wrappers.lambdaQuery();
+        lambdaQuery().like(StringUtils.isNotBlank(params.getColumn()), ColumnInfoDO::getColumnName, params.getColumn());
+        return baseMapper.selectCount(query).intValue();
+    }
 }

@@ -6,9 +6,6 @@ import com.github.paicoding.forum.api.model.vo.banner.ConfigReq;
 import com.github.paicoding.forum.api.model.vo.banner.SearchConfigReq;
 import com.github.paicoding.forum.api.model.vo.banner.dto.ConfigDTO;
 
-/**
- * Banner后台接口
- * */
 public interface ConfigSettingService {
 
     /**

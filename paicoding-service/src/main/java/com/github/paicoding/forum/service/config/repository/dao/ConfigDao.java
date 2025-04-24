@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
-/** */
 @Repository
 public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
     @Resource
@@ -36,7 +35,7 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      * @param type
      * @return
      */
-    public List<ConfigDTO> listConfigByType(Integer type)  {
+    public List<ConfigDTO> listConfigByType(Integer type) {
         List<ConfigDO> configDOS = lambdaQuery()
                 .eq(ConfigDO::getType, type)
                 .eq(ConfigDO::getStatus, PushStatusEnum.ONLINE.getCode())
@@ -46,7 +45,7 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
         return ConfigConverter.toDTOS(configDOS);
     }
 
-    private LambdaQueryChainWrapper<ConfigDO> createConfigQuery(SearchConfigParams params)  {
+    private LambdaQueryChainWrapper<ConfigDO> createConfigQuery(SearchConfigParams params) {
         return lambdaQuery()
                 .eq(ConfigDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .like(StringUtils.isNotBlank(params.getName()), ConfigDO::getName, params.getName())
@@ -58,7 +57,7 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      *
      * @return
      */
-    public List<ConfigDTO> listBanner(SearchConfigParams params)  {
+    public List<ConfigDTO> listBanner(SearchConfigParams params) {
         List<ConfigDO> configDOS = createConfigQuery(params)
                 .orderByDesc(ConfigDO::getUpdateTime)
                 .orderByAsc(ConfigDO::getRank)
@@ -73,28 +72,49 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      *
      * @return
      */
-    public Long countConfig(SearchConfigParams params)  { return null; }
+    public Long countConfig(SearchConfigParams params) {
+        return createConfigQuery(params)
+                .count();
+    }
 
     /**
      * 获取所有公告列表（分页）
      *
      * @return
      */
-    public List<ConfigDTO> listNotice(PageParam pageParam)  { return null; }
+    public List<ConfigDTO> listNotice(PageParam pageParam) {
+        List<ConfigDO> configDOS = lambdaQuery()
+                .eq(ConfigDO::getType, ConfigTypeEnum.NOTICE.getCode())
+                .eq(ConfigDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .orderByDesc(ConfigDO::getCreateTime)
+                .last(PageParam.getLimitSql(pageParam))
+                .list();
+        return ConfigConverter.toDTOS(configDOS);
+    }
 
     /**
      * 获取所有公告总数（分页）
      *
      * @return
      */
-    public Integer countNotice()  { return null; }
+    public Integer countNotice() {
+        return lambdaQuery()
+                .eq(ConfigDO::getType, ConfigTypeEnum.NOTICE.getCode())
+                .eq(ConfigDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .count()
+                .intValue();
+    }
 
     /**
      * 更新阅读相关计数
      */
-    public void updatePdfConfigVisitNum(long configId, String extra)  {}
+    public void updatePdfConfigVisitNum(long configId, String extra) {
+        lambdaUpdate().set(ConfigDO::getExtra, extra)
+                .eq(ConfigDO::getId, configId)
+                .update();
+    }
 
-    public List<GlobalConfigDO> listGlobalConfig(SearchGlobalConfigParams params)  {
+    public List<GlobalConfigDO> listGlobalConfig(SearchGlobalConfigParams params) {
         LambdaQueryWrapper<GlobalConfigDO> query = buildQuery(params);
         query.select(GlobalConfigDO::getId,
                 GlobalConfigDO::getKey,
@@ -103,17 +123,29 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
         return globalConfigMapper.selectList(query);
     }
 
-    public Long countGlobalConfig(SearchGlobalConfigParams params)  {
+    public Long countGlobalConfig(SearchGlobalConfigParams params) {
         return globalConfigMapper.selectCount(buildQuery(params));
     }
 
-    private LambdaQueryWrapper<GlobalConfigDO> buildQuery(SearchGlobalConfigParams params)  { return null; }
+    private LambdaQueryWrapper<GlobalConfigDO> buildQuery(SearchGlobalConfigParams params) {
+        LambdaQueryWrapper<GlobalConfigDO> query = Wrappers.lambdaQuery();
 
-    public void save(GlobalConfigDO globalConfigDO)  {
+        query.and(!StringUtils.isEmpty(params.getKey()),
+                        k -> k.like(GlobalConfigDO::getKey, params.getKey()))
+                .and(!StringUtils.isEmpty(params.getValue()),
+                        v -> v.like(GlobalConfigDO::getValue, params.getValue()))
+                .and(!StringUtils.isEmpty(params.getComment()),
+                        c -> c.like(GlobalConfigDO::getComment, params.getComment()))
+                .eq(GlobalConfigDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .orderByDesc(GlobalConfigDO::getUpdateTime);
+        return query;
+    }
+
+    public void save(GlobalConfigDO globalConfigDO) {
         globalConfigMapper.insert(globalConfigDO);
     }
 
-    public void updateById(GlobalConfigDO globalConfigDO)  {
+    public void updateById(GlobalConfigDO globalConfigDO) {
         globalConfigDO.setUpdateTime(new Date());
         globalConfigMapper.updateById(globalConfigDO);
     }
@@ -124,7 +156,7 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      * @param id
      * @return
      */
-    public GlobalConfigDO getGlobalConfigById(Long id)  {
+    public GlobalConfigDO getGlobalConfigById(Long id) {
         // 查询的时候 deleted 为 0
         LambdaQueryWrapper<GlobalConfigDO> query = Wrappers.lambdaQuery();
         query.select(GlobalConfigDO::getId, GlobalConfigDO::getKey, GlobalConfigDO::getValue, GlobalConfigDO::getComment)
@@ -139,9 +171,16 @@ public class ConfigDao extends ServiceImpl<ConfigMapper, ConfigDO> {
      * @param key
      * @return
      */
-    public GlobalConfigDO getGlobalConfigByKey(String key)  { return null; }
+    public GlobalConfigDO getGlobalConfigByKey(String key) {
+        // 查询的时候 deleted 为 0
+        LambdaQueryWrapper<GlobalConfigDO> query = Wrappers.lambdaQuery();
+        query.select(GlobalConfigDO::getId, GlobalConfigDO::getKey, GlobalConfigDO::getValue, GlobalConfigDO::getComment)
+                .eq(GlobalConfigDO::getKey, key)
+                .eq(GlobalConfigDO::getDeleted, YesOrNoEnum.NO.getCode());
+        return globalConfigMapper.selectOne(query);
+    }
 
-    public void delete(GlobalConfigDO globalConfigDO)  {
+    public void delete(GlobalConfigDO globalConfigDO) {
         globalConfigDO.setDeleted(YesOrNoEnum.YES.getCode());
         globalConfigMapper.updateById(globalConfigDO);
     }

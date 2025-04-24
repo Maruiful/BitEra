@@ -9,14 +9,6 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
-/**
- * ai用户表
- *
- * @ClassName: UserAiDO
- * @Author: ygl
- * @Date: 2023/6/25 21:38
- * @Version: 1.0
- */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

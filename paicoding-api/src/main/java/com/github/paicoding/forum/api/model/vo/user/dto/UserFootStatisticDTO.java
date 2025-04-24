@@ -3,10 +3,6 @@ package com.github.paicoding.forum.api.model.vo.user.dto;
 import lombok.Data;
 import lombok.ToString;
 
-/**
- * 用户主页信息
- * * @since 2023年05月25日
- */
 @Data
 @ToString(callSuper = true)
 public class UserFootStatisticDTO {

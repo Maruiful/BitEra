@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
-/** */
 @Component
 public class TemplateEngineHelper {
     @Autowired

@@ -16,9 +16,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
-/**
- * 配置变更注册
- * */
 @Slf4j
 public class SpringValueRegistry {
     @Data
@@ -84,7 +81,13 @@ public class SpringValueRegistry {
          * @param newVal String: 配置对应的key   Class: 配置绑定的成员/方法参数类型， Object 新的配置值
          * @throws Exception
          */
-        public void update(BiFunction<String, Class, Object> newVal) throws Exception  {}
+        public void update(BiFunction<String, Class, Object> newVal) throws Exception {
+            if (isField()) {
+                injectField(newVal);
+            } else {
+                injectMethod(newVal);
+            }
+        }
 
         private void injectField(BiFunction<String, Class, Object> newVal) throws Exception {
             Object bean = beanRef.get();
@@ -101,9 +104,19 @@ public class SpringValueRegistry {
         }
 
         private void injectMethod(BiFunction<String, Class, Object> newVal)
-                throws Exception  {}
+                throws Exception {
+            Object bean = beanRef.get();
+            if (bean == null) {
+                return;
+            }
+            Object va = newVal.apply(key, methodParameter.getParameterType());
+            methodParameter.getMethod().invoke(bean, va);
+            log.info("更新method: {}#{} = {}", beanName, methodParameter.getMethod().getName(), va);
+        }
 
-        public boolean isField()  { return false; }
+        public boolean isField() {
+            return this.field != null;
+        }
     }
 
 

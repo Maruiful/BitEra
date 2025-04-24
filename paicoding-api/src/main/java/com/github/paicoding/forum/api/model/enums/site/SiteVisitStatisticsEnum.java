@@ -3,10 +3,6 @@ package com.github.paicoding.forum.api.model.enums.site;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * 站点统计类型枚举
- *
- */
 @AllArgsConstructor
 @Getter
 public enum SiteVisitStatisticsEnum {

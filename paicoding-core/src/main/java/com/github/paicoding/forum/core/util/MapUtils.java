@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** */
 public class MapUtils {
 
     public static <K, V> Map<K, V> create(K k, V v, Object... kvs) {

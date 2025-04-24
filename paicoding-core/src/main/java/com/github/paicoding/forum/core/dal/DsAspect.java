@@ -9,14 +9,14 @@ import org.aspectj.lang.reflect.MethodSignature;
 
 import java.lang.reflect.Method;
 
-/** */
 @Aspect
 public class DsAspect {
     /**
      * 切入点, 拦截类上、方法上有注解的方法，用于切换数据源
      */
     @Pointcut("@annotation(com.github.paicoding.forum.core.dal.DsAno) || @within(com.github.paicoding.forum.core.dal.DsAno)")
-    public void pointcut()  {}
+    public void pointcut() {
+    }
 
     @Around("pointcut()")
     public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
@@ -35,7 +35,7 @@ public class DsAspect {
         }
     }
 
-    private DsAno getDsAno(ProceedingJoinPoint proceedingJoinPoint)  {
+    private DsAno getDsAno(ProceedingJoinPoint proceedingJoinPoint) {
         MethodSignature signature = (MethodSignature) proceedingJoinPoint.getSignature();
         Method method = signature.getMethod();
         DsAno ds = method.getAnnotation(DsAno.class);

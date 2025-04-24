@@ -3,9 +3,6 @@ package com.github.paicoding.forum.api.model.enums.user;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * 星球来源枚举
- * */
 @Getter
 @AllArgsConstructor
 public enum StarSourceEnum {
@@ -14,7 +11,7 @@ public enum StarSourceEnum {
      */
     JAVA_GUIDE(1),
     /**
-     * 
+     * 技术派
      */
     TECH_PAI(2),
     ;

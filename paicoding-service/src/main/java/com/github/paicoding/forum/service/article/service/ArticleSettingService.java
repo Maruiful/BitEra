@@ -6,9 +6,6 @@ import com.github.paicoding.forum.api.model.vo.article.ArticlePostReq;
 import com.github.paicoding.forum.api.model.vo.article.SearchArticleReq;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticleAdminDTO;
 
-/**
- * 文章后台接口
- * */
 public interface ArticleSettingService {
 
     /**

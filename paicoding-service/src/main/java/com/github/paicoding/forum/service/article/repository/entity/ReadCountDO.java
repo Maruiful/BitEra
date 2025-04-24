@@ -6,9 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-/**
- * fixme 访问计数，后续改用redis替换
- * */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

@@ -6,9 +6,6 @@ import lombok.experimental.Accessors;
 
 import java.util.List;
 
-/**
- * 侧边推广信息
- * */
 @Data
 @Accessors(chain = true)
 public class SideBarDTO {

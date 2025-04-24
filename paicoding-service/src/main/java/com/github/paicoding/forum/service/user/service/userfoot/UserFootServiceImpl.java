@@ -27,10 +27,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/**
- * 用户足迹Service
- *
- */
 @Service
 public class UserFootServiceImpl implements UserFootService {
     private final UserFootDao userFootDao;

@@ -2,8 +2,6 @@ package com.github.paicoding.forum.core.mdc;
 
 import org.slf4j.MDC;
 
-/**
- */
 public class MdcUtil {
     public static final String TRACE_ID_KEY = "traceId";
 

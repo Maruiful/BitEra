@@ -1,7 +1,9 @@
 package com.github.paicoding.forum.web.leetcode;
 
 public class Solution03701 {
-    public void solveSudoku(char[][] board)  {}
+    public void solveSudoku(char[][] board) {
+        solve(board);
+    }
 
     private boolean solve(char[][] board) {
         for (int i = 0; i < 9; i++) {
@@ -24,7 +26,17 @@ public class Solution03701 {
         return true; // 所有空格填充完毕，返回 true
     }
 
-    private boolean isValid(char[][] board, int row, int col, char c)  { return false; }
+    private boolean isValid(char[][] board, int row, int col, char c) {
+        for (int i = 0; i < 9; i++) {
+            // 检查当前行是否有重复
+            if (board[row][i] == c) return false;
+            // 检查当前列是否有重复
+            if (board[i][col] == c) return false;
+            // 检查当前 3x3 宫格是否有重复
+            if (board[row / 3 * 3 + i / 3][col / 3 * 3 + i % 3] == c) return false;
+        }
+        return true; // 数字符合规则
+    }
 
     public static void main(String[] args) {
         Solution03701 solution = new Solution03701();

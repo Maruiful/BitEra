@@ -4,8 +4,6 @@ import com.github.paicoding.forum.api.model.vo.PageListVo;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticleDTO;
 import lombok.Data;
 
-/**
- */
 @Data
 public class ArticleListVo {
     /**

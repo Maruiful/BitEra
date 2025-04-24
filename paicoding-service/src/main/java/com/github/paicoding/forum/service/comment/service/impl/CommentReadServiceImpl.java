@@ -19,23 +19,21 @@ import com.github.paicoding.forum.service.user.service.UserFootService;
 import com.github.paicoding.forum.service.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 评论Service
- * */
 @Service
 public class CommentReadServiceImpl implements CommentReadService {
 
-
     @Autowired
     private CommentDao commentDao;
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private CountService countService;
-
 
     @Autowired
     private UserFootService userFootService;
@@ -143,6 +141,12 @@ public class CommentReadServiceImpl implements CommentReadService {
         }
     }
 
+    /**
+     * 查询回帖最多的评论
+     *
+     * @param articleId
+     * @return
+     */
     @Override
     public TopCommentDTO queryHotComment(Long articleId) {
         CommentDO comment = commentDao.getHotComment(articleId);

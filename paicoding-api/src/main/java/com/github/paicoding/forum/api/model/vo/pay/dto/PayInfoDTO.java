@@ -5,9 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Map;
 
-/**
- * 用于支付的相关信息
- * */
 @Data
 public class PayInfoDTO implements Serializable {
     /**

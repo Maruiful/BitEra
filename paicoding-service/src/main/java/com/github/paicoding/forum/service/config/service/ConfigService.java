@@ -5,9 +5,6 @@ import com.github.paicoding.forum.api.model.vo.banner.dto.ConfigDTO;
 
 import java.util.List;
 
-/**
- * Banner前台接口
- * */
 public interface ConfigService {
 
     /**

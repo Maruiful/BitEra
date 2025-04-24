@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.config;
 
 import lombok.Data;
 
-/**
- *
- * */
 @Data
 public class SearchGlobalConfigReq {
     // 配置项名称

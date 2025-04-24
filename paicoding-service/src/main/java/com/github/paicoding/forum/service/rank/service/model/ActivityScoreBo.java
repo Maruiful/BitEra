@@ -3,7 +3,6 @@ package com.github.paicoding.forum.service.rank.service.model;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-/** */
 @Data
 @Accessors(chain = true)
 public class ActivityScoreBo {

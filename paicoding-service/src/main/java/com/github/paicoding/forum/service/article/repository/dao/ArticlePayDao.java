@@ -13,10 +13,6 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 文章支付记录
- * <p>
- * */
 @Repository
 public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePayRecordDO> {
 
@@ -30,7 +26,7 @@ public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePa
      * @param payUserId 支付用户id
      * @return 支付记录
      */
-    public ArticlePayRecordDO queryRecordByArticleId(Long articleId, Long payUserId)  {
+    public ArticlePayRecordDO queryRecordByArticleId(Long articleId, Long payUserId) {
         List<ArticlePayRecordDO> list = lambdaQuery()
                 .eq(ArticlePayRecordDO::getArticleId, articleId)
                 .eq(ArticlePayRecordDO::getPayUserId, payUserId).list();
@@ -47,7 +43,7 @@ public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePa
      * @param articleId 文章id
      * @return
      */
-    public List<Long> querySucceedPayUsersByArticleId(Long articleId)  {
+    public List<Long> querySucceedPayUsersByArticleId(Long articleId) {
         List<ArticlePayRecordDO> records = lambdaQuery().select(ArticlePayRecordDO::getPayUserId)
                 .eq(ArticlePayRecordDO::getArticleId, articleId)
                 .eq(ArticlePayRecordDO::getPayStatus, PayStatusEnum.SUCCEED.getStatus())
@@ -62,7 +58,7 @@ public class ArticlePayDao extends ServiceImpl<ArticlePayRecordMapper, ArticlePa
      * @param id
      * @return
      */
-    public ArticlePayRecordDO selectForUpdate(Long id)  {
+    public ArticlePayRecordDO selectForUpdate(Long id) {
         QueryWrapper<ArticlePayRecordDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", id);
         queryWrapper.last("for update");

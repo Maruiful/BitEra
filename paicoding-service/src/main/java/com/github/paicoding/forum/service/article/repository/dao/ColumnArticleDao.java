@@ -9,9 +9,6 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 @Repository
 public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArticleDO> {
     @Resource
@@ -23,7 +20,7 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
      * @param columnId
      * @return 专栏内无文章时，返回0；否则返回当前最大的章节数
      */
-    public int selectMaxSection(Long columnId)  {
+    public int selectMaxSection(Long columnId) {
         return columnArticleMapper.selectMaxSection(columnId);
     }
 
@@ -34,7 +31,7 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
      * @param articleId
      * @return
      */
-    public ColumnArticleDO selectColumnArticleByArticleId(Long articleId)  {
+    public ColumnArticleDO selectColumnArticleByArticleId(Long articleId) {
         List<ColumnArticleDO> list = lambdaQuery()
                 .eq(ColumnArticleDO::getArticleId, articleId)
                 .list();
@@ -44,7 +41,7 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
         return list.get(0);
     }
 
-    public ColumnArticleDO selectBySection(Long columnId, Integer sort)  {
+    public ColumnArticleDO selectBySection(Long columnId, Integer sort) {
         return lambdaQuery()
                 .eq(ColumnArticleDO::getColumnId, columnId)
                 .eq(ColumnArticleDO::getSection, sort)
@@ -52,29 +49,33 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
     }
 
 
-    public ColumnArticleDO selectOneByGroupId(Long groupId)  { return null; }
+    public ColumnArticleDO selectOneByGroupId(Long groupId) {
+        return lambdaQuery()
+                .eq(ColumnArticleDO::getGroupId, groupId)
+                .one();
+    }
 
-    public void updateColumnGroupId(Long groupId, Long columnId)  {
+    public void updateColumnGroupId(Long groupId, Long columnId) {
         lambdaUpdate()
                 .eq(ColumnArticleDO::getColumnId, columnId)
                 .set(ColumnArticleDO::getGroupId, groupId)
                 .update();
     }
 
-    public ColumnArticleDO selectColumnArticle(Long columnId, Long articleId)  {
+    public ColumnArticleDO selectColumnArticle(Long columnId, Long articleId) {
         return lambdaQuery()
                 .eq(ColumnArticleDO::getColumnId, columnId)
                 .eq(ColumnArticleDO::getArticleId, articleId)
                 .one();
     }
 
-    public void updateColumnArticleSection(Long id, Integer section)  {
+    public void updateColumnArticleSection(Long id, Integer section) {
         lambdaUpdate().eq(ColumnArticleDO::getId, id)
                 .set(ColumnArticleDO::getSection, section)
                 .update();
     }
 
-    public void updateColumnArticleSection(Long columnId, Long articleId, Long groupId, Integer section)  {
+    public void updateColumnArticleSection(Long columnId, Long articleId, Long groupId, Integer section) {
         lambdaUpdate()
                 .eq(ColumnArticleDO::getColumnId, columnId)
                 .eq(ColumnArticleDO::getArticleId, articleId)
@@ -91,5 +92,4 @@ public class ColumnArticleDao extends ServiceImpl<ColumnArticleMapper, ColumnArt
                 .setSql("section = section + " + add)
                 .update();
     }
-
 }

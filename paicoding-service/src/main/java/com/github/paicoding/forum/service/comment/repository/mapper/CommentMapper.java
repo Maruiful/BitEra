@@ -6,9 +6,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Map;
 
-/**
- * 评论mapper接口
- * */
 public interface CommentMapper extends BaseMapper<CommentDO> {
     Map<String, Object> getHotTopCommentId(@Param("articleId") Long articleId);
 

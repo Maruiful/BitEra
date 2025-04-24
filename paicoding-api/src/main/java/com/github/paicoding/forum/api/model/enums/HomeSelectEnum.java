@@ -2,10 +2,6 @@ package com.github.paicoding.forum.api.model.enums;
 
 import lombok.Getter;
 
-/**
- * 用户页面选择枚举
- *
- */
 @Getter
 public enum HomeSelectEnum {
 

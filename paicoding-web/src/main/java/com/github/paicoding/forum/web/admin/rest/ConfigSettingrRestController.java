@@ -14,9 +14,6 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Banner后台
- * */
 @RestController
 @Permission(role = UserRole.LOGIN)
 @Api(value = "后台运营配置管理控制器", tags = "配置管理")

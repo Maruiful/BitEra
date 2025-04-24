@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 短链接返回对象
- * */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

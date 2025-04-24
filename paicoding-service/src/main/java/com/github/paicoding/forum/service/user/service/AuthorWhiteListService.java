@@ -4,7 +4,6 @@ import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;
 
 import java.util.List;
 
-/** */
 public interface AuthorWhiteListService {
 
     /**

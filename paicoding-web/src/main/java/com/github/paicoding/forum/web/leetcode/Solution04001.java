@@ -30,5 +30,11 @@ class Solution04001 {
         }
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution04001 solution = new Solution04001();
+        int[] candidates = {10, 1, 2, 7, 6, 1, 5};
+        int target = 8;
+        List<List<Integer>> result = solution.combinationSum2(candidates, target);
+        System.out.println("所有组合: " + result);
+    }
 }

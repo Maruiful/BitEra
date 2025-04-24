@@ -2,8 +2,6 @@ package com.github.paicoding.forum.api.model.enums.column;
 
 import lombok.Getter;
 
-/**
- */
 @Getter
 public enum MovePositionEnum {
     BEFORE(-1, "前"),

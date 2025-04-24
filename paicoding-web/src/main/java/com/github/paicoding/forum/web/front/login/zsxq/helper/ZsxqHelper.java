@@ -11,10 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * 知识星球登录相关类
- *
- */
 @Slf4j
 @Component
 public class ZsxqHelper {

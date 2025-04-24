@@ -20,15 +20,28 @@ public class AliAiServiceImpl extends AbsChatService {
     private AliIntegration aliIntegration;
 
     @Override
-    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat)  { return null; }
+    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat) {
+        if (aliIntegration.directReturn(user, chat)) {
+            return AiChatStatEnum.END;
+        }
+        return AiChatStatEnum.ERROR;
+    }
 
     @Override
-    public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer)  { return null; }
+    public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer) {
+        aliIntegration.streamReturn(user, chatRes, consumer);
+        return AiChatStatEnum.IGNORE;
+    }
 
     @Override
-    public AISourceEnum source()  { return null; }
+    public AISourceEnum source() {
+        return AISourceEnum.ALI_AI;
+    }
 
     @Override
-    public boolean asyncFirst()  { return false; }
+    public boolean asyncFirst() {
+        // true 表示优先使用异步返回； false 表示同步等待结果
+        return true;
+    }
 
 }

@@ -22,11 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * 1. 请求参数日志输出过滤器
- * 2. 判断用户是否登录
- *
- */
 @Slf4j
 @Order(Integer.MIN_VALUE)
 @WebFilter(urlPatterns = "/openapi/*", filterName = "openApiFilter", asyncSupported = true)

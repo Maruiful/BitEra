@@ -12,9 +12,6 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 标签后台
- * */
 @RestController
 @Permission(role = UserRole.LOGIN)
 @Api(value = "全局配置管理控制器", tags = "全局配置")

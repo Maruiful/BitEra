@@ -8,7 +8,6 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-/** */
 @Data
 @JacksonXmlRootElement(localName = "urlset", namespace = "http://www.sitemaps.org/schemas/sitemap/0.9")
 public class SiteMapVo {

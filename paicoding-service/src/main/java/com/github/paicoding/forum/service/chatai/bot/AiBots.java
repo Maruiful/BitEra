@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-/** */
 @Service
 public class AiBots {
     @Autowired
@@ -18,7 +17,9 @@ public class AiBots {
      * @param userId
      * @return
      */
-    public boolean aiBots(Long userId)  { return false; }
+    public boolean aiBots(Long userId) {
+        return Objects.equals(userId, haterBot.getBotUser().getUserId());
+    }
 
     /**
      * 自动补齐AI机器人的提示词
@@ -26,5 +27,7 @@ public class AiBots {
      * @param userId
      * @return
      */
-    public ChatItemVo autoBuildPrompt(Long userId)  { return null; }
+    public ChatItemVo autoBuildPrompt(Long userId) {
+        return haterBot.addPrompt(userId);
+    }
 }

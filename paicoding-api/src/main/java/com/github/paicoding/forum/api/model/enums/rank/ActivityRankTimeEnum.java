@@ -3,10 +3,6 @@ package com.github.paicoding.forum.api.model.enums.rank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * 活跃排行榜时间周期
- *
- */
 @AllArgsConstructor
 @Getter
 public enum ActivityRankTimeEnum {

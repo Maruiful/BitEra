@@ -7,9 +7,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 用户个人信息表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 // autoResultMap 必须存在，否则ip对象无法正确获取

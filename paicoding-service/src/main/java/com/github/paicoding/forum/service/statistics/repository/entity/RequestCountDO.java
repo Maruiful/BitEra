@@ -7,9 +7,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
-/**
- * 请求计数表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("request_count")

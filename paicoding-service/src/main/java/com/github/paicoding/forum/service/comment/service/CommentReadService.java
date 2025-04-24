@@ -6,9 +6,6 @@ import com.github.paicoding.forum.service.comment.repository.entity.CommentDO;
 
 import java.util.List;
 
-/**
- * 评论Service接口
- * */
 public interface CommentReadService {
 
     /**

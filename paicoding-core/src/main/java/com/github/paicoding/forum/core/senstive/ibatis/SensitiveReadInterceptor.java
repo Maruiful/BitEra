@@ -28,9 +28,6 @@ import java.util.Properties;
 import static com.google.common.collect.Lists.newArrayList;
 
 
-/**
- * 敏感词替换拦截器，这里主要是针对从db中读取的数据进行敏感词处理 （如果需要在写入db时，进行脱敏如加密，也可以使用类似的方式来实现）
- * */
 @Intercepts({
         @Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {java.sql.Statement.class})
 })
@@ -45,7 +42,29 @@ public class SensitiveReadInterceptor implements Interceptor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object intercept(Invocation invocation) throws Throwable  { return null; }
+    public Object intercept(Invocation invocation) throws Throwable {
+        final List<Object> results = (List<Object>) invocation.proceed();
+
+        if (results.isEmpty()) {
+            return results;
+        }
+
+        final ResultSetHandler statementHandler = realTarget(invocation.getTarget());
+        final MetaObject metaObject = SystemMetaObject.forObject(statementHandler);
+        final MappedStatement mappedStatement = (MappedStatement) metaObject.getValue(MAPPED_STATEMENT);
+
+        Optional firstOpt = results.stream().filter(Objects::nonNull).findFirst();
+        if (!firstOpt.isPresent()) {
+            return results;
+        }
+        Object firstObject = firstOpt.get();
+        // 找到需要进行敏感词替换的数据库实体类的成员信息
+        SensitiveObjectMeta sensitiveObjectMeta = findSensitiveObjectMeta(firstObject);
+
+        // 执行替换的敏感词替换
+        replaceSensitiveResults(results, mappedStatement, sensitiveObjectMeta);
+        return results;
+    }
 
     /**
      * 执行具体的敏感词替换
@@ -97,13 +116,23 @@ public class SensitiveReadInterceptor implements Interceptor {
      * @param firstObject 待查询的对象
      * @return 返回对象的敏感词元数据
      */
-    private SensitiveObjectMeta findSensitiveObjectMeta(Object firstObject)  { return null; }
+    private SensitiveObjectMeta findSensitiveObjectMeta(Object firstObject) {
+        SensitiveMetaCache.computeIfAbsent(firstObject.getClass().getName(), s -> {
+            Optional<SensitiveObjectMeta> sensitiveObjectMetaOpt = SensitiveObjectMeta.buildSensitiveObjectMeta(firstObject);
+            return sensitiveObjectMetaOpt.orElse(null);
+        });
+
+        return SensitiveMetaCache.get(firstObject.getClass().getName());
+    }
 
     @Override
-    public Object plugin(Object o)  { return null; }
+    public Object plugin(Object o) {
+        return Plugin.wrap(o, this);
+    }
 
     @Override
-    public void setProperties(Properties properties)  {}
+    public void setProperties(Properties properties) {
+    }
 
     public static <T> T realTarget(Object target) {
         if (Proxy.isProxyClass(target.getClass())) {

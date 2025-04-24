@@ -41,5 +41,10 @@ public class Main04601 {
         }
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Main04601 solution = new Main04601();
+        int[] nums = {1, 2, 3};
+        List<List<Integer>> result = solution.permute(nums);
+        System.out.println(result); // 输出所有全排列
+    }
 }

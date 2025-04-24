@@ -19,9 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
-/**
- * 本地保存上传文件
- * */
 @Slf4j
 @ConditionalOnExpression(value = "#{'local'.equals(environment.getProperty('image.oss.type'))}")
 @Component
@@ -67,7 +64,9 @@ public class LocalStorageWrapper implements ImageUploader {
      *
      * @return
      */
-    private String genTmpFileName()  { return null; }
+    private String genTmpFileName() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddhhmmssSSS")) + "_" + random.nextInt(100);
+    }
 
     /**
      * 外网图片转存判定，对于没有转存过的，且是http开头的网络图片时，才需要进行转存
@@ -76,5 +75,16 @@ public class LocalStorageWrapper implements ImageUploader {
      * @return true 表示不需要转存
      */
     @Override
-    public boolean uploadIgnore(String img)  { return false; }
+    public boolean uploadIgnore(String img) {
+        if (StringUtils.isNotBlank(imageProperties.getCdnHost()) && img.startsWith(imageProperties.getCdnHost())) {
+            return true;
+        }
+
+        // 如果是oss的图片，也不需要转存
+        if (StringUtils.isNotBlank(imageProperties.getOss().getHost()) && img.startsWith(imageProperties.getOss().getHost())) {
+            return true;
+        }
+
+        return !img.startsWith("http");
+    }
 }

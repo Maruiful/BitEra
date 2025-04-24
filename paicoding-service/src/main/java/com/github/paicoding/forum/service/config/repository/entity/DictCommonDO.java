@@ -7,12 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-/**
- * <p>
- * 通用数据字典
- * </p>
- * * @since 2021-05-31
- */
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

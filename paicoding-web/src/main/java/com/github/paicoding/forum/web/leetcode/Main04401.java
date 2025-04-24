@@ -30,5 +30,12 @@ public class Main04401 {
         return dp[m][n];
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Main04401 solution = new Main04401();
+        System.out.println(solution.isMatch("aa", "a")); // 输出 false
+        System.out.println(solution.isMatch("aa", "*")); // 输出 true
+        System.out.println(solution.isMatch("cb", "?a")); // 输出 false
+        System.out.println(solution.isMatch("adceb", "*a*b")); // 输出 true
+        System.out.println(solution.isMatch("acdcb", "a*c?b")); // 输出 false
+    }
 }

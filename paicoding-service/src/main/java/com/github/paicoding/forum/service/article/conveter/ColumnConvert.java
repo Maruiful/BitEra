@@ -10,10 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/** */
 public class ColumnConvert {
 
-    public static ColumnDTO toDto(ColumnInfoDO info)  {
+    public static ColumnDTO toDto(ColumnInfoDO info) {
         ColumnDTO dto = new ColumnDTO();
         dto.setColumnId(info.getId());
         dto.setColumn(info.getColumnName());
@@ -30,10 +29,39 @@ public class ColumnConvert {
         return dto;
     }
 
-    public static List<ColumnDTO> toDtos(List<ColumnInfoDO> columnInfoDOS)  { return null; }
+    public static List<ColumnDTO> toDtos(List<ColumnInfoDO> columnInfoDOS) {
+        List<ColumnDTO> columnDTOS = new ArrayList<>();
+        columnInfoDOS.forEach(info -> columnDTOS.add(ColumnConvert.toDto(info)));
+        return columnDTOS;
+    }
 
-    public static ColumnInfoDO toDo(ColumnReq columnReq)  { return null; }
+    public static ColumnInfoDO toDo(ColumnReq columnReq) {
+        if (columnReq == null) {
+            return null;
+        }
+        ColumnInfoDO columnInfoDO = new ColumnInfoDO();
+        columnInfoDO.setColumnName(columnReq.getColumn());
+        columnInfoDO.setUserId(columnReq.getAuthor());
+        columnInfoDO.setIntroduction(columnReq.getIntroduction());
+        columnInfoDO.setCover(columnReq.getCover());
+        columnInfoDO.setState(columnReq.getState());
+        columnInfoDO.setSection(columnReq.getSection());
+        columnInfoDO.setNums(columnReq.getNums());
+        columnInfoDO.setType(columnReq.getType());
+        columnInfoDO.setFreeStartTime(new Date(columnReq.getFreeStartTime()));
+        columnInfoDO.setFreeEndTime(new Date(columnReq.getFreeEndTime()));
+        return columnInfoDO;
+    }
 
-    public static ColumnArticleDO toDo(ColumnArticleReq columnArticleReq)  { return null; }
+    public static ColumnArticleDO toDo(ColumnArticleReq columnArticleReq) {
+        if (columnArticleReq == null) {
+            return null;
+        }
+        ColumnArticleDO columnArticleDO = new ColumnArticleDO();
+        columnArticleDO.setColumnId(columnArticleReq.getColumnId());
+        columnArticleDO.setArticleId(columnArticleReq.getArticleId());
+        columnArticleDO.setSection(columnArticleReq.getSort());
+        return columnArticleDO;
+    }
 
 }

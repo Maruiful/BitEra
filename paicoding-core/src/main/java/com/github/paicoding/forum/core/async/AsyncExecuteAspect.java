@@ -18,10 +18,6 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * 异步执行
- *
- */
 @Slf4j
 @Aspect
 @Component

@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.net.Proxy;
 import java.util.List;
 
-/** */
 @Data
 @ConfigurationProperties(prefix = "net")
 public class ProxyProperties {

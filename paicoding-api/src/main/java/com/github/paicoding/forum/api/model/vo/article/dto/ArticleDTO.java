@@ -10,11 +10,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 文章信息
- * <p>
- * DTO 定义返回给web前端的实体类 (VO)
- * */
 @Data
 public class ArticleDTO implements Serializable {
     private static final long serialVersionUID = -793906904770296838L;

@@ -1,8 +1,5 @@
 package com.github.paicoding.forum.core.util;
 
-/**
- * 数字判空和零值判断工具类
- */
 public class NumUtil {
 
     public static boolean nullOrZero(Long num) {

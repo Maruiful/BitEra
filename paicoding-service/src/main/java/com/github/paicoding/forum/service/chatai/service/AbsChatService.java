@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-/**
- * 聊天的抽象模板类
- * */
 @Slf4j
 @Service
 public abstract class AbsChatService implements ChatService {
@@ -48,7 +45,13 @@ public abstract class AbsChatService implements ChatService {
      * @param user
      * @return
      */
-    protected int queryUserdCnt(Long user)  { return 0; }
+    protected int queryUserdCnt(Long user) {
+        Integer cnt = RedisClient.hGet(ChatConstants.getAiRateKeyPerDay(source()), String.valueOf(user), Integer.class);
+        if (cnt == null) {
+            cnt = 0;
+        }
+        return cnt;
+    }
 
 
     /**
@@ -57,27 +60,93 @@ public abstract class AbsChatService implements ChatService {
      * @param user
      * @return
      */
-    protected Long incrCnt(Long user)  { return null; }
+    protected Long incrCnt(Long user) {
+        String key = ChatConstants.getAiRateKeyPerDay(source());
+        Long cnt = RedisClient.hIncr(key, String.valueOf(user), 1);
+        if (cnt == 1L) {
+            // 做一个简单的判定，如果是某个用户的第一次提问，那就刷新一下这个缓存的有效期
+            // fixme 这里有个不太优雅的地方：每新来一个用户，会导致这个有效期重新刷一边，可以通过再查一下hash的key个数，如果只有一个才进行重置有效期；这里出于简单考虑，省了这一步
+            RedisClient.expire(key, 86400L);
+        }
+        return cnt;
+    }
 
     /**
      * 保存聊天记录
      */
-    protected void recordChatItem(Long user, ChatItemVo item)  {}
+    protected void recordChatItem(Long user, ChatItemVo item) {
+        // 保存聊天记录
+        chatHistoryService.saveRecord(source(), user, ReqInfoContext.getReqInfo().getChatId(), item);
+    }
 
     /**
      * 查询用户的聊天历史
      *
      * @return
      */
-    public ChatRecordsVo getChatHistory(Long user, AISourceEnum aiSource)  { return null; }
+    public ChatRecordsVo getChatHistory(Long user, AISourceEnum aiSource) {
+        if (aiSource == null) {
+            aiSource = source();
+        }
+        List<ChatItemVo> chats = chatHistoryService.listHistory(source(), user, ReqInfoContext.getReqInfo().getChatId(), null);
+        chats.add(0, new ChatItemVo().initAnswer(String.format("开始你和派聪明(%s-大模型)的AI之旅吧!", aiSource.getName())));
+        ChatRecordsVo vo = new ChatRecordsVo();
+        vo.setMaxCnt(getMaxQaCnt(user));
+        vo.setUsedCnt(queryUserdCnt(user));
+        vo.setSource(source());
+        vo.setRecords(chats);
+        return vo;
+    }
 
     @Override
-    public ChatRecordsVo chat(Long user, String question)  { return null; }
+    public ChatRecordsVo chat(Long user, String question) {
+        // 构建提问、返回的实体类，计算使用次数，最大次数
+        ChatRecordsVo res = initResVo(user, question);
+        if (!res.hasQaCnt()) {
+            return res;
+        }
+
+        // 执行提问
+        answer(user, res);
+        // 返回AI应答结果
+        return res;
+    }
 
     @Override
-    public ChatRecordsVo chat(Long user, String question, Consumer<ChatRecordsVo> consumer)  { return null; }
+    public ChatRecordsVo chat(Long user, String question, Consumer<ChatRecordsVo> consumer) {
+        ChatRecordsVo res = initResVo(user, question);
+        if (!res.hasQaCnt()) {
+            return res;
+        }
 
-    private ChatRecordsVo initResVo(Long user, String question)  { return null; }
+        // 同步聊天时，直接返回结果
+        answer(user, res);
+        consumer.accept(res);
+        return res;
+    }
+
+    private ChatRecordsVo initResVo(Long user, String question) {
+        ChatRecordsVo res = new ChatRecordsVo();
+        res.setSource(source());
+        int maxCnt = getMaxQaCnt(user);
+        int usedCnt = queryUserdCnt(user);
+        res.setMaxCnt(maxCnt);
+        res.setUsedCnt(usedCnt);
+
+        ChatItemVo item = new ChatItemVo().initQuestion(question);
+        if (!res.hasQaCnt()) {
+            // 次数已经使用完毕，不需要再与AI进行交互了；直接返回
+            item.initAnswer(ChatConstants.TOKEN_OVER);
+            res.setRecords(Arrays.asList(item));
+            return res;
+        }
+
+        // 构建多轮对话的聊天上下文
+        List<ChatItemVo> history = buildChatContext(user);
+        history.add(0, item);
+        res.setRecords(history);
+        return res;
+    }
 
     /**
      * 构建聊天上下文
@@ -142,7 +211,11 @@ public abstract class AbsChatService implements ChatService {
      * @param user
      * @param response
      */
-    protected void processAfterSuccessedAnswered(Long user, ChatRecordsVo response)  {}
+    protected void processAfterSuccessedAnswered(Long user, ChatRecordsVo response) {
+        // 回答成功，保存聊天记录，剩余次数-1
+        response.setUsedCnt(incrCnt(user).intValue());
+        recordChatItem(user, response.getRecords().get(0));
+    }
 
     /**
      * 异步聊天，即提问并不要求直接得到接口；等后台准备完毕之后再写入对应的结果
@@ -207,5 +280,7 @@ public abstract class AbsChatService implements ChatService {
      * @param user
      * @return
      */
-    protected int getMaxQaCnt(Long user)  { return 0; }
+    protected int getMaxQaCnt(Long user) {
+        return userAiService.getMaxChatCnt(user);
+    }
 }

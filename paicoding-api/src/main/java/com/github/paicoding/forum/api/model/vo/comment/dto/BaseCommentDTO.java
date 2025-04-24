@@ -3,10 +3,6 @@ package com.github.paicoding.forum.api.model.vo.comment.dto;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * 评论树状结构
- *
- */
 @Data
 public class BaseCommentDTO implements Comparable<BaseCommentDTO> {
 

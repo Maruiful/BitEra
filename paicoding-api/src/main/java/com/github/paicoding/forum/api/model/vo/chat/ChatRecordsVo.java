@@ -8,9 +8,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 聊天记录
- * */
 @Data
 @Accessors(chain = true)
 public class ChatRecordsVo implements Serializable, Cloneable {

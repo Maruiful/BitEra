@@ -34,7 +34,29 @@ public class ShortCodeGenerator {
         return shortCode;
     }
 
-    private static String generateHash(String input) throws NoSuchAlgorithmException  { return null; }
+    private static String generateHash(String input) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hash = md.digest(input.getBytes());
+        StringBuilder hashString = new StringBuilder();
 
-    public static void main(String[] args)  {}
+        for (int i = 0; i < hash.length && hashString.length() < ShortCodeGenerator.HASH_LENGTH; i++) {
+            int index = (hash[i] & 0xFF) % BASE62_LENGTH;
+            hashString.append(BASE62.charAt(index));
+        }
+
+        return hashString.toString();
+    }
+
+    public static void main(String[] args) {
+        try {
+            String longUrl = "http://example.com";
+            String shortCode = generateShortCode(longUrl);
+            System.out.println("The First Short code for " + longUrl + " is " + shortCode);
+
+            String repeatShortCode = generateShortCode(longUrl);
+            System.out.println("The Second Short code for " + longUrl + " is " + repeatShortCode);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
 }

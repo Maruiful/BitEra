@@ -10,9 +10,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * 用户足迹mapper接口
- * */
 public interface UserFootMapper extends BaseMapper<UserFootDO> {
 
     /**

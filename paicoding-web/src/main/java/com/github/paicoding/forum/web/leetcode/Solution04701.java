@@ -45,5 +45,10 @@ class Solution04701 {
         }
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution04701 solution = new Solution04701();
+        int[] nums = {1, 1, 2};
+        List<List<Integer>> result = solution.permuteUnique(nums);
+        System.out.println(result); // 输出所有不重复的全排列
+    }
 }

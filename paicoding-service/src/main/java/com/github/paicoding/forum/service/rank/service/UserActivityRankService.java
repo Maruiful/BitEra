@@ -6,9 +6,6 @@ import com.github.paicoding.forum.service.rank.service.model.ActivityScoreBo;
 
 import java.util.List;
 
-/**
- * 用户活跃排行榜
- * */
 public interface UserActivityRankService {
     /**
      * 添加活跃分

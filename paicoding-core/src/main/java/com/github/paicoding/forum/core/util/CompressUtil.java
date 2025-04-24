@@ -2,11 +2,6 @@ package com.github.paicoding.forum.core.util;
 
 import java.nio.ByteBuffer;
 
-/**
- * 压缩工具类
- *
- *
- */
 public class CompressUtil {
     /**
      * 进制转换数组

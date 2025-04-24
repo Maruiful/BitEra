@@ -12,15 +12,12 @@ import com.github.paicoding.forum.service.article.repository.dao.TagDao;
 import com.github.paicoding.forum.service.article.repository.entity.TagDO;
 import com.github.paicoding.forum.service.article.repository.params.SearchTagParams;
 import com.github.paicoding.forum.service.article.service.TagSettingService;
-import com.github.paicoding.forum.service.config.repository.dao.ConfigDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
-/**
- * 标签后台接口
- * */
 @Service
 public class TagSettingServiceImpl implements TagSettingService {
 
@@ -49,9 +46,8 @@ public class TagSettingServiceImpl implements TagSettingService {
         RedisClient.del(redisKey);
     }
 
-    
-
-    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTag(Integer tagId) {
         TagDO tagDO = tagDao.getById(tagId);
         if (tagDO != null){
@@ -90,5 +86,21 @@ public class TagSettingServiceImpl implements TagSettingService {
     }
 
     @Override
-    public TagDTO getTagById(Long tagId) { return null; }
+    public TagDTO getTagById(Long tagId) {
+
+        String redisKey = CACHE_TAG_PRE + tagId;
+
+        // 先查询缓存，如果有就直接返回
+        String tagInfoStr = RedisClient.getStr(redisKey);
+        if (tagInfoStr != null && !tagInfoStr.isEmpty()) {
+            return JsonUtil.toObj(tagInfoStr, TagDTO.class);
+        }
+
+        // 如果未查询到，需要先查询 DB ，再写入缓存
+        TagDTO tagDTO = tagDao.selectById(tagId);
+        tagInfoStr = JsonUtil.toStr(tagDTO);
+        RedisClient.setStrWithExpire(redisKey, tagInfoStr, CACHE_TAG_EXPRIE_TIME);
+
+        return tagDTO;
+    }
 }

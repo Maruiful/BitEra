@@ -6,9 +6,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- *
- * */
 @Data
 @ApiModel("教程排序，根据 ID 和新填的排序")
 public class SortColumnArticleByIDReq implements Serializable {

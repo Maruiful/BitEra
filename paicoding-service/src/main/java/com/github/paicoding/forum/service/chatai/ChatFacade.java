@@ -24,9 +24,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * 聊天的门面类
- * */
 @Slf4j
 @Service
 public class ChatFacade {
@@ -46,11 +43,24 @@ public class ChatFacade {
      *
      * @return
      */
-    public AISourceEnum getRecommendAiSource()  { return null; }
+    public AISourceEnum getRecommendAiSource() {
+        if (aiSourceCache == null) {
+            refreshAiSourceCache(Collections.emptySet());
+        }
+        AISourceEnum sourceEnum = aiSourceCache.get();
+        if (sourceEnum == null) {
+            refreshAiSourceCache(getRecommendAiSource(Collections.emptySet()));
+        }
+        return aiSourceCache.get();
+    }
 
-    public void refreshAiSourceCache(AISourceEnum ai)  {}
+    public void refreshAiSourceCache(AISourceEnum ai) {
+        aiSourceCache = Suppliers.memoizeWithExpiration(() -> ai, 10, TimeUnit.MINUTES);
+    }
 
-    public void refreshAiSourceCache(Set<AISourceEnum> except)  {}
+    public void refreshAiSourceCache(Set<AISourceEnum> except) {
+        refreshAiSourceCache(getRecommendAiSource(except));
+    }
 
     /**
      * 返回推荐的AI模型
@@ -100,7 +110,10 @@ public class ChatFacade {
      * @param callback 定义异步聊天接口返回时的回调策略
      * @return 表示同步直接返回的结果
      */
-    public ChatRecordsVo autoChat(String question, Consumer<ChatRecordsVo> callback)  { return null; }
+    public ChatRecordsVo autoChat(String question, Consumer<ChatRecordsVo> callback) {
+        AISourceEnum source = getRecommendAiSource();
+        return autoChat(source, question, callback);
+    }
 
 
     /**
@@ -111,7 +124,13 @@ public class ChatFacade {
      * @param callback
      * @return
      */
-    public ChatRecordsVo autoChat(AISourceEnum source, String question, Consumer<ChatRecordsVo> callback)  { return null; }
+    public ChatRecordsVo autoChat(AISourceEnum source, String question, Consumer<ChatRecordsVo> callback) {
+        if (source.asyncSupport() && chatServiceFactory.getChatService(source).asyncFirst()) {
+            // 支持异步且异步优先的场景下，自动选择异步方式进行聊天
+            return asyncChat(source, question, callback);
+        }
+        return chat(source, question, callback);
+    }
 
     /**
      * 开始聊天
@@ -120,7 +139,9 @@ public class ChatFacade {
      * @param source
      * @return
      */
-    public ChatRecordsVo chat(AISourceEnum source, String question)  { return null; }
+    public ChatRecordsVo chat(AISourceEnum source, String question) {
+        return chatServiceFactory.getChatService(source).chat(ReqInfoContext.getReqInfo().getUserId(), question);
+    }
 
     /**
      * 开始聊天
@@ -129,7 +150,10 @@ public class ChatFacade {
      * @param source
      * @return
      */
-    public ChatRecordsVo chat(AISourceEnum source, String question, Consumer<ChatRecordsVo> callback)  { return null; }
+    public ChatRecordsVo chat(AISourceEnum source, String question, Consumer<ChatRecordsVo> callback) {
+        return chatServiceFactory.getChatService(source)
+                .chat(ReqInfoContext.getReqInfo().getUserId(), question, callback);
+    }
 
     /**
      * 异步聊天的方式
@@ -137,7 +161,10 @@ public class ChatFacade {
      * @param source
      * @param question
      */
-    public ChatRecordsVo asyncChat(AISourceEnum source, String question, Consumer<ChatRecordsVo> callback)  { return null; }
+    public ChatRecordsVo asyncChat(AISourceEnum source, String question, Consumer<ChatRecordsVo> callback) {
+        return chatServiceFactory.getChatService(source)
+                .asyncChat(ReqInfoContext.getReqInfo().getUserId(), question, callback);
+    }
 
     /**
      * 返回历史聊天记录
@@ -145,5 +172,8 @@ public class ChatFacade {
      * @param source
      * @return
      */
-    public ChatRecordsVo history(AISourceEnum source)  { return null; }
+    public ChatRecordsVo history(AISourceEnum source) {
+        source = source == null ? getRecommendAiSource() : source;
+        return chatServiceFactory.getChatService(source).getChatHistory(ReqInfoContext.getReqInfo().getUserId(), source);
+    }
 }

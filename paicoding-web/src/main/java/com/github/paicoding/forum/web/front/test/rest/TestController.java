@@ -64,10 +64,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * 用于一些功能测试的入口，默认都使用从库，不支持修改数据
- *
- */
 @Slf4j
 @DsAno(MasterSlaveDsEnum.SLAVE)
 @RestController

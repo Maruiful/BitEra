@@ -3,11 +3,12 @@ package com.github.paicoding.forum.web.leetcode;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 class Main01701 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution01701 solution = new Solution01701();
+        List<String> ans = solution.letterCombinations("234");
+        System.out.println(ans);
+    }
 }
 
 class Solution01701 {

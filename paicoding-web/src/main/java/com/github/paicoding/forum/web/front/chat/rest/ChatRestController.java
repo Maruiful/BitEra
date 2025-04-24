@@ -25,10 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * STOMP协议的ChatGpt聊天通讯实现方式
- *
- */
 @Slf4j
 @RestController
 public class ChatRestController {

@@ -21,10 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-/**
- * 用户名 密码方式的登录/登出的入口
- *
- */
 @RestController
 @RequestMapping
 public class LoginRestController {

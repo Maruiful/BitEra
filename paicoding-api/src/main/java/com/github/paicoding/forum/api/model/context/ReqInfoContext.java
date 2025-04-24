@@ -7,10 +7,6 @@ import lombok.Data;
 
 import java.security.Principal;
 
-/**
- * 请求上下文，携带用户身份相关信息
- *
- */
 public class ReqInfoContext {
     private static TransmittableThreadLocal<ReqInfo> contexts = new TransmittableThreadLocal<>();
 

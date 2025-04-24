@@ -9,9 +9,6 @@ import com.github.paicoding.forum.service.user.service.UserService;
 import com.github.paicoding.forum.service.user.service.help.UserSessionHelper;
 import org.springframework.stereotype.Service;
 
-/**
- * 静默登录的开放平台接口（授权的第三方平台，可以根据用户技术派的TOKEN来获取用户信息，实现静默登录）
- * */
 @Service
 public class OpenApiSilentLoginService {
 
@@ -29,7 +26,7 @@ public class OpenApiSilentLoginService {
      * @param session
      * @return
      */
-    public OpenApiUserDTO silentLogin(String session)  {
+    public OpenApiUserDTO silentLogin(String session) {
         Long userId = userSessionHelper.getUserIdBySession(session);
         if (userId == null) {
             return null;

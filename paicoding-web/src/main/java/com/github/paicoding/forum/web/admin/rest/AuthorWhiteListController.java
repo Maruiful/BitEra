@@ -13,13 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 作者白名单服务
- */
 @RestController
 @Api(value = "发布文章作者白名单管理控制器", tags = "作者白名单")
 @Permission(role = UserRole.ADMIN)
-@RequestMapping(path = { "api/admin/author/whitelist" })
+@RequestMapping(path = {"api/admin/author/whitelist"})
 public class AuthorWhiteListController {
     @Autowired
     private AuthorWhiteListService articleWhiteListService;

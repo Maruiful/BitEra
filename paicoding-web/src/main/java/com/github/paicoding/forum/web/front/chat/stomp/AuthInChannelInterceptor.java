@@ -15,10 +15,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import java.security.Principal;
 import java.util.Objects;
 
-/**
- * 权限拦截器，消息发送前进行拦截
- *
- */
 @Slf4j
 public class AuthInChannelInterceptor implements ChannelInterceptor {
     @Override

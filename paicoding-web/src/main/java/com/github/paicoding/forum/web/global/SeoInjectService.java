@@ -23,15 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * seo注入服务，下面加个页面使用
- * - 首页
- * - 文章详情页
- * - 用户主页
- * - 专栏内容详情页
- * <p>
- * ogp seo标签: <a href="https://ogp.me/">开放内容协议 OGP</a>
- * */
 @Service
 public class SeoInjectService {
     private static final String KEYWORDS = "技术派,开源社区,java,springboot,IT,程序员,开发者,mysql,redis,Java基础,多线程,JVM,虚拟机,数据库,MySQL,Spring,Redis,MyBatis,系统设计,分布式,RPC,高可用,高并发,沉默王二";
@@ -45,7 +36,7 @@ public class SeoInjectService {
      *
      * @param detail
      */
-    public void initColumnSeo(ArticleDetailVo detail)  {
+    public void initColumnSeo(ArticleDetailVo detail) {
         Seo seo = initBasicSeoTag();
         List<SeoTagVo> list = seo.getOgp();
         Map<String, Object> jsonLd = seo.getJsonLd();
@@ -96,7 +87,7 @@ public class SeoInjectService {
      *
      * @param detail
      */
-    public void initColumnSeo(ColumnArticlesDTO detail, ColumnDTO column)  {
+    public void initColumnSeo(ColumnArticlesDTO detail, ColumnDTO column) {
         Seo seo = initBasicSeoTag();
         List<SeoTagVo> list = seo.getOgp();
         Map<String, Object> jsonLd = seo.getJsonLd();
@@ -146,7 +137,7 @@ public class SeoInjectService {
      *
      * @param user
      */
-    public void initUserSeo(UserHomeVo user)  {
+    public void initUserSeo(UserHomeVo user) {
         Seo seo = initBasicSeoTag();
         List<SeoTagVo> list = seo.getOgp();
         Map<String, Object> jsonLd = seo.getJsonLd();
@@ -177,7 +168,7 @@ public class SeoInjectService {
     }
 
 
-    public Seo defaultSeo()  {
+    public Seo defaultSeo() {
         Seo seo = initBasicSeoTag();
         List<SeoTagVo> list = seo.getOgp();
         list.add(new SeoTagVo("og:title", "比特纪元"));
@@ -206,7 +197,8 @@ public class SeoInjectService {
         return seo;
     }
 
-    private Seo initBasicSeoTag()  {
+    private Seo initBasicSeoTag() {
+
         List<SeoTagVo> list = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
 

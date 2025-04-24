@@ -16,9 +16,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 基于http的文件上传
- * */
 @Slf4j
 @Component
 @ConditionalOnExpression(value = "#{'rest'.equals(environment.getProperty('image.oss.type'))}")
@@ -45,5 +42,10 @@ public class RestOssWrapper implements ImageUploader {
     }
 
     @Override
-    public boolean uploadIgnore(String fileUrl)  { return false; }
+    public boolean uploadIgnore(String fileUrl) {
+        if (StringUtils.isNotBlank(properties.getOss().getHost()) && fileUrl.startsWith(properties.getOss().getHost())) {
+            return true;
+        }
+        return !fileUrl.startsWith("http");
+    }
 }

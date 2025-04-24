@@ -20,8 +20,6 @@ import com.github.paicoding.forum.service.article.repository.entity.ArticleDO;
 import com.github.paicoding.forum.service.article.repository.entity.ColumnArticleDO;
 import com.github.paicoding.forum.service.article.repository.params.SearchArticleParams;
 import com.github.paicoding.forum.service.article.service.ArticleSettingService;
-import com.github.paicoding.forum.service.statistics.service.RequestCountService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,15 +30,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/**
- * 文章设置服务实现
- */
-@Slf4j
 @Service
 public class ArticleSettingServiceImpl implements ArticleSettingService {
 
     @Autowired
     private ArticleDao articleDao;
+
     @Autowired
     private ColumnArticleDao columnArticleDao;
 

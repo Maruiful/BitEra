@@ -3,9 +3,6 @@ package com.github.paicoding.forum.api.model.vo.user;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-/**
- * 用户入参
- * */
 @Data
 @Accessors(chain = true)
 public class UserSaveReq {

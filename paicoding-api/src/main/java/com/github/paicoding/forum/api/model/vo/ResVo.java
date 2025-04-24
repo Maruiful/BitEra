@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/** */
 @Data
 public class ResVo<T> implements Serializable {
     private static final long serialVersionUID = -510306209659393854L;

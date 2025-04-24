@@ -5,9 +5,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
-/**
- * 用户名密码登录方式
- * */
 @Data
 @Accessors(chain = true)
 public class UserPwdLoginReq implements Serializable {

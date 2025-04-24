@@ -56,9 +56,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 文章查询相关服务类
- * */
 @Slf4j
 @Service
 public class ArticleReadServiceImpl implements ArticleReadService {
@@ -88,41 +85,22 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     @Value("${elasticsearch.open:false}")
     private Boolean openES;
 
-    /**
-     * 查询文章详情
-     * @param articleId
-     * @return
-     */
     @Override
     public ArticleDO queryBasicArticle(Long articleId) {
         return articleDao.getById(articleId);
     }
 
-    /**
-     * 生成文章摘要
-     * @param content
-     * @return
-     */
     @Override
     public String generateSummary(String content) {
         return ArticleUtil.pickSummary(content);
     }
 
-    /**
-     * 查询文章的标签
-     * @param articleId
-     * @return
-     */
     @Override
-    public PageVo<TagDTO> queryTagsByArticleId(Long articleId) {  List<TagDTO> tagDTOS = articleTagDao.queryArticleTagDetails(articleId);
+    public PageVo<TagDTO> queryTagsByArticleId(Long articleId) {
+        List<TagDTO> tagDTOS = articleTagDao.queryArticleTagDetails(articleId);
         return PageVo.build(tagDTOS, 1, 10, tagDTOS.size());
     }
 
-    /**
-     * 查询文章详情
-     * @param articleId
-     * @return
-     */
     @Override
     public ArticleDTO queryDetailArticleInfo(Long articleId) {
         ArticleDTO article = articleDao.queryArticleDetail(articleId);
@@ -202,44 +180,22 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return articleDTOS.stream().map(this::fillArticleRelatedInfo).collect(Collectors.toList());
     }
 
-    /**
-     * 查询文章数量
-     * @param categoryId
-     * @return
-     */
     @Override
     public Long queryArticleCountByCategory(Long categoryId) {
         return articleDao.countArticleByCategoryId(categoryId);
     }
 
-    /**
-     * 查询文章数量
-     * @return
-     */
     @Override
     public Map<Long, Long> queryArticleCountsByCategory() {
         return articleDao.countArticleByCategoryId();
     }
 
-    /**
-     * 查询文章列表
-     *
-     * @param tagId
-     * @param page
-     * @return
-     */
     @Override
     public PageListVo<ArticleDTO> queryArticlesByTag(Long tagId, PageParam page) {
         List<ArticleDO> records = articleDao.listRelatedArticlesOrderByReadCount(null, Arrays.asList(tagId), page);
         return buildArticleListVo(records, page.getPageSize());
     }
 
-    /**
-     * 搜索文章列表
-     *
-     * @param key
-     * @return
-     */
     @Override
     public List<SimpleArticleDTO> querySimpleArticleBySearchKey(String key) {
         // todo 当key为空时，返回热门推荐
@@ -281,13 +237,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 搜索文章列表
-     *
-     * @param key
-     * @param page
-     * @return
-     */
     @Override
     public PageListVo<ArticleDTO> queryArticlesBySearchKey(String key, PageParam page) {
         List<ArticleDO> records = articleDao.listArticlesByBySearchKey(key, page);
@@ -295,13 +244,6 @@ public class ArticleReadServiceImpl implements ArticleReadService {
     }
 
 
-    /**
-     * 查询用户文章列表
-     * @param userId
-     * @param pageParam
-     * @param select
-     * @return
-     */
     @Override
     public PageListVo<ArticleDTO> queryArticlesByUserAndType(Long userId, PageParam pageParam, HomeSelectEnum select) {
         List<ArticleDO> records = null;
@@ -326,9 +268,9 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return buildArticleListVo(records, pageParam.getPageSize());
     }
 
-
     /**
-     * 根据文章id进行排序
+     * fixme @楼仔 这个排序逻辑看着像是有问题的样子
+     *
      * @param articleIds
      * @param records
      * @return
@@ -344,18 +286,11 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return articleDOS;
     }
 
-    /**
-     *
-     * @param records
-     * @param pageSize
-     * @return
-     */
     @Override
     public PageListVo<ArticleDTO> buildArticleListVo(List<ArticleDO> records, long pageSize) {
         List<ArticleDTO> result = records.stream().map(this::fillArticleRelatedInfo).collect(Collectors.toList());
         return PageListVo.newVo(result, pageSize);
     }
-
 
     /**
      * 补全文章的阅读计数、作者、分类、标签等信息
@@ -384,20 +319,11 @@ public class ArticleReadServiceImpl implements ArticleReadService {
         return PageListVo.newVo(list, pageParam.getPageSize());
     }
 
-    /**
-     * 查询对应作者文章数量
-     * @param authorId
-     * @return
-     */
     @Override
     public int queryArticleCount(long authorId) {
         return articleDao.countArticleByUser(authorId);
     }
 
-    /**
-     * 查询文章数量
-     * @return
-     */
     @Override
     public Long getArticleCount() {
         return articleDao.countArticle();

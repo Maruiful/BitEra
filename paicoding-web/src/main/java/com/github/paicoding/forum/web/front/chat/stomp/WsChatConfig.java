@@ -12,10 +12,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
-/**
- * v1.1 stomp协议的websocket实现的chatgpt聊天方式
- *
- */
 @Slf4j
 @Configuration
 @EnableWebSocketMessageBroker // 开启websocket代理

@@ -9,10 +9,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * 推荐服务接口
- *
- */
 @Controller
 public class SearchViewController {
     @Autowired

@@ -1,8 +1,5 @@
 package com.github.paicoding.forum.service.statistics.service;
 
-/**
- * 用户统计服务
- * */
 public interface UserStatisticService {
     /**
      * 添加在线人数

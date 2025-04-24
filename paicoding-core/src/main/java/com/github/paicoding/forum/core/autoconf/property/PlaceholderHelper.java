@@ -29,10 +29,27 @@ public class PlaceholderHelper {
      * <br />
      * "${somePropertyValue}" -> "the actual property value"
      */
-    public Object resolvePropertyValue(ConfigurableBeanFactory beanFactory, String beanName, String placeholder)  { return null; }
+    public Object resolvePropertyValue(ConfigurableBeanFactory beanFactory, String beanName, String placeholder) {
+        // resolve string value
+        String strVal = beanFactory.resolveEmbeddedValue(placeholder);
+
+        BeanDefinition bd = (beanFactory.containsBean(beanName) ? beanFactory
+                .getMergedBeanDefinition(beanName) : null);
+
+        // resolve expressions like "#{systemProperties.myProp}"
+        return evaluateBeanDefinitionString(beanFactory, strVal, bd);
+    }
 
     private Object evaluateBeanDefinitionString(ConfigurableBeanFactory beanFactory, String value,
-                                                BeanDefinition beanDefinition)  { return null; }
+                                                BeanDefinition beanDefinition) {
+        if (beanFactory.getBeanExpressionResolver() == null) {
+            return value;
+        }
+        Scope scope = (beanDefinition != null ? beanFactory
+                .getRegisteredScope(beanDefinition.getScope()) : null);
+        return beanFactory.getBeanExpressionResolver()
+                .evaluate(value, new BeanExpressionContext(beanFactory, scope));
+    }
 
     /**
      * Extract keys from placeholder, e.g.
@@ -101,11 +118,27 @@ public class PlaceholderHelper {
         return placeholderKeys;
     }
 
-    private boolean isNormalizedPlaceholder(String propertyString)  { return false; }
+    private boolean isNormalizedPlaceholder(String propertyString) {
+        return propertyString.startsWith(PLACEHOLDER_PREFIX) && propertyString.endsWith(PLACEHOLDER_SUFFIX);
+    }
 
-    private boolean isExpressionWithPlaceholder(String propertyString)  { return false; }
+    private boolean isExpressionWithPlaceholder(String propertyString) {
+        return propertyString.startsWith(EXPRESSION_PREFIX) && propertyString.endsWith(EXPRESSION_SUFFIX)
+                && propertyString.contains(PLACEHOLDER_PREFIX);
+    }
 
-    private String normalizeToPlaceholder(String strVal)  { return null; }
+    private String normalizeToPlaceholder(String strVal) {
+        int startIndex = strVal.indexOf(PLACEHOLDER_PREFIX);
+        if (startIndex == -1) {
+            return null;
+        }
+        int endIndex = strVal.lastIndexOf(PLACEHOLDER_SUFFIX);
+        if (endIndex == -1) {
+            return null;
+        }
+
+        return strVal.substring(startIndex, endIndex + PLACEHOLDER_SUFFIX.length());
+    }
 
     private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
         int index = startIndex + PLACEHOLDER_PREFIX.length();

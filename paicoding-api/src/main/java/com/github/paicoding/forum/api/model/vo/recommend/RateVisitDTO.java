@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.recommend;
 
 import lombok.Data;
 
-/**
- * 资源的访问、评分信息
- * */
 @Data
 public class RateVisitDTO {
 

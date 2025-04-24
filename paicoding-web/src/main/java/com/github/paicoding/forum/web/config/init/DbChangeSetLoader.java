@@ -13,8 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- */
 public class DbChangeSetLoader {
     public static XMLReader getInstance() throws Exception {
         // javax.xml.parsers.SAXParserFactory 原生api获取factory

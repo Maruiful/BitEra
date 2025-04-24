@@ -16,9 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.function.BiConsumer;
 
-/**
- * deepSeek 聊天接入
- * */
 @Slf4j
 @Service
 public class DeepSeekChatServiceImpl extends AbsChatService {
@@ -33,7 +30,12 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
      * @return
      */
     @Override
-    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat)  { return null; }
+    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat) {
+        if (deepSeekIntegration.directReturn(chat)) {
+            return AiChatStatEnum.END;
+        }
+        return AiChatStatEnum.ERROR;
+    }
 
     /**
      * 异步流式的返回结果
@@ -121,5 +123,7 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
     }
 
     @Override
-    public AISourceEnum source()  { return null; }
+    public AISourceEnum source() {
+        return AISourceEnum.DEEP_SEEK;
+    }
 }

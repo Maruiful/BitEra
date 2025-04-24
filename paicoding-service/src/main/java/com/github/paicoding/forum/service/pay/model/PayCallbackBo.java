@@ -4,9 +4,6 @@ import com.github.paicoding.forum.api.model.enums.pay.PayStatusEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-/**
- * 支付回调通知业务对象
- * */
 @Data
 @Accessors(chain = true)
 public class PayCallbackBo {

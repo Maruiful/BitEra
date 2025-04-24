@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.comment;
 
 import lombok.Data;
 
-/**
- * 评论列表入参
- * */
 @Data
 public class CommentSaveReq {
 

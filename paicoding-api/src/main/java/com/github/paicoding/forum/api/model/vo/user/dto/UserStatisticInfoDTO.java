@@ -7,10 +7,6 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 用户主页信息
- * * @since 2022/7/19
- */
 @Data
 @ToString(callSuper = true)
 public class UserStatisticInfoDTO extends BaseUserInfoDTO {

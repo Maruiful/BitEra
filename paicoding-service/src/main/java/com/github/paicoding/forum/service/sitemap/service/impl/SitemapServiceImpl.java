@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -26,11 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** */
 @Slf4j
 @Service
 public class SitemapServiceImpl implements SitemapService {
-
     @Value("${view.site.host:https://paicoding.com}")
     private String host;
     private static final int SCAN_SIZE = 100;
@@ -42,8 +41,10 @@ public class SitemapServiceImpl implements SitemapService {
     @Resource
     private CountService countService;
 
-
-    
+    /**
+     * 查询站点地图
+     * @return 返回站点地图
+     */
     public SiteMapVo getSiteMap() {
         // key = 文章id, value = 最后更新时间
         Map<String, Long> siteMap = RedisClient.hGetAll(SITE_MAP_CACHE_KEY, Long.class);
@@ -93,22 +94,82 @@ public class SitemapServiceImpl implements SitemapService {
         return vo;
     }
 
-
+    /**
+     * 重新刷新站点地图
+     */
     @Override
     public void refreshSitemap() {
         initSiteMap();
     }
 
-    
+    /**
+     * 基于文章的上下线，自动更新站点地图
+     *
+     * @param event
+     */
+    @EventListener(ArticleMsgEvent.class)
+    public void autoUpdateSiteMap(ArticleMsgEvent<ArticleDO> event) {
+        ArticleEventEnum type = event.getType();
+        if (type == ArticleEventEnum.ONLINE) {
+            addArticle(event.getContent().getId());
+        } else if (type == ArticleEventEnum.OFFLINE || type == ArticleEventEnum.DELETE) {
+            rmArticle(event.getContent().getId());
+        }
+    }
 
-    
-    public void autoUpdateSiteMap(ArticleMsgEvent<ArticleDO> event) {}
+    /**
+     * 新增文章并上线
+     *
+     * @param articleId
+     */
+    private void addArticle(Long articleId) {
+        RedisClient.hSet(SITE_MAP_CACHE_KEY, String.valueOf(articleId), System.currentTimeMillis());
+    }
 
-    
+    /**
+     * 删除文章、or文章下线
+     *
+     * @param articleId
+     */
+    private void rmArticle(Long articleId) {
+        RedisClient.hDel(SITE_MAP_CACHE_KEY, String.valueOf(articleId));
+    }
 
-    
-    public void autoRefreshCache() {}
 
+    /**
+     * 采用定时器方案，每天5:15分刷新站点地图，确保数据的一致性
+     */
+    @Scheduled(cron = "0 15 5 * * ?")
+    public void autoRefreshCache() {
+        log.info("开始刷新sitemap.xml的url地址，避免出现数据不一致问题!");
+        refreshSitemap();
+        log.info("刷新完成！");
+    }
+
+
+    /**
+     * 保存站点数据模型
+     * <p>
+     * 站点统计hash：
+     * - visit_info:
+     * ---- pv: 站点的总pv
+     * ---- uv: 站点的总uv
+     * ---- pv_path: 站点某个资源的总访问pv
+     * ---- uv_path: 站点某个资源的总访问uv
+     * - visit_info_ip:
+     * ---- pv: 用户访问的站点总次数
+     * ---- path_pv: 用户访问的路径总次数
+     * - visit_info_20230822每日记录, 一天一条记录
+     * ---- pv: 12  # field = 月日_pv, pv的计数
+     * ---- uv: 5   # field = 月日_uv, uv的计数
+     * ---- pv_path: 2 # 资源的当前访问计数
+     * ---- uv_path: # 资源的当天访问uv
+     * ---- pv_ip: # 用户当天的访问次数
+     * ---- pv_path_ip: # 用户对资源的当天访问次数
+     *
+     * @param visitIp 访问者ip
+     * @param path    访问的资源路径
+     */
     @Override
     public void saveVisitInfo(String visitIp, String path) {
         String globalKey = SitemapConstants.SITE_VISIT_KEY;
@@ -171,6 +232,13 @@ public class SitemapServiceImpl implements SitemapService {
         }
     }
 
+    /**
+     * 查询站点某一天or总的访问信息
+     *
+     * @param date 日期，为空时，表示查询所有的站点信息
+     * @param path 访问路径，为空时表示查站点信息
+     * @return
+     */
     @Override
     public SiteCntVo querySiteVisitInfo(LocalDate date, String path) {
         String globalKey = SitemapConstants.SITE_VISIT_KEY;

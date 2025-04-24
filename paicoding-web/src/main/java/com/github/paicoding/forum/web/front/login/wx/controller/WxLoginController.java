@@ -17,10 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-/**
- * 公众号登陆的长连接控制器
- *
- **/
 @Controller
 @Slf4j
 public class WxLoginController extends BaseViewController {

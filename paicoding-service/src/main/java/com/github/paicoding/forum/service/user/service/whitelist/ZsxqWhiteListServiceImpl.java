@@ -25,28 +25,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 @Service
 public class ZsxqWhiteListServiceImpl implements ZsxqWhiteListService {
-
     @Autowired
     private UserAiDao userAiDao;
-
-    @Autowired
-    private AiConfig aiConfig;
-    @Autowired
-    private UserPwdEncoder userPwdEncoder;
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private UserPwdEncoder userPwdEncoder;
+    @Resource
+    private AiConfig aiConfig;
+
     @Override
     public PageVo<ZsxqUserInfoDTO> getList(SearchZsxqUserReq req) {
-        SearchZsxqWhiteParams params = UserStructMapper.INSTANCE.toSearchParams(req);
+        SearchZsxqWhiteParams  params = UserStructMapper.INSTANCE.toSearchParams(req);
         // 查询知识星球用户
         List<ZsxqUserInfoDTO> zsxqUserInfoDTOs = userAiDao.listZsxqUsersByParams(params);
         Long totalCount = userAiDao.countZsxqUserByParams(params);
@@ -64,7 +62,7 @@ public class ZsxqWhiteListServiceImpl implements ZsxqWhiteListService {
 
         // 更新用户状态
         userAiDO.setState(operate.getCode());
-
+        
         // 如果设置为正式用户状态，则将过期时间延长360天
         if (UserAIStatEnum.FORMAL.equals(operate) && userAiDO.getStarNumber() != null) {
             userAiDO.setStarExpireTime(new Date(System.currentTimeMillis() + aiConfig.getMaxNum().getExpireDays() * 24 * 60 * 60 * 1000L));
@@ -74,6 +72,7 @@ public class ZsxqWhiteListServiceImpl implements ZsxqWhiteListService {
         userAiDao.updateById(userAiDO);
     }
 
+    @Override
     // 加事务
     @Transactional(rollbackFor = Exception.class)
     public void update(ZsxqUserPostReq req) {
@@ -118,6 +117,7 @@ public class ZsxqWhiteListServiceImpl implements ZsxqWhiteListService {
 
         userAiDao.updateById(userAiDO);
     }
+
     @Override
     public void batchOperate(List<Long> ids, UserAIStatEnum operate) {
         // 如果设置为正式用户状态，则将过期时间延长360天
@@ -133,6 +133,7 @@ public class ZsxqWhiteListServiceImpl implements ZsxqWhiteListService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void reset(Integer authorId) {
         // 根据id获取用户信息
         UserAiDO userAiDO = userAiDao.getById(authorId);

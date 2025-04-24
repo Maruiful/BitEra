@@ -6,9 +6,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
-/**
- * 基本用户信息
- * */
 @Data
 @Accessors(chain = true)
 public class SimpleUserInfoDTO implements Serializable {

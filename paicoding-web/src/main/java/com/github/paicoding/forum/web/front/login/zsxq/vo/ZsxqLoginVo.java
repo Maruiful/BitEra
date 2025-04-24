@@ -2,10 +2,6 @@ package com.github.paicoding.forum.web.front.login.zsxq.vo;
 
 import lombok.Data;
 
-/**
- * 知识星球的登录方式
- *
- */
 @Data
 public class ZsxqLoginVo {
     /**

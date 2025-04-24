@@ -3,14 +3,11 @@ package com.github.paicoding.forum.web.global;
 import com.github.paicoding.forum.api.model.vo.PageParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * 全局属性配置
- * */
 public class BaseViewController {
     @Autowired
     protected GlobalInitService globalInitService;
 
-    public PageParam buildPageParam(Long page, Long size)  {
+    public PageParam buildPageParam(Long page, Long size) {
         if (page <= 0) {
             page = PageParam.DEFAULT_PAGE_NUM;
         }
@@ -28,5 +25,7 @@ public class BaseViewController {
 //     * @param model
 //     */
 //    @ModelAttribute
-//    public void globalAttr(Model model)  {}
+//    public void globalAttr(Model model) {
+//        model.addAttribute("global", globalInitService.globalAttr());
+//    }
 }

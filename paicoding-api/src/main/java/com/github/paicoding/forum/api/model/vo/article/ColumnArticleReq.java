@@ -5,9 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * 保存Column文章请求参数
- * */
 @Data
 public class ColumnArticleReq implements Serializable {
 

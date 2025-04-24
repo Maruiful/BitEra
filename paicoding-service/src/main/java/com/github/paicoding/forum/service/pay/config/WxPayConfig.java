@@ -8,9 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * 微信支付配置
- * */
 @Data
 @Component
 @ConditionalOnProperty(value = "wx.pay.enable")
@@ -36,5 +33,11 @@ public class WxPayConfig {
      *
      * @return 私钥内容
      */
-    public String getPrivateKeyContent()  { return null; }
+    public String getPrivateKeyContent() {
+        try {
+            return FileReadUtil.readAll(privateKey);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

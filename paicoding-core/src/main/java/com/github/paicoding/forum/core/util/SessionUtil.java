@@ -16,18 +16,45 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/** */
 @Slf4j
 public class SessionUtil {
     private static final int COOKIE_AGE = 5 * 86400;
 
-    public static String buildSetCookieString(Cookie cookie)  { return null; }
+    public static String buildSetCookieString(Cookie cookie) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(cookie.getName()).append("=").append(cookie.getValue());
 
-    public static Cookie newCookie(String key, String session)  {
+        if (cookie.getMaxAge() >= 0) {
+            sb.append("; Max-Age=").append(cookie.getMaxAge());
+        }
+
+        if (cookie.getDomain() != null) {
+            sb.append("; Domain=").append(cookie.getDomain());
+        }
+
+        if (cookie.getPath() != null) {
+            sb.append("; Path=").append(cookie.getPath());
+        }
+
+        if (cookie.getSecure()) {
+            sb.append("; Secure");
+        }
+
+        if (cookie.isHttpOnly()) {
+            sb.append("; HttpOnly");
+        }
+
+        return sb.toString();
+    }
+
+    public static Cookie newCookie(String key, String session) {
         return newCookie(key, session, "/", COOKIE_AGE);
     }
 
-    public static Cookie newCookie(String key, String session, String path, int maxAge)  { return null; }
+    public static Cookie newCookie(String key, String session, String path, int maxAge) {
+        String host = ReqInfoContext.getReqInfo() == null ? "" : ReqInfoContext.getReqInfo().getHost();
+        return newCookie(key, session, host, path, maxAge);
+    }
 
     public static Cookie newCookie(String key, String session, String domain, String path, int maxAge) {
         // 移除端口号
@@ -52,9 +79,27 @@ public class SessionUtil {
      * @param host 包含端口号的host，如 "localhost:8080"
      * @return 移除端口号后的host，如 "localhost"
      */
-    private static String removePortFromHost(String host)  { return null; }
+    private static String removePortFromHost(String host) {
+        if (StringUtils.isBlank(host)) {
+            return host;
+        }
+        int portIndex = host.indexOf(':');
+        if (portIndex > 0) {
+            // 移除端口号
+            host = host.substring(0, portIndex);
+        }
 
-    public static Cookie delCookie(String key)  { return null; }
+        // 将 www 开头的域名，移除掉开头的www
+        if (host.startsWith("www.")) {
+            host = host.substring(4);
+        }
+        return host;
+    }
+
+    public static Cookie delCookie(String key) {
+        String host = ReqInfoContext.getReqInfo() == null ? "" : ReqInfoContext.getReqInfo().getHost();
+        return delCookie(key, host);
+    }
 
     /**
      * 移除所有相关的Cookie
@@ -72,11 +117,27 @@ public class SessionUtil {
         });
     }
 
-    public static Cookie delCookie(String key, String host)  { return null; }
+    public static Cookie delCookie(String key, String host) {
+        return delCookie(key, host, "/");
+    }
 
-    public static Cookie delCookie(String key, String host, String path)  { return null; }
+    public static Cookie delCookie(String key, String host, String path) {
+        Cookie cookie = new Cookie(key, null);
+        cookie.setPath(path);
+        if (StringUtils.isNotBlank(host)) {
+            cookie.setDomain(removePortFromHost(host));
+        }
+        cookie.setMaxAge(0);
+        return cookie;
+    }
 
-    public static void delCookie(Cookie ck)  {}
+    public static void delCookie(Cookie ck) {
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
+        ck.setMaxAge(0);
+        if (response != null) {
+            response.addCookie(ck);
+        }
+    }
 
     /**
      * 根据key查询cookie
@@ -85,9 +146,24 @@ public class SessionUtil {
      * @param name
      * @return
      */
-    public static Cookie findCookieByName(HttpServletRequest request, String name)  { return null; }
+    public static Cookie findCookieByName(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null || cookies.length == 0) {
+            return null;
+        }
 
-    public static List<Cookie> findCookiesByName(HttpServletRequest request, String name)  { return null; }
+        return Arrays.stream(cookies).filter(cookie -> StringUtils.equalsAnyIgnoreCase(cookie.getName(), name))
+                .findFirst().orElse(null);
+    }
+
+    public static List<Cookie> findCookiesByName(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null || cookies.length == 0) {
+            return null;
+        }
+
+        return Arrays.stream(cookies).filter(cookie -> StringUtils.equalsAnyIgnoreCase(cookie.getName(), name)).collect(Collectors.toList());
+    }
 
 
     public static String findCookieByName(ServerHttpRequest request, String name) {

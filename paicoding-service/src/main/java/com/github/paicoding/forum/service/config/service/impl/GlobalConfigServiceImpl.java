@@ -18,15 +18,11 @@ import com.github.paicoding.forum.service.config.repository.params.SearchGlobalC
 import com.github.paicoding.forum.service.config.service.GlobalConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 @Service
 public class GlobalConfigServiceImpl implements GlobalConfigService {
-
-
     @Autowired
     private ConfigDao configDao;
 
@@ -56,6 +52,7 @@ public class GlobalConfigServiceImpl implements GlobalConfigService {
         // 配置更新之后，主动触发配置的动态加载
         SpringUtil.publishEvent(new ConfigRefreshEvent(this, req.getKeywords(), req.getValue()));
     }
+
     @Override
     public void delete(Long id) {
         GlobalConfigDO globalConfigDO = configDao.getGlobalConfigById(id);
@@ -66,6 +63,30 @@ public class GlobalConfigServiceImpl implements GlobalConfigService {
         }
     }
 
+    /**
+     * 添加敏感词白名单
+     *
+     * @param word
+     */
     @Override
-    public void addSensitiveWhiteWord(String word) {}
+    public void addSensitiveWhiteWord(String word) {
+        String key = SensitiveProperty.SENSITIVE_KEY_PREFIX + ".allow";
+        GlobalConfigReq req = new GlobalConfigReq();
+        req.setKeywords(key);
+
+        GlobalConfigDO config = configDao.getGlobalConfigByKey(key);
+        if (config == null) {
+            req.setValue(word);
+            req.setComment("敏感词白名单");
+        } else {
+            req.setValue(config.getValue() + "," + word);
+            req.setComment(config.getComment());
+            req.setId(config.getId());
+        }
+        // 更新敏感词白名单
+        save(req);
+
+        // 移除敏感词记录
+        SpringUtil.getBean(SensitiveService.class).removeSensitiveWord(word);
+    }
 }

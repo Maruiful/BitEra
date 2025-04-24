@@ -24,9 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 文章后台
- * */
 @RestController
 @Permission(role = UserRole.LOGIN)
 @Api(value = "文章设置管理控制器", tags = "文章管理")
@@ -52,7 +49,7 @@ public class ArticleSettingRestController {
             this.articleWriteService.saveArticle(req, null);
         }
         return ResVo.ok();
-    } 
+    }
 
     @Permission(role = UserRole.ADMIN)
     @PostMapping(path = "update")
@@ -70,8 +67,8 @@ public class ArticleSettingRestController {
         }
         articleSettingService.operateArticle(articleId, operate);
         return ResVo.ok();
-
     }
+
 
     @Permission(role = UserRole.ADMIN)
     @GetMapping(path = "delete")
@@ -109,4 +106,5 @@ public class ArticleSettingRestController {
         vo.setItems(list);
         return ResVo.ok(vo);
     }
+
 }

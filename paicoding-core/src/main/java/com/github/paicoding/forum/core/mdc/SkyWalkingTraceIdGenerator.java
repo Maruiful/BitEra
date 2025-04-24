@@ -4,12 +4,6 @@ import com.google.common.base.Joiner;
 
 import java.util.UUID;
 
-/**
- * SkyWalking的traceId生成策略
- * <p>
- * 源码：<a href="https://github.com/apache/skywalking-java/blob/ddc68e27e2764ca6299f04ef21a5d864bf660deb/apm-sniffer/apm-agent-core/src/main/java/org/apache/skywalking/apm/agent/core/context/ids/GlobalIdGenerator.java"/>
- *
- */
 public class SkyWalkingTraceIdGenerator {
     private static final String PROCESS_ID = UUID.randomUUID().toString().replaceAll("-", "");
     private static final ThreadLocal<IDContext> THREAD_ID_SEQUENCE = ThreadLocal.withInitial(

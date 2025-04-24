@@ -8,9 +8,6 @@ import com.github.paicoding.forum.api.model.enums.SourceTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 文章表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("article")

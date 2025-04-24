@@ -24,10 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
-/**
- * 消息通知
- *
- **/
 @Permission(role = UserRole.LOGIN)
 @RestController
 @RequestMapping(path = "notice/api")

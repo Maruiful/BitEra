@@ -30,11 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/**
- * 主体来自讯飞官方java sdk
- *
- * <a href="https://www.xfyun.cn/doc/spark/Web.html#_1-%E6%8E%A5%E5%8F%A3%E8%AF%B4%E6%98%8E"/>
- * */
 @Slf4j
 @Setter
 @Component
@@ -47,9 +42,20 @@ public class XunFeiIntegration {
     private OkHttpClient okHttpClient;
 
     @PostConstruct
-    public void init()  {}
+    public void init() {
+        okHttpClient = new OkHttpClient.Builder().build();
+    }
 
-    public String buildXunFeiUrl()  { return null; }
+    public String buildXunFeiUrl() {
+        try {
+            String authUrl = getAuthorizationUrl(xunFeiConfig.hostUrl, xunFeiConfig.apiKey, xunFeiConfig.apiSecret);
+            String url = authUrl.replace("https://", "wss://").replace("http://", "ws://");
+            return url;
+        } catch (Exception e) {
+            log.warn("讯飞url创建失败", e);
+            return null;
+        }
+    }
 
     /**
      * 构建授权url
@@ -60,9 +66,66 @@ public class XunFeiIntegration {
      * @return
      * @throws Exception
      */
-    public String getAuthorizationUrl(String hostUrl, String apikey, String apisecret) throws Exception  { return null; }
+    public String getAuthorizationUrl(String hostUrl, String apikey, String apisecret) throws Exception {
+        //获取host
+        URL url = new URL(hostUrl);
+        //获取鉴权时间 date
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String date = format.format(new Date());
+        //获取signature_origin字段
+        String builder = "host: " + url.getHost() + "\n" +
+                "date: " + date + "\n" +
+                "GET " + url.getPath() + " HTTP/1.1";
+        //获得signatue
+        Charset charset = StandardCharsets.UTF_8;
+        Mac mac = Mac.getInstance("hmacsha256");
+        SecretKeySpec sp = new SecretKeySpec(apisecret.getBytes(charset), "hmacsha256");
+        mac.init(sp);
+        String signature = Base64.getEncoder().encodeToString(mac.doFinal(builder.getBytes(charset)));
+        //获得 authorization_origin
+        String authorizationOrigin = String.format("api_key=\"%s\",algorithm=\"%s\",headers=\"%s\",signature=\"%s\"", apikey, "hmac-sha256", "host date request-line", signature);
+        //获得authorization
+        String authorization = Base64.getEncoder().encodeToString(authorizationOrigin.getBytes(charset));
+        //获取httpurl
+        HttpUrl httpUrl = HttpUrl.parse("https://" + url.getHost() + url.getPath()).newBuilder().
+                addQueryParameter("authorization", authorization).
+                addQueryParameter("date", date).
+                addQueryParameter("host", url.getHost()).
+                build();
+        return httpUrl.toString();
+    }
 
-    public String buildSendMsg(String uid, String question)  { return null; }
+    public String buildSendMsg(String uid, String question) {
+        JsonObject frame = new JsonObject();
+        JsonObject header = new JsonObject();
+        JsonObject chat = new JsonObject();
+        JsonObject parameter = new JsonObject();
+        JsonObject payload = new JsonObject();
+        JsonObject message = new JsonObject();
+        JsonObject text = new JsonObject();
+        JsonArray ja = new JsonArray();
+
+        //填充header
+        header.addProperty("app_id", xunFeiConfig.appId);
+        header.addProperty("uid", uid);
+        //填充parameter
+        chat.addProperty("domain", xunFeiConfig.domain);
+        chat.addProperty("random_threshold", 0);
+        chat.addProperty("max_tokens", 1024);
+        chat.addProperty("auditing", "default");
+        parameter.add("chat", chat);
+        //填充payload
+        text.addProperty("role", "user");
+        text.addProperty("content", question);
+        ja.add(text);
+        message.add("text", ja);
+        payload.add("message", message);
+        frame.add("header", header);
+        frame.add("parameter", parameter);
+        frame.add("payload", payload);
+        return frame.toString();
+    }
 
     /**
      * 结合上下文的回答
@@ -71,7 +134,38 @@ public class XunFeiIntegration {
      * @param items
      * @return
      */
-    public String buildSendMsg(String uid, List<ChatItemVo> items)  { return null; }
+    public String buildSendMsg(String uid, List<ChatItemVo> items) {
+        JsonObject frame = new JsonObject();
+        JsonObject header = new JsonObject();
+        JsonObject chat = new JsonObject();
+        JsonObject parameter = new JsonObject();
+        JsonObject payload = new JsonObject();
+        JsonObject message = new JsonObject();
+        JsonArray ja = new JsonArray();
+
+        //填充header
+        header.addProperty("app_id", xunFeiConfig.appId);
+        header.addProperty("uid", uid);
+        //填充parameter
+        chat.addProperty("domain", xunFeiConfig.domain);
+        chat.addProperty("random_threshold", 0);
+        chat.addProperty("max_tokens", 2048);
+        chat.addProperty("auditing", "default");
+        parameter.add("chat", chat);
+
+        //填充payload
+        for (int i = items.size() - 1; i >= 0; i--) {
+            ChatItemVo item = items.get(i);
+            ja.addAll(toText(item));
+        }
+
+        message.add("text", ja);
+        payload.add("message", message);
+        frame.add("header", header);
+        frame.add("parameter", parameter);
+        frame.add("payload", payload);
+        return frame.toString();
+    }
 
     /**
      * 构建提问消息
@@ -79,9 +173,35 @@ public class XunFeiIntegration {
      * @param item
      * @return
      */
-    private static JsonArray toText(ChatItemVo item)  { return null; }
+    private static JsonArray toText(ChatItemVo item) {
+        JsonArray ary = new JsonArray();
 
-    public ResponseData parse2response(String text)  { return null; }
+        if (item.getQuestion().startsWith(ChatConstants.PROMPT_TAG)) {
+            // 提示词
+            JsonObject obj = new JsonObject();
+            obj.addProperty("role", "user");
+            obj.addProperty("content", item.getQuestion().substring(ChatConstants.PROMPT_TAG.length()));
+            ary.add(obj);
+            return ary;
+        }
+
+        // 用户问答消息
+        JsonObject obj = new JsonObject();
+        obj.addProperty("role", "user");
+        obj.addProperty("content", item.getQuestion());
+        ary.add(obj);
+        if (StringUtils.isNotBlank(item.getAnswer())) {
+            JsonObject obj2 = new JsonObject();
+            obj2.addProperty("role", "assistant");
+            obj2.addProperty("content", item.getAnswer());
+            ary.add(obj);
+        }
+        return ary;
+    }
+
+    public ResponseData parse2response(String text) {
+        return JsonUtil.toObj(text, ResponseData.class);
+    }
 
 
     @Component
@@ -102,21 +222,27 @@ public class XunFeiIntegration {
         private Header header;
         private Payload payload;
 
-        public boolean successReturn()  { return false; }
+        public boolean successReturn() {
+            return header != null && header.code == 0;
+        }
 
         /**
          * 首次返回结果
          *
          * @return
          */
-        public boolean firstResonse()  { return false; }
+        public boolean firstResonse() {
+            return header != null && "0".equalsIgnoreCase(header.status);
+        }
 
         /**
          * 判断是否是最后一次返回的结果
          *
          * @return
          */
-        public boolean endResponse()  { return false; }
+        public boolean endResponse() {
+            return header != null && "2".equalsIgnoreCase(header.status);
+        }
     }
 
     @Data

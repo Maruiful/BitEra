@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 
-/** */
 @Slf4j
 @Service
 public class GlobalInitService {
@@ -128,7 +127,7 @@ public class GlobalInitService {
         }
     }
 
-    public boolean initLoginUser(String session, ReqInfoContext.ReqInfo reqInfo)  {
+    public boolean initLoginUser(String session, ReqInfoContext.ReqInfo reqInfo) {
         BaseUserInfoDTO user = userService.getAndUpdateUserIpInfoBySessionId(session, null);
         if (user != null) {
             reqInfo.setSession(session);

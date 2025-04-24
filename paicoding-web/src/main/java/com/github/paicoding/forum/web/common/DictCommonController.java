@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * 通用
- *
- */
 @RestController
 @Slf4j
 @Permission(role = UserRole.LOGIN)

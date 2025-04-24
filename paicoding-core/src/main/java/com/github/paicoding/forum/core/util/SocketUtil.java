@@ -5,9 +5,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Random;
 
-/**
- * 端口工具类
- */
 public class SocketUtil {
 
     /**

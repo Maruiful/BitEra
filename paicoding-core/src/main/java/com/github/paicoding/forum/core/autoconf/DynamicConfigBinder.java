@@ -20,9 +20,6 @@ import org.springframework.core.env.PropertySources;
 
 import java.util.function.Consumer;
 
-/**
- * 自定义动态配置绑定
- */
 public class DynamicConfigBinder {
     private final ApplicationContext applicationContext;
     private PropertySources propertySource;
@@ -47,7 +44,15 @@ public class DynamicConfigBinder {
     }
 
     private BindHandler getBindHandler(ConfigurationProperties annotation) {
-        return null;
+        BindHandler handler = new IgnoreTopLevelConverterNotFoundBindHandler();
+        if (annotation.ignoreInvalidFields()) {
+            handler = new IgnoreErrorsBindHandler(handler);
+        }
+        if (!annotation.ignoreUnknownFields()) {
+            UnboundElementsSourceFilter filter = new UnboundElementsSourceFilter();
+            handler = new NoUnboundElementsBindHandler(handler, filter);
+        }
+        return handler;
     }
 
     private Binder getBinder() {

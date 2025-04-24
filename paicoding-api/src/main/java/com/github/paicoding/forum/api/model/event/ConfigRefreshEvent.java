@@ -6,9 +6,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
-/**
- * 配置变更消息事件
- * */
 @Getter
 @Setter
 @ToString

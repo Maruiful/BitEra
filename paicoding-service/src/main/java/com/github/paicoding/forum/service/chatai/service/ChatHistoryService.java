@@ -6,9 +6,6 @@ import com.github.paicoding.forum.api.model.vo.chat.ChatSessionItemVo;
 
 import java.util.List;
 
-/**
- * 对话会话记录服务
- * */
 public interface ChatHistoryService {
     /**
      * 获取对话列表

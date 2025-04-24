@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.function.BiConsumer;
 
-/** */
 @Slf4j
 @Service
 public class ChatGptAiServiceImpl extends AbsChatService {
@@ -23,7 +22,12 @@ public class ChatGptAiServiceImpl extends AbsChatService {
     private ChatGptIntegration chatGptIntegration;
 
     @Override
-    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat)  { return null; }
+    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat) {
+        if (chatGptIntegration.directReturn(user, chat)) {
+            return AiChatStatEnum.END;
+        }
+        return AiChatStatEnum.ERROR;
+    }
 
     @Override
     public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer) {
@@ -58,7 +62,12 @@ public class ChatGptAiServiceImpl extends AbsChatService {
             }
 
             @Override
-            public void onError(Throwable throwable, String response)  {}
+            public void onError(Throwable throwable, String response) {
+                // 返回异常的场景
+                item.appendAnswer("Error:" + (StringUtils.isBlank(response) ? throwable.getMessage() : response))
+                        .setAnswerType(ChatAnswerTypeEnum.STREAM_END);
+                consumer.accept(AiChatStatEnum.ERROR, chatRes);
+            }
         };
 
         // 注册回答结束的回调钩子
@@ -72,8 +81,13 @@ public class ChatGptAiServiceImpl extends AbsChatService {
     }
 
     @Override
-    public AISourceEnum source()  { return null; }
+    public AISourceEnum source() {
+        return AISourceEnum.CHAT_GPT_3_5;
+    }
 
     @Override
-    public boolean asyncFirst()  { return false; }
+    public boolean asyncFirst() {
+        // true 表示优先使用异步返回； false 表示同步等待结果
+        return true;
+    }
 }

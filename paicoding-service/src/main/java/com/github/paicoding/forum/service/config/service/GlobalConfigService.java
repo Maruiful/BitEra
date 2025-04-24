@@ -5,9 +5,6 @@ import com.github.paicoding.forum.api.model.vo.config.GlobalConfigReq;
 import com.github.paicoding.forum.api.model.vo.config.SearchGlobalConfigReq;
 import com.github.paicoding.forum.api.model.vo.config.dto.GlobalConfigDTO;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 public interface GlobalConfigService {
     PageVo<GlobalConfigDTO> getList(SearchGlobalConfigReq req);
 

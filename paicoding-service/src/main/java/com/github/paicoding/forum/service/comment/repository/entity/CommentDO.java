@@ -6,9 +6,6 @@ import com.github.paicoding.forum.core.senstive.ano.SensitiveField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 评论表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("comment")

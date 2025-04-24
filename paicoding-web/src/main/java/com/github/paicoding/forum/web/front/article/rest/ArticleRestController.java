@@ -47,10 +47,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
-/**
- * 返回json格式数据
- *
- */
 @Slf4j
 @RequestMapping(path = "article/api")
 @RestController

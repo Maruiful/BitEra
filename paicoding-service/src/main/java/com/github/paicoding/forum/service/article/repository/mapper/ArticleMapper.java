@@ -12,9 +12,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * 文章mapper接口
- * */
 public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**

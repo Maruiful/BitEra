@@ -1,7 +1,5 @@
 package com.github.paicoding.forum.api.model.enums.ai;
 
-/**
- */
 public enum AiChatStatEnum {
     IGNORE(-2) {
         @Override

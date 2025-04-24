@@ -15,15 +15,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * 类目Service
- * */
 @Repository
 public class CategoryDao extends ServiceImpl<CategoryMapper, CategoryDO> {
     /**
      * @return
      */
-    public List<CategoryDO> listAllCategoriesFromDb()  {
+    public List<CategoryDO> listAllCategoriesFromDb() {
         return lambdaQuery()
                 .eq(CategoryDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .eq(CategoryDO::getStatus, PushStatusEnum.ONLINE.getCode())
@@ -31,14 +28,18 @@ public class CategoryDao extends ServiceImpl<CategoryMapper, CategoryDO> {
     }
 
     // 抽一个私有方法，构造查询条件
-    private LambdaQueryChainWrapper<CategoryDO> createCategoryQuery(SearchCategoryParams params)  { return null; }
+    private LambdaQueryChainWrapper<CategoryDO> createCategoryQuery(SearchCategoryParams params) {
+        return lambdaQuery()
+                .eq(CategoryDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .like(StringUtils.isNotBlank(params.getCategory()), CategoryDO::getCategoryName, params.getCategory());
+    }
 
     /**
      * 获取所有 Categorys 列表（分页）
      *
      * @return
      */
-    public List<CategoryDTO> listCategory(SearchCategoryParams params)  {
+    public List<CategoryDTO> listCategory(SearchCategoryParams params) {
         List<CategoryDO> list = createCategoryQuery(params)
                 .orderByDesc(CategoryDO::getUpdateTime)
                 .orderByAsc(CategoryDO::getRank)
@@ -54,7 +55,7 @@ public class CategoryDao extends ServiceImpl<CategoryMapper, CategoryDO> {
      *
      * @return
      */
-    public Long countCategory(SearchCategoryParams params)  {
+    public Long countCategory(SearchCategoryParams params) {
         return createCategoryQuery(params)
                 .count();
     }

@@ -7,11 +7,11 @@ import com.github.paicoding.forum.service.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-/** */
 @Service
 public class AuthorWhiteListServiceImpl implements AuthorWhiteListService {
     /**
@@ -27,6 +27,11 @@ public class AuthorWhiteListServiceImpl implements AuthorWhiteListService {
         return RedisClient.sIsMember(ARTICLE_WHITE_LIST, authorId);
     }
 
+    /**
+     * 获取所有的白名单用户
+     *
+     * @return
+     */
     @Override
     public List<BaseUserInfoDTO> queryAllArticleWhiteListAuthors() {
         Set<Long> users = RedisClient.sGetAll(ARTICLE_WHITE_LIST, Long.class);

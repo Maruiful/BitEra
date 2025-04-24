@@ -7,9 +7,6 @@ import org.springframework.util.DigestUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-/**
- * 密码加密器，后续接入SpringSecurity之后，可以使用 PasswordEncoder 进行替换
- * */
 @Component
 public class UserPwdEncoder {
     /**
@@ -21,7 +18,7 @@ public class UserPwdEncoder {
     @Value("${security.salt-index}")
     private Integer saltIndex;
 
-    public boolean match(String plainPwd, String encPwd)  {
+    public boolean match(String plainPwd, String encPwd) {
         return Objects.equals(encPwd(plainPwd), encPwd);
     }
 

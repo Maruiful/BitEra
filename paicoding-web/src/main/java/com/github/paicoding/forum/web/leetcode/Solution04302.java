@@ -29,5 +29,9 @@ public class Solution04302 {
         return sb.length() == 0 ? "0" : sb.toString(); // 处理乘积为 0 的情况
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution04302 solution = new Solution04302();
+        System.out.println(solution.multiply("2", "3")); // 输出 "6"
+        System.out.println(solution.multiply("123", "456")); // 输出 "56088"
+    }
 }

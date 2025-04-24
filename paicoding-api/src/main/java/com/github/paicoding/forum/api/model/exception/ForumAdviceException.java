@@ -4,9 +4,6 @@ import com.github.paicoding.forum.api.model.vo.Status;
 import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import lombok.Getter;
 
-/**
- * 业务异常
- */
 public class ForumAdviceException extends RuntimeException {
     @Getter
     private Status status;

@@ -1,2 +1,1 @@
-/** */
 package com.github.paicoding.forum.api.model;

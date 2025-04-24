@@ -23,5 +23,14 @@ class Solution04101 {
         return n + 1;
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution04101 solution = new Solution04101();
+        int[] nums1 = {1, 2, 0};
+        int[] nums2 = {3, 4, -1, 1};
+        int[] nums3 = {7, 8, 9, 11, 12};
+
+        System.out.println("缺失的第一个正数: " + solution.firstMissingPositive(nums1)); // 输出 3
+        System.out.println("缺失的第一个正数: " + solution.firstMissingPositive(nums2)); // 输出 2
+        System.out.println("缺失的第一个正数: " + solution.firstMissingPositive(nums3)); // 输出 1
+    }
 }

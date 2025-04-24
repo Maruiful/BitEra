@@ -1,16 +1,13 @@
 package com.github.paicoding.forum.service.config.converter;
 
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.github.paicoding.forum.api.model.vo.article.dto.DictCommonDTO;
 import com.github.paicoding.forum.service.config.repository.entity.DictCommonDO;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Banner转换
- * */
 public class DictCommonConverter {
 
     public static List<DictCommonDTO> toDTOS(List<DictCommonDO> records) {

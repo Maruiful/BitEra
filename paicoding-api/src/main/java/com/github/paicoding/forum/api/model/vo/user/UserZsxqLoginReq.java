@@ -5,9 +5,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
-/**
- * 知识星球登录
- * */
 @Data
 @Accessors(chain = true)
 public class UserZsxqLoginReq implements Serializable {

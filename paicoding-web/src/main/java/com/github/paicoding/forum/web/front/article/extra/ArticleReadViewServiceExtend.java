@@ -12,11 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.function.Supplier;
 
-/**
- * 文章阅读的扩展服务支撑
- * - 用于控制文章阅读模式
- *
- */
 @Service
 public class ArticleReadViewServiceExtend {
     @Autowired

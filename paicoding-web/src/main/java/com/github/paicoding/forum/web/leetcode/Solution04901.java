@@ -25,5 +25,10 @@ public class Solution04901 {
         return new ArrayList<>(map.values());
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution04901 solution = new Solution04901();
+        String[] strs = {"eat", "tea", "tan", "ate", "nat", "bat"};
+        List<List<String>> result = solution.groupAnagrams(strs);
+        System.out.println(result); // 输出 [["eat","tea","ate"], ["tan","nat"], ["bat"]]
+    }
 }

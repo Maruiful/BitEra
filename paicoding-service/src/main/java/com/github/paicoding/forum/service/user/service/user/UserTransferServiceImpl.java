@@ -22,22 +22,21 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
-/**
- * 基于验证码、用户名密码的登录方式
- * */
 @Service
 @Slf4j
 public class UserTransferServiceImpl implements UserTransferService {
+    @Autowired
+    private UserDao userDao;
 
     @Autowired
     private UserAiDao userAiDao;
-    @Autowired
-    private UserDao userDao;
+
     @Autowired
     private UserSessionHelper userSessionHelper;
 
     @Autowired
     private UserPwdEncoder userPwdEncoder;
+
 
     @Override
     public boolean transferUser(String uname, String pwd) {

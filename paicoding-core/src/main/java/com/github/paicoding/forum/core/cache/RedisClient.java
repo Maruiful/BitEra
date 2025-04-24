@@ -21,8 +21,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- */
 public class RedisClient {
     private static final Charset CODE = StandardCharsets.UTF_8;
     private static final String KEY_PREFIX = "pai_";

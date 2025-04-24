@@ -8,9 +8,6 @@ import com.github.paicoding.forum.api.model.enums.ConfigTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 评论表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("config")

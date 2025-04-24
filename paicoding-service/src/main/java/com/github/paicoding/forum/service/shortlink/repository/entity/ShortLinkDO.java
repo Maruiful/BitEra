@@ -7,9 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 短链接数据库对象
- * */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

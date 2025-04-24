@@ -17,22 +17,28 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * 与三方支付服务交互的门面类
- * */
 @Service
 public class ThirdPayHandler {
     @Autowired
     private List<ThirdPayIntegrationApi> payServiceList;
 
-    private ThirdPayIntegrationApi getPayService(ThirdPayWayEnum payWay)  { return null; }
+    private ThirdPayIntegrationApi getPayService(ThirdPayWayEnum payWay) {
+        return payServiceList.stream().filter(s -> s.support(payWay)).findFirst()
+                .orElse(SpringUtil.getBean(EmailPayIntegration.class));
+    }
 
-    public PrePayInfoResBo createPayOrder(ThirdPayOrderReqBo payReq)  { return null; }
+    public PrePayInfoResBo createPayOrder(ThirdPayOrderReqBo payReq) {
+        return getPayService(payReq.getPayWay()).createOrder(payReq);
+    }
 
-    public PayCallbackBo queryOrder(String outTradeNo, ThirdPayWayEnum payWay)  { return null; }
+    public PayCallbackBo queryOrder(String outTradeNo, ThirdPayWayEnum payWay) {
+        return getPayService(payWay).queryOrder(outTradeNo);
+    }
 
     @Transactional
-    public PayCallbackBo payCallback(HttpServletRequest request, ThirdPayWayEnum payWay)  { return null; }
+    public PayCallbackBo payCallback(HttpServletRequest request, ThirdPayWayEnum payWay) {
+        return getPayService(payWay).payCallback(request);
+    }
 
     @Transactional
     public <T> ResponseEntity<?> refundCallback(HttpServletRequest request, ThirdPayWayEnum payWay, Function<T, Boolean> refundCallback) {

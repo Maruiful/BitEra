@@ -35,10 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.function.Function;
 
-/**
- * 微信公众号登录相关
- *
- */
 @Slf4j
 @RequestMapping(path = "wx")
 @RestController

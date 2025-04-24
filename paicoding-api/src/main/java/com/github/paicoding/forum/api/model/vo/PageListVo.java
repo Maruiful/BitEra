@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-/** */
 @Data
 public class PageListVo<T> {
 

@@ -10,10 +10,6 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import java.security.Principal;
 import java.util.Map;
 
-/**
- * 握手处理器
- *
- */
 @Slf4j
 public class AuthHandshakeHandler extends DefaultHandshakeHandler {
 

@@ -2,10 +2,6 @@ package com.github.paicoding.forum.api.model.enums;
 
 import lombok.Getter;
 
-/**
- * 置顶状态枚举
- *
- */
 @Getter
 public enum ToppingStatEnum {
 

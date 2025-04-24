@@ -2,10 +2,6 @@ package com.github.paicoding.forum.api.model.enums;
 
 import lombok.Getter;
 
-/**
- * 阅读状态枚举
- *
- */
 @Getter
 public enum ReadStatEnum {
 

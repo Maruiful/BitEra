@@ -11,9 +11,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-/**
- * 敏感词相关配置，db配置表中的配置优先级更高，支持动态刷新
- * */
 @Data
 public class SensitiveObjectMeta {
     private static final String JAVA_LANG_OBJECT = "java.lang.object";
@@ -32,7 +29,21 @@ public class SensitiveObjectMeta {
      */
     private List<SensitiveFieldMeta> sensitiveFieldMetaList;
 
-    public static Optional<SensitiveObjectMeta> buildSensitiveObjectMeta(Object param)  { return null; }
+    public static Optional<SensitiveObjectMeta> buildSensitiveObjectMeta(Object param) {
+        if (isNull(param)) {
+            return Optional.empty();
+        }
+
+        Class<?> clazz = param.getClass();
+        SensitiveObjectMeta sensitiveObjectMeta = new SensitiveObjectMeta();
+        sensitiveObjectMeta.setClassName(clazz.getName());
+
+        List<SensitiveFieldMeta> sensitiveFieldMetaList = newArrayList();
+        sensitiveObjectMeta.setSensitiveFieldMetaList(sensitiveFieldMetaList);
+        boolean sensitiveField = parseAllSensitiveFields(clazz, sensitiveFieldMetaList);
+        sensitiveObjectMeta.setEnabledSensitiveReplace(sensitiveField);
+        return Optional.of(sensitiveObjectMeta);
+    }
 
 
     private static boolean parseAllSensitiveFields(Class<?> clazz, List<SensitiveFieldMeta> sensitiveFieldMetaList) {

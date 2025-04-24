@@ -17,10 +17,6 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 import java.util.Map;
 
-/**
- * v1. 简单版本聊天： 长连接的登录校验拦截器
- *
- */
 @Slf4j
 public class SimpleWsAuthInterceptor extends HttpSessionHandshakeInterceptor implements ChannelInterceptor {
 

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** */
 @RestController
 @RequestMapping(path = "/openapi/login")
 public class SilentLoginOpenApi {
@@ -20,7 +19,7 @@ public class SilentLoginOpenApi {
     }
 
     @GetMapping(path = "loginByToken")
-    public ResVo<OpenApiUserDTO> loginByToken(String token)  {
+    public ResVo<OpenApiUserDTO> loginByToken(String token) {
         OpenApiUserDTO userInfo = openApiSilentLoginService.silentLogin(token);
         if (userInfo == null) {
             return ResVo.fail(StatusEnum.FORBID_NOTLOGIN);

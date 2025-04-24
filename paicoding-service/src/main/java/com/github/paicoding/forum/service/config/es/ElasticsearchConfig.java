@@ -16,10 +16,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * es配置类
- * * @since 2023-05-25
- **/
 @Slf4j
 @Data
 @Configuration
@@ -66,5 +62,35 @@ public class ElasticsearchConfig {
      * 如果@Bean没有指定bean的名称，那么这个bean的名称就是方法名
      */
     @Bean(name = "restHighLevelClient")
-    public RestHighLevelClient restHighLevelClient()  { return null; }
+    public RestHighLevelClient restHighLevelClient() {
+
+        // 此处为单节点es
+        String host = hosts.split(":")[0];
+        String port = hosts.split(":")[1];
+        HttpHost httpHost = new HttpHost(host, Integer.parseInt(port));
+
+        // 构建连接对象
+        RestClientBuilder builder = RestClient.builder(httpHost);
+
+        // 设置用户名、密码
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password));
+
+        // 连接延时配置
+        builder.setRequestConfigCallback(requestConfigBuilder -> {
+            requestConfigBuilder.setConnectTimeout(connectTimeOut);
+            requestConfigBuilder.setSocketTimeout(socketTimeOut);
+            requestConfigBuilder.setConnectionRequestTimeout(connectionRequestTimeOut);
+            return requestConfigBuilder;
+        });
+        // 连接数配置
+        builder.setHttpClientConfigCallback(httpClientBuilder -> {
+            httpClientBuilder.setMaxConnTotal(maxConnectNum);
+            httpClientBuilder.setMaxConnPerRoute(maxConnectNumPerRoute);
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            return httpClientBuilder;
+        });
+
+        return new RestHighLevelClient(builder);
+    }
 }

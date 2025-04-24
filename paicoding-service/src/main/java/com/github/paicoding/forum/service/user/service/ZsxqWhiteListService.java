@@ -8,8 +8,6 @@ import com.github.paicoding.forum.api.model.vo.user.dto.ZsxqUserInfoDTO;
 
 import java.util.List;
 
-/**
- * */
 public interface ZsxqWhiteListService {
     PageVo<ZsxqUserInfoDTO> getList(SearchZsxqUserReq req);
 

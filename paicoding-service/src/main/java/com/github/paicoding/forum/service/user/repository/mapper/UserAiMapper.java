@@ -9,9 +9,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * ai用户登录mapper接口
- * */
 public interface UserAiMapper extends BaseMapper<UserAiDO> {
 
     Long countZsxqUsersByParams(@Param("searchParams") SearchZsxqWhiteParams params);

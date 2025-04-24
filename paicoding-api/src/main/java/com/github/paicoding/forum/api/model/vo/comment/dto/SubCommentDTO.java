@@ -4,10 +4,6 @@ import lombok.Data;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * 评论树状结构
- *
- */
 @ToString(callSuper = true)
 @Data
 public class SubCommentDTO extends BaseCommentDTO {

@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.statistics.dto;
 
 import lombok.Data;
 
-/**
- * 每天的统计计数
- * */
 @Data
 public class StatisticsDayDTO {
 

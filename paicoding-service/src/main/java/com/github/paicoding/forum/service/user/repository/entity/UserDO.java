@@ -5,9 +5,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 用户登录表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("user")

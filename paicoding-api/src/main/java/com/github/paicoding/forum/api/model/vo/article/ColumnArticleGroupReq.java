@@ -5,9 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * 保存Column分组请求参数
- * */
 @Data
 public class ColumnArticleGroupReq implements Serializable {
 

@@ -5,11 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * 文章信息
- * <p>
- * DTO 定义返回给 admin 后端的实体类 (VO)
- * */
 @Data
 public class ArticleAdminDTO implements Serializable {
     private static final long serialVersionUID = -793906904770296838L;

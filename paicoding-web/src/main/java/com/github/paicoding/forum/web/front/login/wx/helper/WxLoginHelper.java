@@ -18,8 +18,6 @@ import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-/**
- */
 @Slf4j
 @Component
 public class WxLoginHelper {

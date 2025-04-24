@@ -12,9 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * 用户相关DB操作
- * */
 @Repository
 public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelationDO> {
 
@@ -25,7 +22,7 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param pageParam
      * @return
      */
-    public List<FollowUserInfoDTO> listUserFollows(Long followUserId, PageParam pageParam)  {
+    public List<FollowUserInfoDTO> listUserFollows(Long followUserId, PageParam pageParam) {
         return baseMapper.queryUserFollowList(followUserId, pageParam);
     }
 
@@ -36,7 +33,7 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param pageParam
      * @return
      */
-    public List<FollowUserInfoDTO> listUserFans(Long userId, PageParam pageParam)  {
+    public List<FollowUserInfoDTO> listUserFans(Long userId, PageParam pageParam) {
         return baseMapper.queryUserFansList(userId, pageParam);
     }
 
@@ -47,14 +44,26 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param targetUserId 关注者用户id列表
      * @return
      */
-    public List<UserRelationDO> listUserRelations(Long followUserId, Collection<Long> targetUserId)  {
+    public List<UserRelationDO> listUserRelations(Long followUserId, Collection<Long> targetUserId) {
         return lambdaQuery().eq(UserRelationDO::getFollowUserId, followUserId)
                 .in(UserRelationDO::getUserId, targetUserId).list();
     }
 
-    public Long queryUserFollowCount(Long userId)  { return null; }
+    public Long queryUserFollowCount(Long userId) {
+        QueryWrapper<UserRelationDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserRelationDO::getFollowUserId, userId)
+                .eq(UserRelationDO::getFollowState, FollowStateEnum.FOLLOW.getCode());
+        return baseMapper.selectCount(queryWrapper);
+    }
 
-    public Long queryUserFansCount(Long userId)  { return null; }
+    public Long queryUserFansCount(Long userId) {
+        QueryWrapper<UserRelationDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(UserRelationDO::getUserId, userId)
+                .eq(UserRelationDO::getFollowState, FollowStateEnum.FOLLOW.getCode());
+        return baseMapper.selectCount(queryWrapper);
+    }
 
     /**
      * 获取关注信息
@@ -63,7 +72,7 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param followUserId 关注的用户
      * @return
      */
-    public UserRelationDO getUserRelationByUserId(Long userId, Long followUserId)  {
+    public UserRelationDO getUserRelationByUserId(Long userId, Long followUserId) {
         QueryWrapper<UserRelationDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
                 .eq(UserRelationDO::getUserId, userId)
@@ -79,7 +88,7 @@ public class UserRelationDao extends ServiceImpl<UserRelationMapper, UserRelatio
      * @param followUserId 关注的用户
      * @return
      */
-    public UserRelationDO getUserRelationRecord(Long userId, Long followUserId)  {
+    public UserRelationDO getUserRelationRecord(Long userId, Long followUserId) {
         QueryWrapper<UserRelationDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
                 .eq(UserRelationDO::getUserId, userId)

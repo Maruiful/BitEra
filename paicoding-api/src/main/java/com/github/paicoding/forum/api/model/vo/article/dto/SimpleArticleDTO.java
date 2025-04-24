@@ -8,9 +8,6 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-/**
- * 文章推荐
- * */
 @Data
 @Accessors(chain = true)
 public class SimpleArticleDTO implements Serializable {

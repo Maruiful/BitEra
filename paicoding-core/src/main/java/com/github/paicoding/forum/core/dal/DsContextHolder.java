@@ -1,9 +1,5 @@
 package com.github.paicoding.forum.core.dal;
 
-/**
- * 数据源选择上下持有类，用于存储当前选中的是哪个数据源
- *
- */
 public class DsContextHolder {
     /**
      * 使用继承的线程上下文，支持异步时选择传递

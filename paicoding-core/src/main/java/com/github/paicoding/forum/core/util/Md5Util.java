@@ -4,9 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Md5加密算法工具类
- */
 public class Md5Util {
     private Md5Util() {
     }

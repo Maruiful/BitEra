@@ -1,8 +1,5 @@
 package com.github.paicoding.forum.service.statistics.constants;
 
-/**
- * 用户相关的常量信息
- * */
 public interface CountConstants {
 
     /**

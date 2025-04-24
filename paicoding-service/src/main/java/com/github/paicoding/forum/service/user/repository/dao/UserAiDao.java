@@ -20,7 +20,6 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.Resource;
 import java.util.List;
 
-/** */
 @Repository
 public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
 
@@ -36,9 +35,16 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      * @param starNumber
      * @return
      */
-    public UserAiDO getByStarNumber(String starNumber)  { return null; }
+    public UserAiDO getByStarNumber(String starNumber) {
+        LambdaQueryWrapper<UserAiDO> queryUserAi = Wrappers.lambdaQuery();
 
-    public UserAiDO getByUserId(Long userId)  {
+        queryUserAi.eq(UserAiDO::getStarNumber, starNumber)
+                .eq(UserAiDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .last("limit 1");
+        return userAiMapper.selectOne(queryUserAi);
+    }
+
+    public UserAiDO getByUserId(Long userId) {
         LambdaQueryWrapper<UserAiDO> queryUserAi = Wrappers.lambdaQuery();
 
         queryUserAi.eq(UserAiDO::getUserId, userId)
@@ -52,7 +58,17 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      *
      * @param userId
      */
-    public UserAiDO getOrInitAiInfo(Long userId)  { return null; }
+    public UserAiDO getOrInitAiInfo(Long userId) {
+        UserAiDO ai = getByUserId(userId);
+        if (ai != null) {
+            return ai;
+        }
+
+        // 当不存在时，初始化一个
+        ai = UserAiConverter.initAi(userId);
+        saveOrUpdateAiBindInfo(ai);
+        return ai;
+    }
 
     /**
      * 根据邀请码，查找对应的邀请人
@@ -60,7 +76,7 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      * @param inviteCode 邀请码
      * @return
      */
-    public UserAiDO getByInviteCode(String inviteCode)  {
+    public UserAiDO getByInviteCode(String inviteCode) {
         LambdaQueryWrapper<UserAiDO> queryUserAi = Wrappers.lambdaQuery();
 
         queryUserAi.eq(UserAiDO::getInviteCode, inviteCode)
@@ -74,13 +90,15 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
      * @param id
      * @param incr
      */
-    private void updateInviteCnt(Long id, int incr)  {
+    private void updateInviteCnt(Long id, int incr) {
         LambdaUpdateWrapper<UserAiDO> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(UserAiDO::getId, id).setSql("invite_num = invite_num + " + incr);
         userAiMapper.update(null, updateWrapper);
     }
 
-    public void saveOrUpdateAiBindInfo(UserAiDO ai)  {}
+    public void saveOrUpdateAiBindInfo(UserAiDO ai) {
+        saveOrUpdateAiBindInfo(ai, null);
+    }
 
     /**
      * 更新userAi绑定信息
@@ -125,21 +143,29 @@ public class UserAiDao extends ServiceImpl<UserAiMapper, UserAiDO> {
         this.saveOrUpdate(ai);
     }
 
-    public List<ZsxqUserInfoDTO> listZsxqUsersByParams(SearchZsxqWhiteParams params)  {
+    public List<ZsxqUserInfoDTO> listZsxqUsersByParams(SearchZsxqWhiteParams params) {
         return userAiMapper.listZsxqUsersByParams(params,
                 PageParam.newPageInstance(params.getPageNum(), params.getPageSize()));
     }
 
-    public Long countZsxqUserByParams(SearchZsxqWhiteParams params)  {
+    public Long countZsxqUserByParams(SearchZsxqWhiteParams params) {
         return userAiMapper.countZsxqUsersByParams(params);
     }
 
-    public void batchUpdateState(List<Long> ids, Integer code)  {}
+    public void batchUpdateState(List<Long> ids, Integer code) {
+        LambdaUpdateWrapper<UserAiDO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(UserAiDO::getId, ids).set(UserAiDO::getState, code);
+        userAiMapper.update(null, updateWrapper);
+    }
 
     /**
      * 更新用户的星球状态
      * @param userId 用户id
      * @param code 状态码
      */
-    public void updateUserStarState(Long userId, Integer code)  {}
+    public void updateUserStarState(Long userId, Integer code) {
+        LambdaUpdateWrapper<UserAiDO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(UserAiDO::getUserId, userId).set(UserAiDO::getState, code);
+        userAiMapper.update(null, updateWrapper);
+    }
 }

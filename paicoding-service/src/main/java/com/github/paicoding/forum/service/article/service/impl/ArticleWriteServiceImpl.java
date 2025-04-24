@@ -26,18 +26,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * 文章操作相关服务类
- * */
 @Slf4j
 @Service
 public class ArticleWriteServiceImpl implements ArticleWriteService {
 
+    private final ArticleDao articleDao;
+
+    private final ArticleTagDao articleTagDao;
+
+    @Autowired
+    private ColumnSettingService columnSettingService;
+
+    @Autowired
+    private UserFootService userFootService;
 
     @Autowired
     private ImageService imageService;
@@ -48,18 +55,18 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
     @Autowired
     private AuthorWhiteListService articleWhiteListService;
 
+    // 构造方法的注入方式
+    public ArticleWriteServiceImpl(ArticleDao articleDao, ArticleTagDao articleTagDao) {
+        this.articleDao = articleDao;
+        this.articleTagDao = articleTagDao;
+    }
 
-    @Autowired
-    private ArticleDao articleDao;
-    @Autowired
-    private ArticleTagDao articleTagDao;
-
-    @Autowired
-    private UserFootService userFootService;
-
-    @Autowired
-    private ColumnSettingService columnSettingService;
-
+    /**
+     * 保存文章，当articleId存在时，表示更新记录； 不存在时，表示插入
+     *
+     * @param req
+     * @return
+     */
     @Override
     public Long saveArticle(ArticlePostReq req, Long author) {
         ArticleDO article = ArticleConverter.toArticleDo(req, author);
@@ -165,20 +172,10 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
 
 
     /**
-     * 非白名单的用户，发布的文章需要先进行审核
+     * 删除文章
      *
-     * @param article
-     * @return
+     * @param articleId
      */
-    private boolean needToReview(ArticleDO article) {
-        // 把 admin 用户加入白名单
-        BaseUserInfoDTO user = ReqInfoContext.getReqInfo().getUser();
-        if (user.getRole() != null && user.getRole().equalsIgnoreCase(UserRole.ADMIN.name())) {
-            return false;
-        }
-        return article.getStatus() == PushStatusEnum.ONLINE.getCode() && !articleWhiteListService.authorInArticleWhiteList(article.getUserId());
-    }
-
     @Override
     public void deleteArticle(Long articleId, Long loginUserId) {
         ArticleDO dto = articleDao.getById(articleId);
@@ -194,5 +191,21 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
             // 发布文章删除事件
             SpringUtil.publishEvent(new ArticleMsgEvent<>(this, ArticleEventEnum.DELETE, dto));
         }
+    }
+
+
+    /**
+     * 非白名单的用户，发布的文章需要先进行审核
+     *
+     * @param article
+     * @return
+     */
+    private boolean needToReview(ArticleDO article) {
+        // 把 admin 用户加入白名单
+        BaseUserInfoDTO user = ReqInfoContext.getReqInfo().getUser();
+        if (user.getRole() != null && user.getRole().equalsIgnoreCase(UserRole.ADMIN.name())) {
+            return false;
+        }
+        return article.getStatus() == PushStatusEnum.ONLINE.getCode() && !articleWhiteListService.authorInArticleWhiteList(article.getUserId());
     }
 }

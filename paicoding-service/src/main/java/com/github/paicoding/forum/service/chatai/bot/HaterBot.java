@@ -20,9 +20,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * 基于大模型的杠精机器人
- * */
 @Component
 public class HaterBot {
 
@@ -82,7 +79,9 @@ public class HaterBot {
      *
      * @return
      */
-    public BaseUserInfoDTO getBotUser()  { return null; }
+    public BaseUserInfoDTO getBotUser() {
+        return haterBotUser.get();
+    }
 
     /**
      * 添加机器人提示词
@@ -90,5 +89,11 @@ public class HaterBot {
      * @param userId
      * @return
      */
-    public ChatItemVo addPrompt(Long userId)  { return null; }
+    public ChatItemVo addPrompt(Long userId) {
+        if (Objects.equals(userId, getBotUser().getUserId())) {
+            return new ChatItemVo()
+                    .setQuestion(ChatConstants.PROMPT_TAG + AiBotEnum.HATER_BOT.getPrompt());
+        }
+        return null;
+    }
 }

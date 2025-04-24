@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-/** */
 @Component
 public class ChatServiceFactory {
     private final Map<AISourceEnum, ChatService> chatServiceMap;
@@ -20,5 +19,7 @@ public class ChatServiceFactory {
         }
     }
 
-    public ChatService getChatService(AISourceEnum aiSource)  { return null; }
+    public ChatService getChatService(AISourceEnum aiSource) {
+        return chatServiceMap.get(aiSource);
+    }
 }

@@ -2,10 +2,6 @@ package com.github.paicoding.forum.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * 星球编号工具类
- *
- */
 public class StarNumberUtil {
 
     /**
@@ -18,7 +14,7 @@ public class StarNumberUtil {
         if (StringUtils.isBlank(starNumber)) {
             return "";
         }
-
+        
         // 移除可能存在的前导零，然后重新格式化
         try {
             // 解析为整数以去除前导零

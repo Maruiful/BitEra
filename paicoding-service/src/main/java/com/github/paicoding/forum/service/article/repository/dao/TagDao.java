@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/** */
 @Repository
 public class TagDao extends ServiceImpl<TagMapper, TagDO> {
 
@@ -26,7 +25,7 @@ public class TagDao extends ServiceImpl<TagMapper, TagDO> {
      *
      * @return
      */
-    public List<TagDTO> listOnlineTag(String key, PageParam pageParam)  {
+    public List<TagDTO> listOnlineTag(String key, PageParam pageParam) {
         LambdaQueryWrapper<TagDO> query = Wrappers.lambdaQuery();
         query.eq(TagDO::getStatus, PushStatusEnum.ONLINE.getCode())
                 .eq(TagDO::getDeleted, YesOrNoEnum.NO.getCode())
@@ -44,7 +43,7 @@ public class TagDao extends ServiceImpl<TagMapper, TagDO> {
      *
      * @return
      */
-    public Integer countOnlineTag(String key)  {
+    public Integer countOnlineTag(String key) {
         return lambdaQuery()
                 .eq(TagDO::getStatus, PushStatusEnum.ONLINE.getCode())
                 .eq(TagDO::getDeleted, YesOrNoEnum.NO.getCode())
@@ -53,14 +52,28 @@ public class TagDao extends ServiceImpl<TagMapper, TagDO> {
                 .intValue();
     }
 
-    private LambdaQueryChainWrapper<TagDO> createTagQuery(SearchTagParams params)  { return null; }
+    private LambdaQueryChainWrapper<TagDO> createTagQuery(SearchTagParams params) {
+        return lambdaQuery()
+                .eq(TagDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .apply(StringUtils.isNotBlank(params.getTag()),
+                        "LOWER(tag_name) LIKE {0}",
+                        "%" + params.getTag().toLowerCase() + "%");
+    }
 
     /**
      * 获取所有 Tags 列表（分页）
      *
      * @return
      */
-    public List<TagDO> listTag(SearchTagParams params)  { return null; }
+    public List<TagDO> listTag(SearchTagParams params) {
+        List<TagDO> list = createTagQuery(params)
+                .orderByDesc(TagDO::getUpdateTime)
+                .last(PageParam.getLimitSql(
+                        PageParam.newPageInstance(params.getPageNum(), params.getPageSize())
+                ))
+                .list();
+        return list;
+    }
 
 
 
@@ -69,7 +82,10 @@ public class TagDao extends ServiceImpl<TagMapper, TagDO> {
      *
      * @return
      */
-    public Long countTag(SearchTagParams params)  { return null; }
+    public Long countTag(SearchTagParams params) {
+        return createTagQuery(params)
+                .count();
+    }
 
     /**
      * 查询tagId
@@ -77,12 +93,22 @@ public class TagDao extends ServiceImpl<TagMapper, TagDO> {
      * @param tag
      * @return
      */
-    public Long selectTagIdByTag(String tag)  { return null; }
+    public Long selectTagIdByTag(String tag) {
+        TagDO record = lambdaQuery().select(TagDO::getId)
+                .eq(TagDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(TagDO::getTagName, tag)
+                .last("limit 1")
+                .one();
+        return record != null ? record.getId() : null;
+    }
 
     /**
      * 查询tag
      * @param tagId
      * @return
      */
-    public TagDTO selectById(Long tagId)  { return null; }
+    public TagDTO selectById(Long tagId) {
+        TagDO tagDO = lambdaQuery().eq(TagDO::getId, tagId).one();
+        return ArticleConverter.toDto(tagDO);
+    }
 }

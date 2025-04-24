@@ -13,9 +13,6 @@ import com.github.paicoding.forum.service.user.repository.entity.UserInfoDO;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * 用户Service接口
- * */
 public interface UserService {
     /**
      * 判断微信用户是否注册过

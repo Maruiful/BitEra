@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.paicoding.forum.api.model.enums.YesOrNoEnum;
 import com.github.paicoding.forum.api.model.enums.column.MovePositionEnum;
 import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
@@ -20,7 +19,6 @@ import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;
 import com.github.paicoding.forum.core.util.NumUtil;
 import com.github.paicoding.forum.service.article.conveter.ColumnArticleStructMapper;
-import com.github.paicoding.forum.service.article.conveter.ColumnConvert;
 import com.github.paicoding.forum.service.article.conveter.ColumnStructMapper;
 import com.github.paicoding.forum.service.article.helper.TreeBuilder;
 import com.github.paicoding.forum.service.article.repository.dao.ArticleDao;
@@ -34,37 +32,37 @@ import com.github.paicoding.forum.service.article.repository.entity.ColumnInfoDO
 import com.github.paicoding.forum.service.article.repository.params.SearchColumnArticleParams;
 import com.github.paicoding.forum.service.article.repository.params.SearchColumnParams;
 import com.github.paicoding.forum.service.article.service.ColumnSettingService;
-import com.github.paicoding.forum.service.config.repository.dao.ConfigDao;
 import com.github.paicoding.forum.service.user.service.UserService;
 import org.apache.http.util.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * 专栏后台接口
- * */
 @Service
 public class ColumnSettingServiceImpl implements ColumnSettingService {
 
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ColumnArticleDao columnArticleDao;
-    @Autowired
-    private ColumnStructMapper columnStructMapper;
 
-    @Autowired
-    private ColumnDao columnDao;
     @Autowired
     private ColumnArticleGroupDao columnArticleGroupDao;
 
     @Autowired
+    private ColumnDao columnDao;
+
+    @Autowired
     private ArticleDao articleDao;
-    private UserService userService;
+
+    @Autowired
+    private ColumnStructMapper columnStructMapper;
 
     @Override
     public void saveColumn(ColumnReq req) {
@@ -85,9 +83,14 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         }
     }
 
-    
-
-    
+    /**
+     * section 的排序规则
+     * 1. 以父节点的 section * 1000 为前缀，然后在同一个父节点中，按照顺序找位置（新增，则放在最后，修改则放在对应位置，并将其之后的进行顺移）
+     *
+     * @param req
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveColumnArticleGroup(ColumnArticleGroupReq req) {
         ColumnArticleGroupDO groupDO = columnStructMapper.toGroupDO(req);
         if (!NumUtil.nullOrZero(req.getId())) {
@@ -101,7 +104,6 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
             this.autoCalculateGroupSection(groupDO);
         }
     }
-
 
     private boolean firstAddGroup(ColumnArticleGroupDO groupDO) {
         // 如果这个分组是当前专栏的第一个分组；那么就直接新增分组；并将所有未分组的教程全部挂在这个分组下面
@@ -216,26 +218,13 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         }
     }
 
-    /**
-     * 更新当前节点，和对应子节点的顺序
-     *
-     * @param groupDO
-     */
-    private void updateGroupSection(ColumnArticleGroupDO groupDO) {
-        // 更新当前节点的顺序
-        columnArticleGroupDao.updateById(groupDO);
-        // 更新子节点的顺序
-        List<ColumnArticleGroupDO> children = columnArticleGroupDao.selectColumnGroupsBySameParent(groupDO.getColumnId(), groupDO.getId());
-        long baseSection = groupDO.getSection() * ColumnArticleGroupDao.SECTION_STEP;
-        for (int i = 0; i < children.size(); i++) {
-            ColumnArticleGroupDO item = children.get(i);
-            item.setSection(baseSection + i + 1);
-            updateGroupSection(item);
-        }
-    }
-    
 
-    
+    /**
+     * 将文章保存到对应的专栏中
+     *
+     * @param articleId
+     * @param columnId
+     */
     public void saveColumnArticle(Long articleId, Long columnId) {
         // 转换参数
         // 插入的时候，需要判断是否已经存在
@@ -259,9 +248,8 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         }
     }
 
-    
-
-    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveColumnArticle(ColumnArticleReq req) {
         // 转换参数
         ColumnArticleDO columnArticleDO = ColumnArticleStructMapper.INSTANCE.reqToDO(req);
@@ -296,9 +284,8 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         columnDao.deleteColumn(columnId);
     }
 
-    
-
-    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteColumnArticle(Long id) {
         ColumnArticleDO columnArticleDO = columnArticleDao.getById(id);
         if (columnArticleDO != null) {
@@ -310,9 +297,6 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
                     .gt(ColumnArticleDO::getSection, 1).gt(ColumnArticleDO::getSection, columnArticleDO.getSection()));
         }
     }
-
-
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -370,9 +354,8 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         }
     }
 
-    
-
-    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void sortColumnArticleByIDApi(SortColumnArticleByIDReq req) {
         // 获取要重新排序的专栏文章
         ColumnArticleDO columnArticleDO = columnArticleDao.getById(req.getId());
@@ -474,10 +457,6 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         return TreeBuilder.buildTree(dtoList);
     }
 
-    
-
-    
-
 
     public List<ColumnArticleGroupDTO> getColumnGroupAndArticles(Long columnId) {
         List<ColumnArticleGroupDO> entityList = columnArticleGroupDao.selectByColumnId(columnId);
@@ -509,8 +488,37 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         return TreeBuilder.buildTree(dtoList);
     }
 
+
+    /**
+     * 删除专栏内的文章分组
+     *
+     * @param groupId 分组id
+     * @return true 表示删除成功， false 表示删除失败
+     */
     @Override
-    public boolean deleteColumnGroup(Long groupId) { return false; }
+    public boolean deleteColumnGroup(Long groupId) {
+        ColumnArticleGroupDO group = columnArticleGroupDao.getById(groupId);
+        if (group == null) {
+            throw ExceptionUtil.of(StatusEnum.RECORDS_NOT_EXISTS, groupId);
+        }
+
+        // 判断这个分组下是否有子分组，如果有，则不允许直接删除
+        ColumnArticleGroupDO sub = columnArticleGroupDao.selectByParentGroupId(groupId);
+        if (sub != null) {
+            throw ExceptionUtil.of(StatusEnum.UNEXPECT_ERROR, "存在子分组，不支持直接删除当前分组!");
+        }
+
+        // 判断分组下是否存在文章，如果存在，也不允许删除
+        ColumnArticleDO article = columnArticleDao.selectOneByGroupId(groupId);
+        if (article != null) {
+            throw ExceptionUtil.of(StatusEnum.UNEXPECT_ERROR, "分组下已经有文章了，不支持直接删除当前分组!");
+        }
+
+        // 直接删除
+        group.setDeleted(YesOrNoEnum.YES.getCode());
+        group.setUpdateTime(new Date());
+        return columnArticleGroupDao.updateById(group);
+    }
 
     @Override
     @Transactional
@@ -566,6 +574,22 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
         // 专栏内教程顺序重排
         this.autoUpdateColumnArticleSections(req.getColumnId());
         return true;
+    }
+
+    /**
+     * 前台在显示文章时，是按照顺序递增的方式进行访问的，因此拖拽教程之后，我们对专栏内的教程做一次重排
+     *
+     * @param columnId
+     */
+    private void autoUpdateColumnArticleSections(Long columnId) {
+        SearchColumnArticleParams params = new SearchColumnArticleParams();
+        params.setColumnId(columnId);
+        List<ColumnArticleDTO> articleList = columnDao.listColumnArticlesDetail(params, PageParam.newPageInstance(1, Integer.MAX_VALUE));
+        int section = 1;
+        for (ColumnArticleDTO item : articleList) {
+            columnArticleDao.updateColumnArticleSection(item.getId(), section);
+            section += 1;
+        }
     }
 
     /**
@@ -656,18 +680,20 @@ public class ColumnSettingServiceImpl implements ColumnSettingService {
     }
 
     /**
-     * 前台在显示文章时，是按照顺序递增的方式进行访问的，因此拖拽教程之后，我们对专栏内的教程做一次重排
+     * 更新当前节点，和对应子节点的顺序
      *
-     * @param columnId
+     * @param groupDO
      */
-    private void autoUpdateColumnArticleSections(Long columnId) {
-        SearchColumnArticleParams params = new SearchColumnArticleParams();
-        params.setColumnId(columnId);
-        List<ColumnArticleDTO> articleList = columnDao.listColumnArticlesDetail(params, PageParam.newPageInstance(1, Integer.MAX_VALUE));
-        int section = 1;
-        for (ColumnArticleDTO item : articleList) {
-            columnArticleDao.updateColumnArticleSection(item.getId(), section);
-            section += 1;
+    private void updateGroupSection(ColumnArticleGroupDO groupDO) {
+        // 更新当前节点的顺序
+        columnArticleGroupDao.updateById(groupDO);
+        // 更新子节点的顺序
+        List<ColumnArticleGroupDO> children = columnArticleGroupDao.selectColumnGroupsBySameParent(groupDO.getColumnId(), groupDO.getId());
+        long baseSection = groupDO.getSection() * ColumnArticleGroupDao.SECTION_STEP;
+        for (int i = 0; i < children.size(); i++) {
+            ColumnArticleGroupDO item = children.get(i);
+            item.setSection(baseSection + i + 1);
+            updateGroupSection(item);
         }
     }
 }

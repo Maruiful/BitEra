@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/** */
 @Data
 public class OpenApiUserDTO implements Serializable {
     private static final long serialVersionUID = 4663622879892017339L;

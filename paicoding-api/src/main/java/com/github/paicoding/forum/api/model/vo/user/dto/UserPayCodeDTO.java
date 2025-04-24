@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 用户收款码
- * */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

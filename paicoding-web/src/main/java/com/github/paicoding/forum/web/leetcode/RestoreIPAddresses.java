@@ -1,8 +1,5 @@
 package com.github.paicoding.forum.web.leetcode;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,7 +8,10 @@ public class RestoreIPAddresses {
     List<String> ans = new ArrayList<>();
     int[] anss = new int[4];
 
-    public List<String> restoreIpAddresses(String s)  { return null; }
+    public List<String> restoreIpAddresses(String s) {
+        dfs(s, 0, 0);
+        return ans;
+    }
 
     public void dfs(String s, int cnt, int pos) {
         if (cnt == 4) {
@@ -47,5 +47,15 @@ public class RestoreIPAddresses {
         }
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("请输入给定的 IP 字符串: ");
+        String s = scanner.next();
+        RestoreIPAddresses solution = new RestoreIPAddresses();
+        List<String> result = solution.restoreIpAddresses(s);
+        System.out.println("可能的 IP 地址有:");
+        for (String ip : result) {
+            System.out.println(ip);
+        }
+    }
 }

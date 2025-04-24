@@ -1,6 +1,5 @@
 package com.github.paicoding.forum.service.user.converter;
 
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.github.paicoding.forum.api.model.context.ReqInfoContext;
 import com.github.paicoding.forum.api.model.enums.FollowStateEnum;
 import com.github.paicoding.forum.api.model.enums.RoleEnum;
@@ -17,13 +16,20 @@ import com.github.paicoding.forum.service.user.repository.entity.UserDO;
 import com.github.paicoding.forum.service.user.repository.entity.UserInfoDO;
 import com.github.paicoding.forum.service.user.repository.entity.UserRelationDO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
-/**
- * 用户转换
- * */
 public class UserConverter {
 
-    public static UserDO toDO(UserSaveReq req) { return null; }
+    public static UserDO toDO(UserSaveReq req) {
+        if (req == null) {
+            return null;
+        }
+        UserDO userDO = new UserDO();
+        userDO.setId(req.getUserId());
+        userDO.setThirdAccountId(req.getThirdAccountId());
+        userDO.setLoginType(req.getLoginType());
+        return userDO;
+    }
 
     public static UserInfoDO toDO(UserInfoSaveReq req) {
         if (req == null) {
@@ -68,7 +74,12 @@ public class UserConverter {
         return user;
     }
 
-    public static SimpleUserInfoDTO toSimpleInfo(UserInfoDO info) { return null; }
+    public static SimpleUserInfoDTO toSimpleInfo(UserInfoDO info) {
+        return new SimpleUserInfoDTO().setUserId(info.getUserId())
+                .setName(info.getUserName())
+                .setAvatar(info.getPhoto())
+                .setProfile(info.getProfile());
+    }
 
     public static UserRelationDO toDO(UserRelationReq req) {
         if (req == null) {

@@ -5,11 +5,6 @@ import com.github.paicoding.forum.service.sitemap.model.SiteMapVo;
 
 import java.time.LocalDate;
 
-/**
- * 站点统计相关服务：
- * - 站点地图
- * - pv/uv
- * */
 public interface SitemapService {
 
     /**

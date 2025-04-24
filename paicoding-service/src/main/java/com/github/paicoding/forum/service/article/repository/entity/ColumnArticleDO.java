@@ -6,9 +6,6 @@ import com.github.paicoding.forum.api.model.enums.column.ColumnArticleReadEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 专栏文章
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("column_article")

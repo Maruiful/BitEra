@@ -4,9 +4,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * 保存Tag请求参数
- * */
 @Data
 public class TagReq implements Serializable {
 

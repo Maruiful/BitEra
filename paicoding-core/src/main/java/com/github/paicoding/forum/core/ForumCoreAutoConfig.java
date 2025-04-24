@@ -16,8 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
-/**
- */
 @Configuration
 @EnableConfigurationProperties(ProxyProperties.class)
 @ComponentScan(basePackages = "com.github.paicoding.forum.core")

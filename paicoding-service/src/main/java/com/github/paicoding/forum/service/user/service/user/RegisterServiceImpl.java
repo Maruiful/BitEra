@@ -10,14 +10,14 @@ import com.github.paicoding.forum.core.util.RandUtil;
 import com.github.paicoding.forum.core.util.SpringUtil;
 import com.github.paicoding.forum.core.util.StarNumberUtil;
 import com.github.paicoding.forum.core.util.TransactionUtil;
-import com.github.paicoding.forum.service.user.converter.UserAiConverter;       
-import com.github.paicoding.forum.service.user.repository.dao.UserAiDao;        
+import com.github.paicoding.forum.service.user.converter.UserAiConverter;
+import com.github.paicoding.forum.service.user.repository.dao.UserAiDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserDao;
-import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;      
-import com.github.paicoding.forum.service.user.repository.entity.UserDO;        
-import com.github.paicoding.forum.service.user.repository.entity.UserInfoDO;    
+import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;
+import com.github.paicoding.forum.service.user.repository.entity.UserDO;
+import com.github.paicoding.forum.service.user.repository.entity.UserInfoDO;
 import com.github.paicoding.forum.service.user.service.RegisterService;
-import com.github.paicoding.forum.service.user.service.help.UserPwdEncoder;     
+import com.github.paicoding.forum.service.user.service.help.UserPwdEncoder;
 import com.github.paicoding.forum.service.user.service.help.UserRandomGenHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,23 +26,39 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
-/**
- * 用户注册服务
- */
 @Service
 public class RegisterServiceImpl implements RegisterService {
-
+    @Autowired
+    private UserPwdEncoder userPwdEncoder;
     @Autowired
     private UserDao userDao;
 
     @Autowired
-    private UserPwdEncoder userPwdEncoder;
-
-    @Autowired
     private UserAiDao userAiDao;
 
+
     @Override
-    public Long registerSystemUser(String loginUser, String nickUser, String avatar) { return null; }
+    @Transactional(rollbackFor = Exception.class)
+    public Long registerSystemUser(String loginUser, String nickUser, String avatar) {
+        UserDO dbUser = userDao.getUserByUserName(loginUser);
+        if (dbUser != null) {
+            return dbUser.getId();
+        }
+
+        // 注册系统账号
+        UserDO user = new UserDO();
+        user.setUserName(loginUser);
+        user.setThirdAccountId("system_" + RandUtil.random(16));
+        user.setLoginType(LoginTypeEnum.WECHAT.getType());
+        userDao.saveUser(user);
+
+        UserInfoDO userInfo = new UserInfoDO();
+        userInfo.setUserId(user.getId());
+        userInfo.setUserName(nickUser);
+        userInfo.setPhoto(avatar);
+        userDao.save(userInfo);
+        return user.getId();
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -81,10 +97,29 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
-    public Long registerByWechat(String thirdAccount) { return null; }
+    @Transactional(rollbackFor = Exception.class)
+    public Long registerByWechat(String thirdAccount) {
+        // 用户不存在，则需要注册
+        // 1. 保存用户登录信息
+        UserDO user = new UserDO();
+        user.setThirdAccountId(thirdAccount);
+        user.setLoginType(LoginTypeEnum.WECHAT.getType());
+        userDao.saveUser(user);
 
-    
-    public void run() {}
+
+        // 2. 初始化用户信息，随机生成用户昵称 + 头像
+        UserInfoDO userInfo = new UserInfoDO();
+        userInfo.setUserId(user.getId());
+        userInfo.setUserName(UserRandomGenHelper.genNickName());
+        userInfo.setPhoto(UserRandomGenHelper.genAvatar());
+        userDao.save(userInfo);
+
+        // 3. 保存ai相互信息
+        UserAiDO userAiDO = UserAiConverter.initAi(user.getId());
+        userAiDao.saveOrUpdateAiBindInfo(userAiDO);
+        processAfterUserRegister(user.getId());
+        return user.getId();
+    }
 
 
     /**

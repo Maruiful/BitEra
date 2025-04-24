@@ -4,9 +4,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
 
-/**
- * 简单文本请求
- * * @link <a href="https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Receiving_standard_messages.html"/> */
 @Data
 @JacksonXmlRootElement(localName = "xml")
 public class WxTxtMsgReqVo {

@@ -5,10 +5,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * RabbitMQ配置文件
- *
- */
 @Setter
 @Getter
 @ConfigurationProperties(prefix = "rabbitmq")

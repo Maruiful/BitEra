@@ -15,9 +15,6 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import java.util.Arrays;
 
-/**
- * Markdown 转换为 HTML 的工具类
- */
 public class MarkdownConverter {
     // 定义一个静态方法，将 Markdown 文本转换为 HTML
     public static String markdownToHtml(String markdown) {

@@ -1,13 +1,20 @@
 package com.github.paicoding.forum.web.leetcode;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 import java.util.Scanner;
 
 public class InterleavingString {
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // 读取输入
+        String s1 = scanner.nextLine();
+        String s2 = scanner.nextLine();
+        String s3 = scanner.nextLine();
+
+        // 调用函数并输出结果
+        System.out.println(isInterleave(s1, s2, s3));
+    }
 
     public static boolean isInterleave(String s1, String s2, String s3) {
         int n = s1.length(), m = s2.length();

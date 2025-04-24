@@ -1,6 +1,5 @@
 package com.github.paicoding.forum.service.chatai.service;
 
-/** */
 public interface ChatgptService {
 
     /**

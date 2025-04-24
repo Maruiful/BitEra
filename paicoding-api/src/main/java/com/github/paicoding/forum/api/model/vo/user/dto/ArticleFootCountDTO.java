@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.user.dto;
 
 import lombok.Data;
 
-/**
- * 文章足迹计数
- * */
 @Data
 public class ArticleFootCountDTO {
 

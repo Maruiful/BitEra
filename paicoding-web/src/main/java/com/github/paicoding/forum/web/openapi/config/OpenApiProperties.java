@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * 开放平台相关配置
- */
 @Data
 @ConfigurationProperties(prefix = "paicoding.openapi")
 @Component

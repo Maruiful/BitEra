@@ -18,10 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * 用户权限管理后台
- *
- */
 @RestController
 @Permission(role = UserRole.ADMIN)
 @Api(value = "用户管理控制器", tags = "用户管理")

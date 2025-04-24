@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- */
 @Slf4j
 @Component
 public class WxAckHelper {

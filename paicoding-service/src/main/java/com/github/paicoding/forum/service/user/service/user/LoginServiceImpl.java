@@ -30,38 +30,36 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.Objects;
 
-/**
- * 登录相关服务类
- */
-@Slf4j
 @Service
+@Slf4j
 public class LoginServiceImpl implements LoginService {
-
     @Autowired
     private UserDao userDao;
-    @Autowired
-    private UserAiService userAiService;
 
     @Autowired
-    private UserPwdEncoder userPwdEncoder;
+    private UserAiDao userAiDao;
 
     @Autowired
     private UserSessionHelper userSessionHelper;
+    @Autowired
+    private StarNumberHelper starNumberHelper;
 
     @Autowired
     private RegisterService registerService;
 
     @Autowired
+    private UserPwdEncoder userPwdEncoder;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
-    private StarNumberHelper starNumberHelper;
+    private UserAiService userAiService;
     @Autowired
-    private UserAiDao userAiDao;
     private ImageService imageService;
 
-
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long autoRegisterWxUserInfo(String uuid) {
         UserSaveReq req = new UserSaveReq().setLoginType(0).setThirdAccountId(uuid);
         Long userId = registerOrGetUserInfo(req);
@@ -87,11 +85,24 @@ public class LoginServiceImpl implements LoginService {
         userSessionHelper.removeSession(session);
     }
 
+    /**
+     * 给微信公众号的用户生成一个用于登录的会话
+     *
+     * @param userId 用户id
+     * @return
+     */
     @Override
     public String loginByWx(Long userId) {
         return userSessionHelper.genSession(userId);
     }
 
+    /**
+     * 用户名密码方式登录
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @return
+     */
     @Override
     public String loginByUserPwd(String username, String password) {
         UserDO user = userDao.getUserByUserName(username);
@@ -112,6 +123,13 @@ public class LoginServiceImpl implements LoginService {
         return userSessionHelper.genSession(userId);
     }
 
+
+    /**
+     * 用户名密码方式登录，若用户不存在，则进行注册
+     *
+     * @param loginReq 登录信息
+     * @return
+     */
     @Override
     public String registerByUserPwd(UserPwdLoginReq loginReq) {
         // 1. 前置校验
@@ -186,21 +204,6 @@ public class LoginServiceImpl implements LoginService {
             throw ExceptionUtil.of(StatusEnum.UNEXPECT_ERROR, "非法的邀请码【" + starNumber + "】");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)

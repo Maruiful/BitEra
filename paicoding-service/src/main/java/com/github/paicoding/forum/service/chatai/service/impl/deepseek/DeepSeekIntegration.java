@@ -25,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * DeepSeek的集成类，主要负责与DeepSeek进行交互
- * */
 @Slf4j
 @Component
 public class DeepSeekIntegration {

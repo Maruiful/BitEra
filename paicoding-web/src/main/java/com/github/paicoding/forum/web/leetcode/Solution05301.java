@@ -16,5 +16,9 @@ public class Solution05301 {
         return maxSum; // 返回最大子数组的和
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution05301 solution = new Solution05301();
+        int[] nums = {-2, 1, -3, 4, -1, 2, 1, -5, 4};
+        System.out.println(solution.maxSubArray(nums)); // 输出: 6
+    }
 }

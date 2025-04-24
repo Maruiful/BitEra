@@ -29,10 +29,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-/**
- * 异步工具类
- *
- */
 @Slf4j
 public class AsyncUtil {
     private static final TransmittableThreadLocal<CompletableFutureBridge> THREAD_LOCAL = new TransmittableThreadLocal<>();

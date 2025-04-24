@@ -2,7 +2,6 @@ package com.github.paicoding.forum.core.config;
 
 import lombok.Data;
 
-/** */
 @Data
 public class OssProperties {
     /**

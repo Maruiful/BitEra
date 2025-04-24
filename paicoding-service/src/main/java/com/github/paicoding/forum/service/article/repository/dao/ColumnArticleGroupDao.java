@@ -8,9 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * 专栏文章分组
- * */
 @Repository
 public class ColumnArticleGroupDao extends ServiceImpl<ColumnArticleGroupMapper, ColumnArticleGroupDO> {
 
@@ -26,7 +23,7 @@ public class ColumnArticleGroupDao extends ServiceImpl<ColumnArticleGroupMapper,
      * @param columnId 专栏
      * @return
      */
-    public List<ColumnArticleGroupDO> selectByColumnId(Long columnId)  {
+    public List<ColumnArticleGroupDO> selectByColumnId(Long columnId) {
         return lambdaQuery()
                 .eq(ColumnArticleGroupDO::getColumnId, columnId)
                 .eq(ColumnArticleGroupDO::getDeleted, YesOrNoEnum.NO.getCode())
@@ -40,7 +37,12 @@ public class ColumnArticleGroupDao extends ServiceImpl<ColumnArticleGroupMapper,
      * @param parentGroupId
      * @return
      */
-    public ColumnArticleGroupDO selectByParentGroupId(Long parentGroupId)  { return null; }
+    public ColumnArticleGroupDO selectByParentGroupId(Long parentGroupId) {
+        return lambdaQuery()
+                .eq(ColumnArticleGroupDO::getParentGroupId, parentGroupId)
+                .eq(ColumnArticleGroupDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .one();
+    }
 
     /**
      * 获取同一父分组下的所有数据
@@ -49,7 +51,7 @@ public class ColumnArticleGroupDao extends ServiceImpl<ColumnArticleGroupMapper,
      * @param parentGroupId
      * @return
      */
-    public List<ColumnArticleGroupDO> selectColumnGroupsBySameParent(Long columnId, Long parentGroupId)  {
+    public List<ColumnArticleGroupDO> selectColumnGroupsBySameParent(Long columnId, Long parentGroupId) {
         return lambdaQuery()
                 .eq(ColumnArticleGroupDO::getColumnId, columnId)
                 .eq(ColumnArticleGroupDO::getParentGroupId, parentGroupId)

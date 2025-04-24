@@ -1,6 +1,5 @@
 package com.github.paicoding.forum.core.permission;
 
-/** */
 public enum UserRole {
     /**
      * 管理员

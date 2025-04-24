@@ -16,10 +16,6 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 import java.util.Map;
 
-/**
- * 握手拦截器, 用于身份验证识别
- *
- */
 @Slf4j
 public class AuthHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 

@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
 
-/** */
 @Configuration
 @ConditionalOnProperty(value = "rabbitmq.switchFlag")
 @EnableConfigurationProperties(RabbitmqProperties.class)
@@ -26,5 +25,14 @@ public class RabbitMqAutoConfig implements ApplicationRunner {
 
 
     @Override
-    public void run(ApplicationArguments args) throws Exception  {}
+    public void run(ApplicationArguments args) throws Exception {
+        String host = rabbitmqProperties.getHost();
+        Integer port = rabbitmqProperties.getPort();
+        String userName = rabbitmqProperties.getUsername();
+        String password = rabbitmqProperties.getPassport();
+        String virtualhost = rabbitmqProperties.getVirtualhost();
+        Integer poolSize = rabbitmqProperties.getPoolSize();
+        RabbitmqConnectionPool.initRabbitmqConnectionPool(host, port, userName, password, virtualhost, poolSize);
+        AsyncUtil.execute(() -> rabbitmqService.processConsumerMsg());
+    }
 }

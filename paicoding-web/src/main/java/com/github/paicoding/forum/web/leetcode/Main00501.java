@@ -1,12 +1,24 @@
 package com.github.paicoding.forum.web.leetcode;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 import java.util.Scanner;
 
 public class Main00501 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        // 请输入字符串
+        System.out.println("请输入字符串：");
+        // 创建 Scanner 对象用于读取输入
+        Scanner scanner = new Scanner(System.in);
+
+        // 读取字符串
+        String s = scanner.nextLine();
+
+        // 创建 Solution 实例并调用 longestPalindrome 方法
+        Solution00501 solution = new Solution00501();
+        String result = solution.longestPalindrome(s);
+
+        // 输出结果
+        System.out.println(result);
+    }
 }
 
 class Solution00501 {

@@ -6,9 +6,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 评论表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("global_conf")

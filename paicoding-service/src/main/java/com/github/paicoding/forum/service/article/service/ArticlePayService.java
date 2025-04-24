@@ -8,7 +8,6 @@ import com.github.paicoding.forum.service.article.repository.entity.ArticlePayRe
 
 import java.util.List;
 
-/** */
 public interface ArticlePayService {
 
     /**

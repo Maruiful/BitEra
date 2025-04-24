@@ -18,18 +18,19 @@ import com.github.paicoding.forum.service.article.service.ColumnService;
 import com.github.paicoding.forum.service.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** */
 @Service
 public class ColumnServiceImpl implements ColumnService {
-
+    @Autowired
+    private ColumnDao columnDao;
+    @Autowired
+    private ArticleDao articleDao;
 
     @Autowired
     private ColumnArticleDao columnArticleDao;
-    @Autowired
-    private ColumnDao columnDao;
 
     @Autowired
     private UserService userService;
@@ -39,6 +40,11 @@ public class ColumnServiceImpl implements ColumnService {
         return columnArticleDao.selectColumnArticleByArticleId(articleId);
     }
 
+    /**
+     * 专栏列表
+     *
+     * @return
+     */
     @Override
     public PageListVo<ColumnDTO> listColumn(PageParam pageParam) {
         List<ColumnInfoDO> columnList = columnDao.listOnlineColumns(pageParam);
@@ -61,40 +67,9 @@ public class ColumnServiceImpl implements ColumnService {
         return buildColumnInfo(queryBasicColumnInfo(columnId));
     }
 
-    @Override
-    public ColumnArticleDO queryColumnArticle(long columnId, Integer section) {
-        ColumnArticleDO article = columnDao.getColumnArticleId(columnId, section);
-        if (article == null) {
-            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, section);
-        }
-        return article;
-    }
-
-    @Override
-    public List<SimpleArticleDTO> queryColumnArticles(long columnId) {
-        List<SimpleArticleDTO> list = columnDao.listColumnArticles(columnId);
-        long preGroup = -1;
-        for (SimpleArticleDTO article : list) {
-            if (preGroup != article.getGroupLevel()) {
-                preGroup = article.getGroupLevel();
-                article.setGroupLevel(groupSectionToLevel(article.getGroupLevel()));
-            } else {
-                // 和前面一个是同一层级，则不需要显示分组，直接沿用之前的即可
-                article.setGroupLevel(groupSectionToLevel(article.getGroupLevel()));
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public Long getTutorialCount() {
-        return this.columnDao.countColumnArticles();
-    }
-
     private ColumnDTO buildColumnInfo(ColumnInfoDO info) {
         return buildColumnInfo(ColumnConvert.toDto(info));
     }
-
 
     /**
      * 构建专栏详情信息
@@ -121,6 +96,32 @@ public class ColumnServiceImpl implements ColumnService {
         return dto;
     }
 
+
+    @Override
+    public ColumnArticleDO queryColumnArticle(long columnId, Integer section) {
+        ColumnArticleDO article = columnDao.getColumnArticleId(columnId, section);
+        if (article == null) {
+            throw ExceptionUtil.of(StatusEnum.ARTICLE_NOT_EXISTS, section);
+        }
+        return article;
+    }
+
+    @Override
+    public List<SimpleArticleDTO> queryColumnArticles(long columnId) {
+        List<SimpleArticleDTO> list = columnDao.listColumnArticles(columnId);
+        long preGroup = -1;
+        for (SimpleArticleDTO article : list) {
+            if (preGroup != article.getGroupLevel()) {
+                preGroup = article.getGroupLevel();
+                article.setGroupLevel(groupSectionToLevel(article.getGroupLevel()));
+            } else {
+                // 和前面一个是同一层级，则不需要显示分组，直接沿用之前的即可
+                article.setGroupLevel(groupSectionToLevel(article.getGroupLevel()));
+            }
+        }
+        return list;
+    }
+
     private int groupSectionToLevel(long section) {
         // 0 - 1000 是一层, 1000 1000_000 是二层
         if (section < 1000) {
@@ -137,4 +138,10 @@ public class ColumnServiceImpl implements ColumnService {
             return 6;
         }
     }
+
+    @Override
+    public Long getTutorialCount() {
+        return this.columnDao.countColumnArticles();
+    }
+
 }

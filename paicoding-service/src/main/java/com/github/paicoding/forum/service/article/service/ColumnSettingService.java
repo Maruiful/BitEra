@@ -16,9 +16,6 @@ import com.github.paicoding.forum.api.model.vo.article.dto.SimpleColumnDTO;
 
 import java.util.List;
 
-/**
- * 专栏后台接口
- * */
 public interface ColumnSettingService {
 
     /**

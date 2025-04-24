@@ -13,11 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.nio.charset.Charset;
 
-/**
- * 生成 sitemap.xml
- *
-
- */
 @RestController
 public class SiteMapController {
     private XmlMapper xmlMapper = new XmlMapper();

@@ -24,9 +24,6 @@ import org.springframework.util.StreamUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-/**
- * 阿里云oss文件上传
- * */
 @Slf4j
 @ConditionalOnExpression(value = "#{'ali'.equals(environment.getProperty('image.oss.type'))}")
 @Component
@@ -129,13 +126,34 @@ public class AliOssWrapper implements ImageUploader, InitializingBean, Disposabl
     }
 
     @Override
-    public boolean uploadIgnore(String fileUrl)  { return false; }
+    public boolean uploadIgnore(String fileUrl) {
+        if (StringUtils.isNotBlank(properties.getOss().getHost()) && fileUrl.startsWith(properties.getOss().getHost())) {
+            return true;
+        }
+
+        return !fileUrl.startsWith("http");
+    }
 
     @Override
-    public void destroy()  {}
+    public void destroy() {
+        if (ossClient != null) {
+            ossClient.shutdown();
+        }
+    }
 
-    private void init()  {}
+    private void init() {
+        // 创建OSSClient实例。
+        log.info("init ossClient");
+        ossClient = new OSSClientBuilder().build(properties.getOss().getEndpoint(), properties.getOss().getAk(), properties.getOss().getSk());
+    }
 
     @Override
-    public void afterPropertiesSet()  {}
+    public void afterPropertiesSet() {
+        init();
+//        // 监听配置变更，然后重新初始化OSSClient实例
+//        dynamicConfigContainer.registerRefreshCallback(properties, () -> {
+//            init();
+//            log.info("ossClient refreshed!");
+//        });
+    }
 }

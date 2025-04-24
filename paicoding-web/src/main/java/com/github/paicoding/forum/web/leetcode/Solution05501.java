@@ -12,5 +12,9 @@ public class Solution05501 {
         return true;
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution05501 solution = new Solution05501();
+        int[] nums = {2,3,1,1,4};
+        System.out.println(solution.canJump(nums)); // 输出: true
+    }
 }

@@ -22,10 +22,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 注册xml解析器
- *
- */
 @Slf4j
 @Configuration
 public class PaiWebConfig implements WebMvcConfigurer {

@@ -6,9 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
 
-/**
- * 多数据源的配置加载
- * */
 @Data
 @ConfigurationProperties(prefix = DsProperties.DS_PREFIX)
 public class DsProperties {

@@ -22,10 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 文章转换
- * <p>
- * */
 public class ArticleConverter {
 
     public static ArticleDO toArticleDo(ArticlePostReq req, Long author) {
@@ -82,7 +78,9 @@ public class ArticleConverter {
         return articleDTO;
     }
 
-    public static List<ArticleDTO> toArticleDtoList(List<ArticleDO> articleDOS) { return null; }
+    public static List<ArticleDTO> toArticleDtoList(List<ArticleDO> articleDOS) {
+        return articleDOS.stream().map(ArticleConverter::toDto).collect(Collectors.toList());
+    }
 
     /**
      * do转换
@@ -116,11 +114,42 @@ public class ArticleConverter {
         return dto;
     }
 
-    public static List<CategoryDTO> toCategoryDtoList(List<CategoryDO> categorys) { return null; }
+    public static List<CategoryDTO> toCategoryDtoList(List<CategoryDO> categorys) {
+        return categorys.stream().map(ArticleConverter::toDto).collect(Collectors.toList());
+    }
 
-    public static TagDO toDO(TagReq tagReq) { return null; }
+    public static TagDO toDO(TagReq tagReq) {
+        if (tagReq == null) {
+            return null;
+        }
+        TagDO tagDO = new TagDO();
+        tagDO.setTagName(tagReq.getTag());
+        return tagDO;
+    }
 
-    public static CategoryDO toDO(CategoryReq categoryReq) { return null; }
+    public static CategoryDO toDO(CategoryReq categoryReq) {
+        if (categoryReq == null) {
+            return null;
+        }
+        CategoryDO categoryDO = new CategoryDO();
+        categoryDO.setCategoryName(categoryReq.getCategory());
+        categoryDO.setRank(categoryReq.getRank());
+        return categoryDO;
+    }
 
-    public static SearchArticleParams toSearchParams(SearchArticleReq req) { return null; }
+    public static SearchArticleParams toSearchParams(SearchArticleReq req) {
+        if (req == null) {
+            return null;
+        }
+        SearchArticleParams searchArticleParams = new SearchArticleParams();
+        searchArticleParams.setTitle(req.getTitle());
+        searchArticleParams.setArticleId(req.getArticleId());
+        searchArticleParams.setUserId(req.getUserId());
+        searchArticleParams.setStatus(req.getStatus());
+        searchArticleParams.setOfficalStat(req.getOfficalStat());
+        searchArticleParams.setToppingStat(req.getToppingStat());
+        searchArticleParams.setPageNum(req.getPageNumber());
+        searchArticleParams.setPageSize(req.getPageSize());
+        return searchArticleParams;
+    }
 }

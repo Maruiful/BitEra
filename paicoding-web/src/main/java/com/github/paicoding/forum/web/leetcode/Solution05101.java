@@ -68,7 +68,16 @@ class Solution05101 {
     }
 
     // 将当前棋盘状态转换为字符串列表
-    private List<String> construct(char[][] board)  { return null; }
+    private List<String> construct(char[][] board) {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < board.length; i++) {
+            result.add(new String(board[i]));
+        }
+        return result;
+    }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution05101 solution = new Solution05101();
+        System.out.println(solution.solveNQueens(4));
+    }
 }

@@ -9,14 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-/** */
 public final class ChatConstants {
     /**
      * 记录每个用户的使用次数
      */
-    public static String getAiRateKey(AISourceEnum ai)  { return null; }
+    public static String getAiRateKey(AISourceEnum ai) {
+        return "chat.rates." + ai.name().toLowerCase();
+    }
 
-    public static String getAiRateKeyPerDay(AISourceEnum ai)  { return null; }
+    public static String getAiRateKeyPerDay(AISourceEnum ai) {
+        return "chat.rates." + ai.name().toLowerCase() + "-" + LocalDate.now();
+    }
 
     /**
      * 对话列表缓存
@@ -25,7 +28,9 @@ public final class ChatConstants {
      * @param user
      * @return
      */
-    public static String getAiChatListKey(AISourceEnum ai, Long user)  { return null; }
+    public static String getAiChatListKey(AISourceEnum ai, Long user) {
+        return "chat.list." + ai.name().toLowerCase() + "." + user;
+    }
 
     /**
      * 聊天历史记录
@@ -34,7 +39,9 @@ public final class ChatConstants {
      * @param user
      * @return
      */
-    public static String getAiHistoryRecordsKey(AISourceEnum ai, Long user)  { return null; }
+    public static String getAiHistoryRecordsKey(AISourceEnum ai, Long user) {
+        return "chat.history." + ai.name().toLowerCase() + "." + user;
+    }
 
     /**
      * 聊天历史记录
@@ -43,7 +50,9 @@ public final class ChatConstants {
      * @param user
      * @return
      */
-    public static String getAiHistoryRecordsKey(AISourceEnum ai, String user)  { return null; }
+    public static String getAiHistoryRecordsKey(AISourceEnum ai, String user) {
+        return "chat.history." + ai.name().toLowerCase() + "." + user;
+    }
 
     /**
      * 聊天历史构建问答上下问
@@ -78,7 +87,7 @@ public final class ChatConstants {
     public static final long QAS_TIME_INTERVAL = 20_000;
 
 
-    public static final String CHAT_REPLY_RECOMMEND = "请注册之后再来体验吧，技术派官网： \n https://paicoding.com";
+    public static final String CHAT_REPLY_RECOMMEND = "请注册技术派之后再来体验吧，技术派官网： \n https://paicoding.com";
     public static final String CHAT_REPLY_BEGIN = "让我们开始体验ChatGPT的魅力吧~";
     public static final String CHAT_REPLY_OVER = "体验结束，让我们下次再见吧~";
     public static final String CHAT_REPLY_CNT_OVER = "次数使用完了哦，勾搭一下群主，多申请点使用次数吧~\n微信：itwanger";
@@ -101,7 +110,7 @@ public final class ChatConstants {
     public static final String SWITCH_TO_OTHER_MODEL = "当前模型还在开发当中，请右上角下拉框切换到其他模型";
 
 
-    public static final String SENSITIVE_QUESTION = "提问中包含敏感词:%s";
+    public static final String SENSITIVE_QUESTION = "提问中包含敏感词:%s，请微信联系二哥「itwanger」加入白名单!";
 
     /**
      * 提示词标识

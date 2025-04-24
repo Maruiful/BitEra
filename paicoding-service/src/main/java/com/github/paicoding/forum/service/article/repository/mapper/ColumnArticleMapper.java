@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-/** */
 public interface ColumnArticleMapper extends BaseMapper<ColumnArticleDO> {
     /**
      * 查询文章列表

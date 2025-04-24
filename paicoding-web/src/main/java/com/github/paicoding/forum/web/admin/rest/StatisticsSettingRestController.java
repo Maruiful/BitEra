@@ -18,9 +18,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
-/**
- * 数据统计后台
- * */
 @RestController
 @Permission(role = UserRole.LOGIN)
 @Api(value = "全栈统计分析控制器", tags = "统计分析")

@@ -9,9 +9,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 
 import java.util.Map;
 
-/**
- * 消息通知服务类
- * */
 public interface NotifyService {
     public static String NOTIFY_TOPIC = "/msg";
 

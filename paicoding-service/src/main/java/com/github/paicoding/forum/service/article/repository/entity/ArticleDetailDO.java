@@ -5,11 +5,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 文章详情
- *
- * DO 对应数据库实体类
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("article_detail")

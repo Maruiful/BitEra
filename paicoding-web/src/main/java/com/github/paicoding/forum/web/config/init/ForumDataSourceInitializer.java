@@ -23,10 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * 表初始化，只有首次启动时，才会执行
- *
- */
 @Slf4j
 @Configuration
 public class ForumDataSourceInitializer {

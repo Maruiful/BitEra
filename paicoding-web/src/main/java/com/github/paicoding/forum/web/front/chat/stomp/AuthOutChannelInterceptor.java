@@ -6,10 +6,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 
-/**
- * 权限拦截器，消息广播给用户的场景
- *
- */
 @Slf4j
 public class AuthOutChannelInterceptor implements ChannelInterceptor {
     @Override

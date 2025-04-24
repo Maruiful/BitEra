@@ -8,7 +8,6 @@ import com.github.paicoding.forum.service.article.repository.entity.ColumnArticl
 
 import java.util.List;
 
-/** */
 public interface ColumnService {
     /**
      * 根据文章id，构建对应的专栏详情地址

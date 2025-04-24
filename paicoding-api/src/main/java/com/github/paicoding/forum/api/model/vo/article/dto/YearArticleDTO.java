@@ -3,10 +3,6 @@ package com.github.paicoding.forum.api.model.vo.article.dto;
 import lombok.Data;
 import lombok.ToString;
 
-/**
- * 创作历程
- *
- */
 @Data
 @ToString(callSuper = true)
 public class YearArticleDTO {

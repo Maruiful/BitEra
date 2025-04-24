@@ -3,9 +3,6 @@ package com.github.paicoding.forum.api.model.vo.statistics.dto;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * 统计计数
- * */
 @Data
 @Builder
 public class StatisticsCountDTO {

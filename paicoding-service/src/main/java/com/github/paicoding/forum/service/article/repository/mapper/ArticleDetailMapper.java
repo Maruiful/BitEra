@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.paicoding.forum.service.article.repository.entity.ArticleDetailDO;
 import org.apache.ibatis.annotations.Update;
 
-/**
- * 文章详情mapper接口
- * */
 public interface ArticleDetailMapper extends BaseMapper<ArticleDetailDO> {
 
     /**

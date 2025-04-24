@@ -16,16 +16,15 @@ import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * UserDao
- * */
 @Repository
 public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
 
     @Resource
     private UserMapper userMapper;
 
-    public List<Long> scanUserId(Long userId, Integer size)  { return null; }
+    public List<Long> scanUserId(Long userId, Integer size) {
+        return userMapper.getUserIdsOrderByIdAsc(userId, size == null ? PageParam.DEFAULT_PAGE_SIZE : size);
+    }
 
     /**
      * 三方账号登录方式
@@ -33,7 +32,9 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
      * @param accountId
      * @return
      */
-    public UserDO getByThirdAccountId(String accountId)  { return null; }
+    public UserDO getByThirdAccountId(String accountId) {
+        return userMapper.getByThirdAccountId(accountId);
+    }
 
     /**
      * 根据用户名来查询
@@ -41,7 +42,7 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
      * @param userName
      * @return
      */
-    public List<UserInfoDO> getByUserNameLike(String userName)  {
+    public List<UserInfoDO> getByUserNameLike(String userName) {
         LambdaQueryWrapper<UserInfoDO> query = Wrappers.lambdaQuery();
         query.select(UserInfoDO::getUserId, UserInfoDO::getUserName, UserInfoDO::getPhoto, UserInfoDO::getProfile)
                 .and(!StringUtils.isEmpty(userName),
@@ -59,27 +60,27 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
         }
     }
 
-    public UserInfoDO getByUserId(Long userId)  {
+    public UserInfoDO getByUserId(Long userId) {
         LambdaQueryWrapper<UserInfoDO> query = Wrappers.lambdaQuery();
         query.eq(UserInfoDO::getUserId, userId)
                 .eq(UserInfoDO::getDeleted, YesOrNoEnum.NO.getCode());
         return baseMapper.selectOne(query);
     }
 
-    public List<UserInfoDO> getByUserIds(Collection<Long> userIds)  {
+    public List<UserInfoDO> getByUserIds(Collection<Long> userIds) {
         LambdaQueryWrapper<UserInfoDO> query = Wrappers.lambdaQuery();
         query.in(UserInfoDO::getUserId, userIds)
                 .eq(UserInfoDO::getDeleted, YesOrNoEnum.NO.getCode());
         return baseMapper.selectList(query);
     }
 
-    public Long getUserCount()  {
+    public Long getUserCount() {
         return lambdaQuery()
                 .eq(UserInfoDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .count();
     }
 
-    public void updateUserInfo(UserInfoDO user)  {
+    public void updateUserInfo(UserInfoDO user) {
         UserInfoDO record = getByUserId(user.getUserId());
         if (record.equals(user)) {
             return;
@@ -100,7 +101,7 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
         updateById(user);
     }
 
-    public UserDO getUserByUserName(String userName)  {
+    public UserDO getUserByUserName(String userName) {
         LambdaQueryWrapper<UserDO> queryUser = Wrappers.lambdaQuery();
         queryUser.eq(UserDO::getUserName, userName)
                 .eq(UserDO::getDeleted, YesOrNoEnum.NO.getCode())
@@ -108,11 +109,11 @@ public class UserDao extends ServiceImpl<UserInfoMapper, UserInfoDO> {
         return userMapper.selectOne(queryUser);
     }
 
-    public UserDO getUserByUserId(Long userId)  {
+    public UserDO getUserByUserId(Long userId) {
         return userMapper.selectById(userId);
     }
 
-    public void updateUser(UserDO userDO)  {
+    public void updateUser(UserDO userDO) {
         userMapper.updateById(userDO);
     }
 }

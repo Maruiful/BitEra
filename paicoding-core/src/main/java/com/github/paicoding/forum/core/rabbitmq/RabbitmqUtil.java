@@ -5,10 +5,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 说明：添加rabbitmq连接池后，这个就可以废弃掉
- *
- */
 public class RabbitmqUtil {
 
     /**
@@ -27,10 +23,10 @@ public class RabbitmqUtil {
      * @return
      */
     private static ConnectionFactory init(String host,
-                                          Integer port,
-                                          String username,
-                                          String passport,
-                                          String virtualhost) {
+                                  Integer port,
+                                  String username,
+                                  String passport,
+                                  String virtualhost) {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(port);

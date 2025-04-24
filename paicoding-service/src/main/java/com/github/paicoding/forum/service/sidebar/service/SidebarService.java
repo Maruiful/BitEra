@@ -4,7 +4,6 @@ import com.github.paicoding.forum.api.model.vo.recommend.SideBarDTO;
 
 import java.util.List;
 
-/** */
 public interface SidebarService {
 
     /**

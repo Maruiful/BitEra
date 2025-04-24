@@ -36,9 +36,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
-/**
- * chatgpt的交互封装集成
- * */
 @Slf4j
 @Service
 public class ChatGptIntegration {
@@ -64,7 +61,10 @@ public class ChatGptIntegration {
         private int timeOut;
         private int maxToken;
 
-        public String fetchKey()  { return null; }
+        public String fetchKey() {
+            int index = RandomUtil.randomInt(keys.size());
+            return keys.get(index);
+        }
     }
 
     public static ChatCompletion.Model parse2GptMode(AISourceEnum model) {
@@ -75,7 +75,9 @@ public class ChatGptIntegration {
     }
 
     @PostConstruct
-    public void init()  {}
+    public void init() {
+        log.info("ChatGpt配置初始化完成: {}", config);
+    }
 
     /**
      * 每个用户的会话缓存
@@ -87,7 +89,9 @@ public class ChatGptIntegration {
         cacheStream = CacheBuilder.newBuilder().expireAfterWrite(300, TimeUnit.SECONDS)
                 .build(new CacheLoader<ImmutablePair<Long, AISourceEnum>, ImmutablePair<ChatGPT, ChatGPTStream>>() {
                     @Override
-                    public ImmutablePair<ChatGPT, ChatGPTStream> load(ImmutablePair<Long, AISourceEnum> s) throws Exception  { return null; }
+                    public ImmutablePair<ChatGPT, ChatGPTStream> load(ImmutablePair<Long, AISourceEnum> s) throws Exception {
+                        return ImmutablePair.of(null, null);
+                    }
                 });
     }
 
@@ -97,7 +101,13 @@ public class ChatGptIntegration {
      * @param routingKey
      * @return
      */
-    private ChatGPT simpleGPT(Long routingKey, AISourceEnum model)  { return null; }
+    private ChatGPT simpleGPT(Long routingKey, AISourceEnum model) {
+        GptConf conf = config.getConf().getOrDefault(model, config.getConf().get(config.getMain()));
+        Proxy proxy = conf.isProxy() ? ProxyCenter.loadProxy(String.valueOf(routingKey)) : Proxy.NO_PROXY;
+
+        return ChatGPT.builder().apiKeyList(conf.getKeys()).proxy(proxy).apiHost(conf.getApiHost()) //反向代理地址
+                .timeout(conf.getTimeOut()).build().init();
+    }
 
     /**
      * 基于routingkey进行路由，创建一个简单的流式GPTClientStream
@@ -105,18 +115,45 @@ public class ChatGptIntegration {
      * @param routingKey
      * @return
      */
-    private ChatGPTStream simpleStreamGPT(Long routingKey, AISourceEnum model)  { return null; }
+    private ChatGPTStream simpleStreamGPT(Long routingKey, AISourceEnum model) {
+        GptConf conf = config.getConf().getOrDefault(model, config.getConf().get(config.getMain()));
+        Proxy proxy = conf.isProxy() ? ProxyCenter.loadProxy(String.valueOf(routingKey)) : Proxy.NO_PROXY;
 
-    public ChatGPT getGpt(Long routingKey, AISourceEnum model)  { return null; }
+        return ChatGPTStream.builder().timeout(conf.getTimeOut()).apiKey(conf.fetchKey()).proxy(proxy)
+                .apiHost(conf.getApiHost()).build().init();
+    }
 
-    public ChatGPTStream getGptStream(Long routingKey, AISourceEnum model)  { return null; }
+    public ChatGPT getGpt(Long routingKey, AISourceEnum model) {
+        ImmutablePair<Long, AISourceEnum> key = ImmutablePair.of(routingKey, model);
+        ImmutablePair<ChatGPT, ChatGPTStream> pair = cacheStream.getUnchecked(key);
+        ChatGPT gpt = pair.left;
+        if (gpt == null) {
+            gpt = simpleGPT(routingKey, model);
+            cacheStream.put(key, ImmutablePair.of(gpt, pair.right));
+        }
+        return gpt;
+    }
+
+    public ChatGPTStream getGptStream(Long routingKey, AISourceEnum model) {
+        ImmutablePair<Long, AISourceEnum> key = ImmutablePair.of(routingKey, model);
+        ImmutablePair<ChatGPT, ChatGPTStream> pair = cacheStream.getUnchecked(key);
+        ChatGPTStream gpt = pair.right;
+        if (gpt == null) {
+            gpt = simpleStreamGPT(routingKey, model);
+            cacheStream.put(key, ImmutablePair.of(pair.left, gpt));
+        }
+        return gpt;
+    }
 
     /**
      * 账户信息
      *
      * @return
      */
-    public CreditGrantsResponse creditInfo(AISourceEnum model)  { return null; }
+    public CreditGrantsResponse creditInfo(AISourceEnum model) {
+        CreditGrantsResponse response = getGpt(0L, model).creditGrants();
+        return response;
+    }
 
     public boolean directReturn(Long routingKey, ChatItemVo chat) {
 
@@ -147,7 +184,16 @@ public class ChatGptIntegration {
      * @param listener
      * @return
      */
-    public boolean streamReturn(Long routingKey, ChatItemVo chat, EventSourceListener listener)  { return false; }
+    public boolean streamReturn(Long routingKey, ChatItemVo chat, EventSourceListener listener) {
+        AISourceEnum selectModel = config.getMain();
+        GptConf conf = config.getConf().getOrDefault(selectModel, config.getConf().get(config.getMain()));
+        ChatGPTStream chatGPTStream = simpleStreamGPT(routingKey, selectModel);
+
+        ChatCompletion chatCompletion = ChatCompletion.builder().model(parse2GptMode(selectModel).getName())
+                .messages(toMsg(chat)).maxTokens(conf.getMaxToken()).build();
+        chatGPTStream.streamChatCompletion(chatCompletion, listener);
+        return true;
+    }
 
     /**
      * 多轮对话，传递历史聊天上下文
@@ -159,7 +205,26 @@ public class ChatGptIntegration {
      * @param listener   事件源监听器，用于处理流式处理过程中的事件
      * @return 总是返回true，表示方法执行过程中的一个固定行为
      */
-    public boolean streamReturn(Long routingKey, List<ChatItemVo> chatList, EventSourceListener listener)  { return false; }
+    public boolean streamReturn(Long routingKey, List<ChatItemVo> chatList, EventSourceListener listener) {
+        // 选择要使用的模型
+        AISourceEnum selectModel = config.getMain();
+        // 获取配置，如果未找到对应模型的配置，则使用主配置
+        GptConf conf = config.getConf().getOrDefault(selectModel, config.getConf().get(config.getMain()));
+        // 创建一个流式聊天GPT实例
+        ChatGPTStream chatGPTStream = simpleStreamGPT(routingKey, selectModel);
+
+        // 构建多轮聊天的上下文
+        List<Message> msgList = ChatConstants.toMsgList(chatList, this::toMsg);
+        // 构建聊天完成对象，包括选定的模型、消息列表和最大令牌数配置
+        ChatCompletion chatCompletion = ChatCompletion.builder().model(parse2GptMode(selectModel).getName())
+                .messages(msgList).maxTokens(conf.getMaxToken()).build();
+
+        // 使用流式处理聊天完成，并通过监听器处理事件
+        chatGPTStream.streamChatCompletion(chatCompletion, listener);
+
+        // 固定返回值，表示方法执行完毕
+        return true;
+    }
 
     /**
      * 一个基础的chatgpt问答， 给微信公众号自动问答使用
@@ -188,5 +253,19 @@ public class ChatGptIntegration {
         }
     }
 
-    private List<Message> toMsg(ChatItemVo item)  { return null; }
+    private List<Message> toMsg(ChatItemVo item) {
+        List<Message> list = new ArrayList<>(2);
+        if (item.getQuestion().startsWith(ChatConstants.PROMPT_TAG)) {
+            // 提示词，构建完之后直接返回
+            list.add(Message.ofSystem(item.getQuestion().substring(ChatConstants.PROMPT_TAG.length())));
+            return list;
+        }
+
+        // 用户问答消息
+        list.add(Message.of(item.getQuestion()));
+        if (StringUtils.isNotBlank(item.getAnswer())) {
+            list.add(Message.ofAssistant(item.getAnswer()));
+        }
+        return list;
+    }
 }

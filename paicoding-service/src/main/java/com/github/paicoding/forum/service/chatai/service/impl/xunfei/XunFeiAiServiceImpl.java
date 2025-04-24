@@ -22,10 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.function.BiConsumer;
 
-/**
- * 讯飞星火大模型
- * <a href="https://www.xfyun.cn/doc/spark/Web.html#_1-%E6%8E%A5%E5%8F%A3%E8%AF%B4%E6%98%8E"/>
- * */
 @Slf4j
 @Service
 public class XunFeiAiServiceImpl extends AbsChatService {
@@ -41,7 +37,9 @@ public class XunFeiAiServiceImpl extends AbsChatService {
      * @return
      */
     @Override
-    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat)  { return null; }
+    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat) {
+        return AiChatStatEnum.IGNORE;
+    }
 
     /**
      * 异步回答提问
@@ -51,10 +49,16 @@ public class XunFeiAiServiceImpl extends AbsChatService {
      * @param consumer 具体将 response 写回前端的实现策略
      */
     @Override
-    public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer)  { return null; }
+    public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer) {
+        XunFeiChatWrapper chat = new XunFeiChatWrapper(String.valueOf(user), chatRes, consumer);
+        chat.initAndQuestion();
+        return AiChatStatEnum.IGNORE;
+    }
 
     @Override
-    public AISourceEnum source()  { return null; }
+    public AISourceEnum source() {
+        return AISourceEnum.XUN_FEI_AI;
+    }
 
     /**
      * 一个简单的ws装饰器，用于包装一下讯飞长连接的交互情况
@@ -82,12 +86,17 @@ public class XunFeiAiServiceImpl extends AbsChatService {
         /**
          * 首次使用时，开启提问
          */
-        public void initAndQuestion()  {}
+        public void initAndQuestion() {
+            webSocket = client.newWebSocket(request, listener);
+        }
 
         /**
          * 追加的提问, 主要是为了复用websocket的构造参数
          */
-        public void appendQuestion(String uid, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer)  {}
+        public void appendQuestion(String uid, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer) {
+            listener = new XunFeiMsgListener(uid, chatRes, consumer);
+            webSocket = client.newWebSocket(request, listener);
+        }
 
     }
 
@@ -111,7 +120,12 @@ public class XunFeiAiServiceImpl extends AbsChatService {
 
         //重写onopen
         @Override
-        public void onOpen(WebSocket webSocket, Response response)  {}
+        public void onOpen(WebSocket webSocket, Response response) {
+            super.onOpen(webSocket, response);
+            connectState = WsConnectStateEnum.CONNECTED;
+            // 连接成功之后，发送消息buildSendMsg
+            webSocket.send(xunFeiIntegration.buildSendMsg(user, chatRecord.getRecords()));
+        }
 
         @Override
         public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
@@ -153,7 +167,13 @@ public class XunFeiAiServiceImpl extends AbsChatService {
         }
 
         @Override
-        public void onFailure(WebSocket webSocket, Throwable t, Response response)  {}
+        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+            super.onFailure(webSocket, t, response);
+            log.warn("websocket 连接失败! {}", response, t);
+            connectState = WsConnectStateEnum.FAILED;
+            chatRecord.getRecords().get(0).initAnswer("讯飞AI连接失败了!" + t.getMessage());
+            callback.accept(AiChatStatEnum.ERROR, chatRecord);
+        }
 
         @Override
         public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {

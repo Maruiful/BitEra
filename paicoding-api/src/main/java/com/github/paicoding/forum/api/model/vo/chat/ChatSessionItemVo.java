@@ -4,9 +4,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * 对话
- * */
 @Data
 public class ChatSessionItemVo implements Serializable {
     private static final long serialVersionUID = 4083274108548272765L;

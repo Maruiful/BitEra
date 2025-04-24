@@ -9,9 +9,6 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
-/**
- * 请求计数mapper接口
- * */
 public interface RequestCountMapper extends BaseMapper<RequestCountDO> {
 
     /**

@@ -14,9 +14,6 @@ import java.math.BigInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-/**
- * Json工具类
- */
 public class JsonUtil {
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();

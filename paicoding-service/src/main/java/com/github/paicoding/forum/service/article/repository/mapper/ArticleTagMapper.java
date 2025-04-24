@@ -7,9 +7,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * 文章标签映mapper接口
- * */
 public interface ArticleTagMapper extends BaseMapper<ArticleTagDO> {
 
     /**

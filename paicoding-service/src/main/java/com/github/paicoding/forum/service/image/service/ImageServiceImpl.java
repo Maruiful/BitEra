@@ -29,12 +29,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-/**
- *
- */
 @Slf4j
 @Service
 public class ImageServiceImpl implements ImageService {
+
     @Autowired
     private ImageUploader imageUploader;
 
@@ -46,7 +44,6 @@ public class ImageServiceImpl implements ImageService {
             .maximumSize(300)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .build();
-
 
     @Override
     public String saveImg(HttpServletRequest request) {
@@ -79,6 +76,12 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+    /**
+     * 外网图片转存
+     *
+     * @param img
+     * @return
+     */
     @Override
     public String saveImg(String img) {
         if (imageUploader.uploadIgnore(img)) {
@@ -112,7 +115,6 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-
     /**
      * 外网图片自动转存，添加了执行日志，超时限制；避免出现因为超时导致发布文章异常
      *
@@ -136,8 +138,8 @@ public class ImageServiceImpl implements ImageService {
         }
 
         // 超过1张图片时，做并发的图片转存，提升性能
-        Map<MdImgLoader.MdImg, String> imgReplaceMap = new ConcurrentHashMap<>();
-        try (AsyncUtil.CompletableFutureBridge bridge = AsyncUtil.concurrentExecutor("MdImgReplace")) {
+        Map<MdImgLoader.MdImg, String> imgReplaceMap =  new ConcurrentHashMap<>();
+        try(AsyncUtil.CompletableFutureBridge bridge = AsyncUtil.concurrentExecutor("MdImgReplace")) {
             for (MdImgLoader.MdImg img : imgList) {
                 bridge.async(() -> {
                     imgReplaceMap.put(img, saveImg(img.getUrl()));
@@ -154,9 +156,8 @@ public class ImageServiceImpl implements ImageService {
         return content;
     }
 
-
-    public ByteArrayInputStream toByteArrayInputStream(InputStream inputStream) throws IOException {
-        return null;
+    private String buildUploadFailImgUrl(String img) {
+        return img.contains("saveError") ? img : img + "?&cause=saveError!";
     }
 
     /**
@@ -183,7 +184,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     /**
-     * 图片摘要生成
+     *  图片摘要生成
      *
      * @param inputStream
      * @return
@@ -210,7 +211,31 @@ public class ImageServiceImpl implements ImageService {
         return hexString.toString();
     }
 
-    private String buildUploadFailImgUrl(String img) {
-        return img.contains("saveError") ? img : img + "?&cause=saveError!";
+    /**
+     * 转换为字节数组输入流，可以重复消费流中数据
+     *
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
+    public ByteArrayInputStream toByteArrayInputStream(InputStream inputStream) throws IOException {
+        if (inputStream instanceof ByteArrayInputStream) {
+            return (ByteArrayInputStream) inputStream;
+        }
+
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            BufferedInputStream br = new BufferedInputStream(inputStream);
+            byte[] b = new byte[1024];
+            for (int c; (c = br.read(b)) != -1; ) {
+                bos.write(b, 0, c);
+            }
+            // 主动告知回收
+            b = null;
+            br.close();
+            inputStream.close();
+            return new ByteArrayInputStream(bos.toByteArray());
+        }
     }
+
+
 }

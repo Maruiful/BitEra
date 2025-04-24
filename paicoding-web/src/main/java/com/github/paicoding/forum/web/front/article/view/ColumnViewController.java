@@ -33,10 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 专栏入口
- *
- */
 @Controller
 @RequestMapping(path = "column")
 public class ColumnViewController {

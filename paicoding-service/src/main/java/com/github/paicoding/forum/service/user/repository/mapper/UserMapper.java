@@ -7,9 +7,6 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-/**
- * 用户登录mapper接口
- * */
 public interface UserMapper extends BaseMapper<UserDO> {
     /**
      * 根据三方唯一id进行查询

@@ -10,9 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.function.Function;
 
-/**
- * 对接三方支付的API定义
- * */
 public interface ThirdPayIntegrationApi {
 
     boolean support(ThirdPayWayEnum payWay);

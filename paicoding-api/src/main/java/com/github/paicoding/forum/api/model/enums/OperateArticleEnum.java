@@ -2,10 +2,6 @@ package com.github.paicoding.forum.api.model.enums;
 
 import lombok.Getter;
 
-/**
- * 操作文章
- *
- */
 @Getter
 public enum OperateArticleEnum {
 

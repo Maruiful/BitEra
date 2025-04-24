@@ -5,7 +5,6 @@ import com.github.paicoding.forum.api.model.enums.column.ColumnTypeEnum;
 import com.github.paicoding.forum.api.model.vo.user.dto.ColumnFootCountDTO;
 import lombok.Data;
 
-/** */
 @Data
 public class ColumnDTO {
 

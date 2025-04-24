@@ -36,5 +36,9 @@ public class Solution04203 {
         return totalWater; // 返回总的接雨水量
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution04203 solution = new Solution04203();
+        int[] height = {0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1};
+        System.out.println("能接的雨水量: " + solution.trap(height)); // 输出 6
+    }
 }

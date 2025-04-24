@@ -20,9 +20,6 @@ import org.springframework.util.CollectionUtils;
 import javax.sql.DataSource;
 import java.util.Map;
 
-/**
- * 当配置了多数据源时，启用
- */
 @Slf4j
 @Configuration
 @ConditionalOnProperty(prefix = "spring.dynamic", name = "primary")

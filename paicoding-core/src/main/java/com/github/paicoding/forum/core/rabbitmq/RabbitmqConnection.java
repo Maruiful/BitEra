@@ -6,9 +6,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- *RabbtMQ连接
- */
 public class RabbitmqConnection {
 
     private Connection connection;

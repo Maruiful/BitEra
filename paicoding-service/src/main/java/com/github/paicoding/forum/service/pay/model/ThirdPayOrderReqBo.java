@@ -4,9 +4,6 @@ import com.github.paicoding.forum.api.model.enums.pay.ThirdPayWayEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-/**
- * 向三方支付平台下单的请求业务参数
- * */
 @Data
 @Accessors(chain = true)
 public class ThirdPayOrderReqBo {

@@ -23,10 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * 知识星球登录
- *
- */
 @RestController
 @Slf4j
 public class ZsxqLoginController {

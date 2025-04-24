@@ -6,9 +6,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 类目管理表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("category")

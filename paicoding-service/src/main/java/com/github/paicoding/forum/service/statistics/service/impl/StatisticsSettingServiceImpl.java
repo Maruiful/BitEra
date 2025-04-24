@@ -7,11 +7,10 @@ import com.github.paicoding.forum.api.model.vo.user.dto.UserFootStatisticDTO;
 import com.github.paicoding.forum.service.article.service.ArticleReadService;
 import com.github.paicoding.forum.service.article.service.ColumnService;
 import com.github.paicoding.forum.service.statistics.converter.StatisticsConverter;
+import com.github.paicoding.forum.service.statistics.repository.entity.RequestCountDO;
 import com.github.paicoding.forum.service.statistics.repository.entity.StatisticsDayExcelDO;
 import com.github.paicoding.forum.service.statistics.service.RequestCountService;
 import com.github.paicoding.forum.service.statistics.service.StatisticsSettingService;
-import com.github.paicoding.forum.service.user.repository.dao.UserDao;
-import com.github.paicoding.forum.service.user.repository.dao.UserFootDao;
 import com.github.paicoding.forum.service.user.service.UserFootService;
 import com.github.paicoding.forum.service.user.service.UserService;
 import com.github.paicoding.forum.service.user.service.conf.AiConfig;
@@ -19,19 +18,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * 统计配置服务
- */
 @Slf4j
 @Service
 public class StatisticsSettingServiceImpl implements StatisticsSettingService {
 
     @Autowired
-    private UserFootService userFootService;
+    private RequestCountService requestCountService;
+
     @Autowired
     private UserService userService;
 
@@ -39,15 +38,24 @@ public class StatisticsSettingServiceImpl implements StatisticsSettingService {
     private ColumnService columnService;
 
     @Autowired
-    private ArticleReadService articleReadService;
-    @Autowired
-    private RequestCountService requestCountService;
+    private UserFootService userFootService;
 
     @Autowired
+    private ArticleReadService articleReadService;
+
+    @Resource
     private AiConfig aiConfig;
 
     @Override
-    public void saveRequestCount(String host) {}
+    public void saveRequestCount(String host) {
+        RequestCountDO requestCountDO = requestCountService.getRequestCount(host);
+        if (requestCountDO == null) {
+            requestCountService.insert(host);
+        } else {
+            // 改为数据库直接更新
+            requestCountService.incrementCount(requestCountDO.getId());
+        }
+    }
 
     @Override
     public StatisticsCountDTO getStatisticsCount() {
@@ -90,4 +98,5 @@ public class StatisticsSettingServiceImpl implements StatisticsSettingService {
             throw new RuntimeException(e);
         }
     }
+
 }

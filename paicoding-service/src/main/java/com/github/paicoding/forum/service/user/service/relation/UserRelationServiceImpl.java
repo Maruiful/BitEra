@@ -14,24 +14,26 @@ import com.github.paicoding.forum.service.user.converter.UserConverter;
 import com.github.paicoding.forum.service.user.repository.dao.UserRelationDao;
 import com.github.paicoding.forum.service.user.repository.entity.UserRelationDO;
 import com.github.paicoding.forum.service.user.service.UserRelationService;
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 用户关系Service
- * */
 @Service
 public class UserRelationServiceImpl implements UserRelationService {
-
-    @Autowired
+    @Resource
     private UserRelationDao userRelationDao;
 
 
+    /**
+     * 查询用户的关注列表
+     *
+     * @param userId
+     * @param pageParam
+     * @return
+     */
     @Override
     public PageListVo<FollowUserInfoDTO> getUserFollowList(Long userId, PageParam pageParam) {
         List<FollowUserInfoDTO> userRelationList = userRelationDao.listUserFollows(userId, pageParam);
@@ -77,6 +79,13 @@ public class UserRelationServiceImpl implements UserRelationService {
         });
     }
 
+    /**
+     * 根据登录用户从给定用户列表中，找出已关注的用户id
+     *
+     * @param userIds    主用户列表
+     * @param fansUserId 粉丝用户id
+     * @return 返回fansUserId已经关注过的用户id列表
+     */
     @Override
     public Set<Long> getFollowedUserId(List<Long> userIds, Long fansUserId) {
         if (CollectionUtils.isEmpty(userIds)) {

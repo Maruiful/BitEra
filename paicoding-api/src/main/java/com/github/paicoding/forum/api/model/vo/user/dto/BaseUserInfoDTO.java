@@ -9,7 +9,6 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
-/** */
 @Data
 @ApiModel("用户基础实体对象")
 @Accessors(chain = true)

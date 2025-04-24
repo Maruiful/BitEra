@@ -6,9 +6,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 @Mapper
 public interface UserStructMapper {
     UserStructMapper INSTANCE = Mappers.getMapper( UserStructMapper.class );

@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.user;
 
 import lombok.Data;
 
-/**
- * 用户关系入参
- * */
 @Data
 public class UserRelationReq {
 

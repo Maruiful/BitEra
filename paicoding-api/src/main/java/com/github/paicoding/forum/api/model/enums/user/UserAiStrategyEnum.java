@@ -3,9 +3,6 @@ package com.github.paicoding.forum.api.model.enums.user;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * ai可用次数的条件策略
- * */
 @Getter
 @AllArgsConstructor
 public enum UserAiStrategyEnum {

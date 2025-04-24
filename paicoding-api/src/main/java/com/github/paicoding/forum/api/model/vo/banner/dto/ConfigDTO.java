@@ -4,9 +4,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDTO;
 import com.github.paicoding.forum.api.model.enums.ConfigTagEnum;
 import lombok.Data;
 
-/**
- * Banner
- * */
 @Data
 public class ConfigDTO extends BaseDTO {
 

@@ -1,8 +1,5 @@
 package com.github.paicoding.forum.web.leetcode;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 import java.util.Scanner;
 
 public class WordSearch {
@@ -48,7 +45,9 @@ public class WordSearch {
         return false;
     }
 
-    private static boolean checkMove(int posX, int posY)  { return false; }
+    private static boolean checkMove(int posX, int posY) {
+        return posX < map.length && posX >= 0 && posY < map[0].length && posY >= 0 && !vis[posX][posY];
+    }
 
     private static boolean DFS(int posX, int posY, int step) {
         if (map[posX][posY] != str.charAt(step)) return false;

@@ -65,5 +65,8 @@ class Solution05201 {
         return true;
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution05201 solution = new Solution05201();
+        System.out.println(solution.totalNQueens(4));
+    }
 }

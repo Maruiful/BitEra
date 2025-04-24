@@ -11,12 +11,6 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * 自定义的traceId生成器
- * <p>
- * 生成规则参考 <a href="https://help.aliyun.com/document_detail/151840.html"/>
- *
- */
 @Slf4j
 public class SelfTraceIdGenerator {
     private final static Integer MIN_AUTO_NUMBER = 1000;

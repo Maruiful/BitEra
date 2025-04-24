@@ -18,13 +18,10 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.util.List;
 
-/**
- * 请求计数
- * */
 @Repository
 public class RequestCountDao extends ServiceImpl<RequestCountMapper, RequestCountDO> {
 
-    public Long getPvTotalCount()  {
+    public Long getPvTotalCount() {
         return baseMapper.getPvTotalCount();
     }
 
@@ -35,18 +32,32 @@ public class RequestCountDao extends ServiceImpl<RequestCountMapper, RequestCoun
      * @param date
      * @return
      */
-    public RequestCountDO getRequestCount(String host, Date date)  { return null; }
+    public RequestCountDO getRequestCount(String host, Date date) {
+        return lambdaQuery()
+                .eq(RequestCountDO::getHost, host)
+                .eq(RequestCountDO::getDate, date)
+                .one();
+    }
 
-    public List<RequestCountDO> listRequestCount(PageParam pageParam)  { return null; }
+    public List<RequestCountDO> listRequestCount(PageParam pageParam) {
+        LambdaQueryWrapper<RequestCountDO> query = Wrappers.lambdaQuery();
+        query.orderByDesc(RequestCountDO::getId);
+        if (pageParam != null) {
+            query.last(PageParam.getLimitSql(pageParam));
+        }
+        return baseMapper.selectList(query);
+    }
 
     /**
      * 获取 PV UV 数据列表
      * @param day
      * @return
      */
-    public List<StatisticsDayDTO> getPvUvDayList(Integer day)  {
+    public List<StatisticsDayDTO> getPvUvDayList(Integer day) {
         return baseMapper.getPvUvDayList(day);
     }
 
-    public void incrementCount(Long id)  {}
+    public void incrementCount(Long id) {
+        baseMapper.incrementCount(id);
+    }
 }

@@ -31,16 +31,24 @@ public class DoubaoAiServiceImpl extends AbsChatService {
 
 
     @Override
-    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat)  { return null; }
+    public AiChatStatEnum doAnswer(Long user, ChatItemVo chat) {
+        return doubaoIntegration.directAnswer(user, chat);
+    }
 
     @Override
-    public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer)  { return null; }
+    public AiChatStatEnum doAsyncAnswer(Long user, ChatRecordsVo chatRes, BiConsumer<AiChatStatEnum, ChatRecordsVo> consumer) {
+        return doubaoIntegration.streamAsyncAnswer(user, chatRes, consumer);
+    }
 
     @Override
-    public AISourceEnum source()  { return null; }
+    public AISourceEnum source() {
+        return AISourceEnum.DOU_BAO_AI;
+    }
 
     @Override
-    public boolean asyncFirst()  { return false; }
+    public boolean asyncFirst() {
+        return true;
+    }
 
 
 }

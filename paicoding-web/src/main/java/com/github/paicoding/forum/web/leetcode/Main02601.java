@@ -1,7 +1,12 @@
 package com.github.paicoding.forum.web.leetcode;
 
 public class Main02601 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solutions02601 solutions = new Solutions02601();
+        int[] nums = {0,0,1,1,1,2,2,3,3,4};
+        int result = solutions.removeDuplicates(nums);
+        System.out.println(result);
+    }
 }
 
 class Solutions02601 {

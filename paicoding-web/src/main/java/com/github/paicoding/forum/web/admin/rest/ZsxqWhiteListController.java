@@ -15,10 +15,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 作者白名单服务
- *
- */
 @RestController
 @Api(value = "星球用户白名单管理控制器", tags = "星球白名单")
 @Permission(role = UserRole.ADMIN)
@@ -38,7 +34,7 @@ public class ZsxqWhiteListController {
     @ApiOperation("改变用户状态")
     @GetMapping(path = "operate")
     public ResVo<String> operate(@RequestParam(name = "id") Long id,
-                                 @RequestParam(name = "status") Integer status) {
+                                  @RequestParam(name = "status") Integer status) {
         UserAIStatEnum operate = UserAIStatEnum.fromCode(status);
         zsxqWhiteListService.operate(id, operate);
         return ResVo.ok();

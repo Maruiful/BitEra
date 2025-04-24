@@ -3,9 +3,6 @@ package com.github.paicoding.forum.api.model.vo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * 数据库分页参数
- * */
 @Data
 public class PageParam {
 
@@ -23,11 +20,15 @@ public class PageParam {
     private long offset;
     private long limit;
 
-    public static PageParam newPageInstance()  { return null; }
+    public static PageParam newPageInstance() {
+        return newPageInstance(DEFAULT_PAGE_NUM, DEFAULT_PAGE_SIZE);
+    }
 
-    public static PageParam newPageInstance(Integer pageNum, Integer pageSize)  { return null; }
+    public static PageParam newPageInstance(Integer pageNum, Integer pageSize) {
+        return newPageInstance(pageNum.longValue(), pageSize.longValue());
+    }
 
-    public static PageParam newPageInstance(Long pageNum, Long pageSize)  {
+    public static PageParam newPageInstance(Long pageNum, Long pageSize) {
         if (pageNum == null || pageSize == null) {
             return null;
         }
@@ -42,6 +43,8 @@ public class PageParam {
         return pageParam;
     }
 
-    public static String getLimitSql(PageParam pageParam)  { return null; }
+    public static String getLimitSql(PageParam pageParam) {
+        return String.format("limit %s,%s", pageParam.offset, pageParam.limit);
+    }
 
 }

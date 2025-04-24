@@ -29,5 +29,11 @@ public class Solution03902 {
         }
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution03902 solution = new Solution03902();
+        int[] candidates = {2, 3, 6, 7};
+        int target = 7;
+        List<List<Integer>> result = solution.combinationSum(candidates, target);
+        System.out.println("所有组合: " + result);
+    }
 }

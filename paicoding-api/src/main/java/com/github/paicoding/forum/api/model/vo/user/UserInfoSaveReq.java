@@ -4,9 +4,6 @@ import lombok.Data;
 
 import java.util.Map;
 
-/**
- * 用户信息入参
- * */
 @Data
 public class UserInfoSaveReq {
 

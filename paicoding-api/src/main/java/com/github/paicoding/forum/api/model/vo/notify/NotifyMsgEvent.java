@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
-/** */
 @Getter
 @Setter
 @ToString

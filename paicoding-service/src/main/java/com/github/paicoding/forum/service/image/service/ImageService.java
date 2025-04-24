@@ -2,7 +2,6 @@ package com.github.paicoding.forum.service.image.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-/** */
 public interface ImageService {
     /**
      * 图片转存

@@ -6,10 +6,6 @@ import com.github.paicoding.forum.core.util.SpringUtil;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-/**
- * websocket消息响应封装工具类
- *
- */
 public class WebSocketResponseUtil {
     private static volatile SimpMessagingTemplate simpMessagingTemplate;
 

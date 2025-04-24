@@ -15,10 +15,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 基础的websocket实现通讯的方式
- *
- */
 @Slf4j
 public class SimpleChatgptHandler extends TextWebSocketHandler {
 

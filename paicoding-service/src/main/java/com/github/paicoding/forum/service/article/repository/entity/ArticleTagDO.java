@@ -5,9 +5,6 @@ import com.github.paicoding.forum.api.model.entity.BaseDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 文章标签映射表
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("article_tag")

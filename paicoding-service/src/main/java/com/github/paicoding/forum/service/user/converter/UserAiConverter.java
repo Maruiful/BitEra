@@ -6,8 +6,8 @@ import com.github.paicoding.forum.service.user.repository.entity.UserAiDO;
 import com.github.paicoding.forum.service.user.service.help.UserRandomGenHelper;
 import org.apache.commons.lang3.StringUtils;
 
-/** */
 public class UserAiConverter {
+
 
     public static UserAiDO initAi(Long userId) {
         return initAi(userId, null);

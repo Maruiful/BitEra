@@ -9,9 +9,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
-/**
- * 文章支付记录
- * */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("article_pay_record")

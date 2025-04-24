@@ -9,11 +9,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StatisticsConverter {
-    public static StatisticsDayExcelDO convertToExcelDO(StatisticsDayDTO dto) { return null; }
+    public static StatisticsDayExcelDO convertToExcelDO(StatisticsDayDTO dto) {
+        StatisticsDayExcelDO excelDO = new StatisticsDayExcelDO();
+        excelDO.setDate(dto.getDate());
+        excelDO.setUvCount(dto.getUvCount());
+        excelDO.setPvCount(dto.getPvCount());
+        return excelDO;
+    }
 
-    public static RequestCountExcelDO ConvertToRequestCountDO(RequestCountDO requestCountDO) { return null; }
+    public static RequestCountExcelDO ConvertToRequestCountDO(RequestCountDO requestCountDO) {
+        RequestCountExcelDO excelDO = new RequestCountExcelDO();
+        excelDO.setHost(requestCountDO.getHost());
+        excelDO.setCnt(requestCountDO.getCnt());
+        excelDO.setDate(requestCountDO.getDate());
+        return excelDO;
+    }
 
-    public static List<RequestCountExcelDO> convertToRequestCountExcelDOList(List<RequestCountDO> requestCountDOList) { return null; }
+    public static List<RequestCountExcelDO> convertToRequestCountExcelDOList(List<RequestCountDO> requestCountDOList) {
+        return requestCountDOList.stream()
+                .map(StatisticsConverter::ConvertToRequestCountDO)
+                .collect(Collectors.toList());
+    }
 
     public static List<StatisticsDayExcelDO> convertToExcelDOList(List<StatisticsDayDTO> dtoList) {
         return dtoList.stream()

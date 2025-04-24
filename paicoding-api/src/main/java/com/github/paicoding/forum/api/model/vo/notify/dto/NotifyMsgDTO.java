@@ -5,7 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-/** */
 @Data
 public class NotifyMsgDTO implements Serializable {
     private static final long serialVersionUID = 3833777672628522348L;

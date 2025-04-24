@@ -21,9 +21,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * ip工具类
- */
 @Slf4j
 public class IpUtil {
     private static final String UNKNOWN = "unKnown";

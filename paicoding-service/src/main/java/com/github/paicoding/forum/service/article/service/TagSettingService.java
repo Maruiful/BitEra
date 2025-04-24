@@ -5,9 +5,6 @@ import com.github.paicoding.forum.api.model.vo.article.SearchTagReq;
 import com.github.paicoding.forum.api.model.vo.article.TagReq;
 import com.github.paicoding.forum.api.model.vo.article.dto.TagDTO;
 
-/**
- * 标签后台接口
- * */
 public interface TagSettingService {
 
     void saveTag(TagReq tagReq);
@@ -19,6 +16,7 @@ public interface TagSettingService {
     /**
      * 获取tag列表
      *
+     * @param pageParam
      * @return
      */
     PageVo<TagDTO> getTagList(SearchTagReq req);

@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/** */
 @Repository
 public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
 
@@ -23,7 +22,7 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      * @param pageParam
      * @return
      */
-    public List<CommentDO> listTopCommentList(Long articleId, PageParam pageParam)  {
+    public List<CommentDO> listTopCommentList(Long articleId, PageParam pageParam) {
         return lambdaQuery()
                 .eq(CommentDO::getTopCommentId, 0)
                 .eq(CommentDO::getArticleId, articleId)
@@ -38,7 +37,7 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      * @param articleId
      * @return
      */
-    public List<CommentDO> listSubCommentIdMappers(Long articleId, Collection<Long> topCommentIds)  {
+    public List<CommentDO> listSubCommentIdMappers(Long articleId, Collection<Long> topCommentIds) {
         return lambdaQuery()
                 .in(CommentDO::getTopCommentId, topCommentIds)
                 .eq(CommentDO::getArticleId, articleId)
@@ -52,7 +51,7 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
      * @param articleId
      * @return
      */
-    public int commentCount(Long articleId)  {
+    public int commentCount(Long articleId) {
         QueryWrapper<CommentDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
                 .eq(CommentDO::getArticleId, articleId)
@@ -60,11 +59,12 @@ public class CommentDao extends ServiceImpl<CommentMapper, CommentDO> {
         return baseMapper.selectCount(queryWrapper).intValue();
     }
 
-    public CommentDO getHotComment(Long articleId)  {
+    public CommentDO getHotComment(Long articleId) {
         Map<String, Object> map = baseMapper.getHotTopCommentId(articleId);
         if (CollectionUtils.isEmpty(map)) {
             return null;
         }
+
         return baseMapper.selectById(Long.parseLong(String.valueOf(map.get("top_comment_id"))));
     }
 

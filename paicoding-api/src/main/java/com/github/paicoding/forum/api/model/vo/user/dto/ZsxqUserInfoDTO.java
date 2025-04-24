@@ -7,9 +7,6 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * 基本用户信息
- * */
 @Data
 @Accessors(chain = true)
 public class ZsxqUserInfoDTO implements Serializable {

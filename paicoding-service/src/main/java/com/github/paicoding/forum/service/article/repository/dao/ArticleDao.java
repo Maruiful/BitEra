@@ -38,11 +38,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * 文章相关DB操作
- * <p>
- * 多表结构的操作封装，只与DB操作相关
- * */
 @Repository
 public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     @Resource
@@ -51,8 +46,6 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     private ReadCountMapper readCountMapper;
     @Resource
     private ArticleMapper articleMapper;
-    @Resource
-    private ArticleDao articleDao;
 
 
     /**
@@ -61,7 +54,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param articleId
      * @return
      */
-    public ArticleDTO queryArticleDetail(Long articleId)  {
+    public ArticleDTO queryArticleDetail(Long articleId) {
         // 查询文章记录
         ArticleDO article = baseMapper.selectById(articleId);
         if (article == null || Objects.equals(article.getDeleted(), YesOrNoEnum.YES.getCode())) {
@@ -86,7 +79,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param article 文章实体
      * @return false 表示需要展示审核中的字样 | true 表示展示原文
      */
-    private boolean showReviewContent(ArticleDO article)  {
+    private boolean showReviewContent(ArticleDO article) {
         if (article.getStatus() != PushStatusEnum.REVIEW.getCode()) {
             return true;
         }
@@ -103,7 +96,8 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
 
     // ------------ article content  ----------------
 
-    private ArticleDetailDO findLatestDetail(long articleId)  {
+    private ArticleDetailDO findLatestDetail(long articleId) {
+        // 查询文章内容
         LambdaQueryWrapper<ArticleDetailDO> contentQuery = Wrappers.lambdaQuery();
         contentQuery.eq(ArticleDetailDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .eq(ArticleDetailDO::getArticleId, articleId)
@@ -118,7 +112,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param content
      * @return
      */
-    public Long saveArticleContent(Long articleId, String content)  {
+    public Long saveArticleContent(Long articleId, String content) {
         ArticleDetailDO detail = new ArticleDetailDO();
         detail.setArticleId(articleId);
         detail.setContent(content);
@@ -134,7 +128,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param content
      * @param update    true 表示更新最后一条记录； false 表示新插入一个新的记录
      */
-    public void updateArticleContent(Long articleId, String content, boolean update)  {
+    public void updateArticleContent(Long articleId, String content, boolean update) {
         if (update) {
             articleDetailMapper.updateContent(articleId, content);
         } else {
@@ -148,7 +142,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
 
     // ------------- 文章列表查询 --------------
 
-    public List<ArticleDO> listArticlesByUserId(Long userId, PageParam pageParam)  {
+    public List<ArticleDO> listArticlesByUserId(Long userId, PageParam pageParam) {
         LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
         query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .eq(ArticleDO::getUserId, userId)
@@ -162,7 +156,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     }
 
 
-    public List<ArticleDO> listArticlesByCategoryId(Long categoryId, PageParam pageParam)  {
+    public List<ArticleDO> listArticlesByCategoryId(Long categoryId, PageParam pageParam) {
         if (categoryId != null && categoryId <= 0) {
             // 分类不存在时，表示查所有
             categoryId = null;
@@ -183,7 +177,13 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
         return baseMapper.selectList(query);
     }
 
-    public Long countArticleByCategoryId(Long categoryId)  { return null; }
+    public Long countArticleByCategoryId(Long categoryId) {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(ArticleDO::getCategoryId, categoryId);
+        return baseMapper.selectCount(query);
+    }
 
     /**
      * 按照分类统计文章的数量
@@ -206,7 +206,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
         return result;
     }
 
-    public List<ArticleDO> listArticlesByBySearchKey(String key, PageParam pageParam)  {
+    public List<ArticleDO> listArticlesByBySearchKey(String key, PageParam pageParam) {
         LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
         query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
@@ -227,7 +227,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param key
      * @return
      */
-    public List<ArticleDO> listSimpleArticlesByBySearchKey(String key)  {
+    public List<ArticleDO> listSimpleArticlesByBySearchKey(String key) {
         LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
         query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
@@ -249,7 +249,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param articleId
      * @return
      */
-    public int incrReadCount(Long articleId)  {
+    public int incrReadCount(Long articleId) {
         LambdaQueryWrapper<ReadCountDO> query = Wrappers.lambdaQuery();
         query.eq(ReadCountDO::getDocumentId, articleId).eq(ReadCountDO::getDocumentType, DocumentTypeEnum.ARTICLE.getCode());
         ReadCountDO record = readCountMapper.selectOne(query);
@@ -270,7 +270,12 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param userId
      * @return
      */
-    public int countArticleByUser(Long userId)  { return 0; }
+    public int countArticleByUser(Long userId) {
+        return lambdaQuery().eq(ArticleDO::getUserId, userId)
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .count().intValue();
+    }
 
 
     /**
@@ -279,7 +284,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param pageParam
      * @return
      */
-    public List<SimpleArticleDTO> listHotArticles(PageParam pageParam)  {
+    public List<SimpleArticleDTO> listHotArticles(PageParam pageParam) {
         return baseMapper.listArticlesByReadCounts(pageParam);
     }
 
@@ -290,7 +295,9 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param pageParam
      * @return
      */
-    public List<SimpleArticleDTO> listAuthorHotArticles(long userId, PageParam pageParam)  { return null; }
+    public List<SimpleArticleDTO> listAuthorHotArticles(long userId, PageParam pageParam) {
+        return baseMapper.listArticlesByUserIdOrderByReadCounts(userId, pageParam);
+    }
 
     /**
      * 根据相同的类目 + 标签进行推荐
@@ -299,7 +306,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param tagIds
      * @return
      */
-    public List<ArticleDO> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, PageParam pageParam)  {
+    public List<ArticleDO> listRelatedArticlesOrderByReadCount(Long categoryId, List<Long> tagIds, PageParam pageParam) {
         List<ReadCountDO> list = baseMapper.listArticleByCategoryAndTags(categoryId, tagIds, pageParam);
         if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
@@ -322,20 +329,30 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      * @param userId
      * @return
      */
-    public List<YearArticleDTO> listYearArticleByUserId(Long userId)  {
+    public List<YearArticleDTO> listYearArticleByUserId(Long userId) {
         return baseMapper.listYearArticleByUserId(userId);
     }
 
     /**
      * 抽取样板代码
      */
-    private LambdaQueryChainWrapper<ArticleDO> buildQuery(SearchArticleParams searchArticleParams)  { return null; }
+    private LambdaQueryChainWrapper<ArticleDO> buildQuery(SearchArticleParams searchArticleParams) {
+        return lambdaQuery()
+                .like(StringUtils.isNotBlank(searchArticleParams.getTitle()), ArticleDO::getTitle, searchArticleParams.getTitle())
+                // ID 不为空
+                .eq(Objects.nonNull(searchArticleParams.getArticleId()), ArticleDO::getId, searchArticleParams.getArticleId())
+                .eq(Objects.nonNull(searchArticleParams.getUserId()), ArticleDO::getUserId, searchArticleParams.getUserId())
+                .eq(Objects.nonNull(searchArticleParams.getStatus()) && searchArticleParams.getStatus() != -1, ArticleDO::getStatus, searchArticleParams.getStatus())
+                .eq(Objects.nonNull(searchArticleParams.getOfficalStat()) && searchArticleParams.getOfficalStat() != -1, ArticleDO::getOfficalStat, searchArticleParams.getOfficalStat())
+                .eq(Objects.nonNull(searchArticleParams.getToppingStat()) && searchArticleParams.getToppingStat() != -1, ArticleDO::getToppingStat, searchArticleParams.getToppingStat())
+                .eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode());
+    }
 
 
     /**
      * 文章列表（用于后台）
      */
-    public List<ArticleAdminDTO> listArticlesByParams(SearchArticleParams params)  {
+    public List<ArticleAdminDTO> listArticlesByParams(SearchArticleParams params) {
         return articleMapper.listArticlesByParams(params,
                 PageParam.newPageInstance(params.getPageNum(), params.getPageSize()));
     }
@@ -343,7 +360,7 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
     /**
      * 文章总数（用于后台）
      */
-    public Long countArticleByParams(SearchArticleParams searchArticleParams)  {
+    public Long countArticleByParams(SearchArticleParams searchArticleParams) {
         return articleMapper.countArticlesByParams(searchArticleParams);
     }
 
@@ -352,14 +369,16 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
      *
      * @return
      */
-    public Long countArticle()  {
+    public Long countArticle() {
         return lambdaQuery()
                 .eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
                 .count();
     }
 
-    public List<ArticleDO> selectByIds(List<Integer> ids)  {
+    public List<ArticleDO> selectByIds(List<Integer> ids) {
+
         List<ArticleDO> articleDOS = baseMapper.selectBatchIds(ids);
         return articleDOS;
+
     }
 }

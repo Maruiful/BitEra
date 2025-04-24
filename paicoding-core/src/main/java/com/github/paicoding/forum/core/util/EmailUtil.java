@@ -6,7 +6,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 
 import javax.mail.internet.MimeMessage;
 
-/** */
 @Slf4j
 public class EmailUtil {
     private static volatile String from;

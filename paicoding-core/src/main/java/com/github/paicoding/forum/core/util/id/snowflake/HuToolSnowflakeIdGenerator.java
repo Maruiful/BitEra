@@ -5,7 +5,6 @@ import cn.hutool.core.lang.Snowflake;
 import java.util.Date;
 
 
-/** */
 public class HuToolSnowflakeIdGenerator implements IdGenerator {
     private static final Date EPOC = new Date(2023, 1, 1);
     private Snowflake snowflake;
@@ -15,7 +14,7 @@ public class HuToolSnowflakeIdGenerator implements IdGenerator {
     }
 
     @Override
-    public Long nextId()  {
+    public Long nextId() {
         return snowflake.nextId();
     }
 }

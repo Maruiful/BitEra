@@ -1,7 +1,17 @@
 package com.github.paicoding.forum.web.leetcode;
 
 class Solution03801 {
-    public String countAndSay(int n)  { return null; }
+    public String countAndSay(int n) {
+        // 初始项是 "1"
+        String result = "1";
+
+        // 逐步生成每一项，直到第 n 项
+        for (int i = 1; i < n; i++) {
+            result = getNextSequence(result);
+        }
+
+        return result;
+    }
 
     // 生成外观数列的下一项
     private String getNextSequence(String sequence) {
@@ -26,5 +36,10 @@ class Solution03801 {
         return nextSequence.toString();
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution03801 solution = new Solution03801();
+        int n = 5;
+        String result = solution.countAndSay(n);
+        System.out.println("外观数列的第 " + n + " 项: " + result);
+    }
 }

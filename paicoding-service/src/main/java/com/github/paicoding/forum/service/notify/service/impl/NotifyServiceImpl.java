@@ -19,7 +19,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -30,18 +29,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-/**
- * 消息通知服务实现
- */
 @Slf4j
 @Service
 public class NotifyServiceImpl implements NotifyService {
-
-
-    @Autowired
+    @Resource
     private NotifyMsgDao notifyMsgDao;
 
-    @Autowired
+    @Resource
     private UserRelationService userRelationService;
 
     /**
@@ -49,13 +43,29 @@ public class NotifyServiceImpl implements NotifyService {
      */
     private LoadingCache<Long, Set<String>> wsUserSessionCache;
 
-    public Set<String> load(Long aLong) throws Exception { return null; }
+    @PostConstruct
+    public void init() {
+        wsUserSessionCache = CacheBuilder.newBuilder()
+                .maximumSize(500)
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build(new CacheLoader<Long, Set<String>>() {
+                    @Override
+                    public Set<String> load(Long aLong) throws Exception {
+                        return new HashSet<>();
+                    }
+                });
+    }
 
     @Override
     public int queryUserNotifyMsgCount(Long userId) {
         return notifyMsgDao.countByUserIdAndStat(userId, NotifyStatEnum.UNREAD.getStat());
     }
 
+    /**
+     * 查询消息通知列表
+     *
+     * @return
+     */
     @Override
     public PageListVo<NotifyMsgDTO> queryUserNotices(Long userId, NotifyTypeEnum type, PageParam page) {
         List<NotifyMsgDTO> list = notifyMsgDao.listNotifyMsgByUserIdAndType(userId, type, page);
@@ -111,8 +121,27 @@ public class NotifyServiceImpl implements NotifyService {
     }
 
     @Override
-    public void saveArticleNotify(UserFootDO foot, NotifyTypeEnum notifyTypeEnum) {}
+    public void saveArticleNotify(UserFootDO foot, NotifyTypeEnum notifyTypeEnum) {
+        NotifyMsgDO msg = new NotifyMsgDO().setRelatedId(foot.getDocumentId())
+                .setNotifyUserId(foot.getDocumentUserId())
+                .setOperateUserId(foot.getUserId())
+                .setType(notifyTypeEnum.getType() )
+                .setState(NotifyStatEnum.UNREAD.getStat())
+                .setMsg("");
+        NotifyMsgDO record = notifyMsgDao.getByUserIdRelatedIdAndType(msg);
+        if (record == null) {
+            // 若之前已经有对应的通知，则不重复记录；因为一个用户对一篇文章，可以重复的点赞、取消点赞，但是最终我们只通知一次
+            notifyMsgDao.save(msg);
+        }
+    }
 
+    // -------------------------------------------- 下面是与用户的websocket长连接维护相关实现 -------------------------
+
+    /**
+     * x用户发送
+     * @param userId 用户id
+     * @param msg 通知内容
+     */
     @Override
     public void notifyToUser(Long userId, String msg) {
         wsUserSessionCache.getUnchecked(userId).forEach(s -> {
@@ -120,6 +149,54 @@ public class NotifyServiceImpl implements NotifyService {
         });
     }
 
+    /**
+     * 用户建立连接时，添加用户信息
+     *
+     * @param userId  用户id
+     * @param session jwt token
+     */
+    private void addUserToken(Long userId, String session) {
+        wsUserSessionCache.getUnchecked(userId).add(session);
+    }
+
+    /**
+     * 断开连接时，移除用户信息
+     *
+     * @param userId  用户id
+     * @param session jwt token
+     */
+    private void releaseUserToken(Long userId, String session) {
+        wsUserSessionCache.getUnchecked(userId).remove(session);
+    }
+
+    /**
+     * WebSocket通道管理
+     *
+     * @param accessor
+     */
     @Override
-    public void notifyChannelMaintain(StompHeaderAccessor accessor) {}
+    public void notifyChannelMaintain(StompHeaderAccessor accessor) {
+        String destination = accessor.getDestination();
+        if (StringUtils.isBlank(destination) || accessor.getCommand() == null) {
+            return;
+        }
+
+
+        // 全局私信、通知长连接入口
+        ReqInfoContext.ReqInfo user = (ReqInfoContext.ReqInfo) accessor.getUser();
+        if (user == null) {
+            log.info("websocket用户未登录! {}", accessor);
+            return;
+        }
+        switch (accessor.getCommand()) {
+            case SUBSCRIBE:
+                // 建立用户通信通道
+                addUserToken(user.getUserId(), user.getSession());
+                break;
+            case DISCONNECT:
+                // 中断链接，去掉用户的长连接会话
+                releaseUserToken(user.getUserId(), user.getSession());
+                break;
+        }
+    }
 }

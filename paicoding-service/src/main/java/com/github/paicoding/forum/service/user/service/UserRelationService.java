@@ -8,9 +8,6 @@ import com.github.paicoding.forum.api.model.vo.user.dto.FollowUserInfoDTO;
 import java.util.List;
 import java.util.Set;
 
-/**
- * 用户关系Service接口
- * */
 public interface UserRelationService {
 
     /**

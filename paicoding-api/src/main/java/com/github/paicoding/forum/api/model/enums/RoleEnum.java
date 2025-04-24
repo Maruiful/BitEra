@@ -4,8 +4,6 @@ import lombok.Getter;
 
 import java.util.Objects;
 
-/**
- */
 public enum RoleEnum {
     NORMAL(0, "普通用户"),
     ADMIN(1, "超级用户"),

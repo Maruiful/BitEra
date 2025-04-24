@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
-/** */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("column_info")

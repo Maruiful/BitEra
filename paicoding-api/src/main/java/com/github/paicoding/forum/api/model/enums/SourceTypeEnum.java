@@ -2,10 +2,6 @@ package com.github.paicoding.forum.api.model.enums;
 
 import lombok.Getter;
 
-/**
- * 文档来源枚举
- *
- */
 @Getter
 public enum SourceTypeEnum {
 

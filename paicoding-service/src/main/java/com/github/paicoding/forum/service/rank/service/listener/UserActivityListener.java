@@ -15,9 +15,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * 用户活跃相关的消息监听器
- * */
 @Component
 public class UserActivityListener {
     @Autowired
@@ -30,7 +27,40 @@ public class UserActivityListener {
      */
     @EventListener(classes = NotifyMsgEvent.class)
     @Async
-    public void notifyMsgListener(NotifyMsgEvent msgEvent)  {}
+    public void notifyMsgListener(NotifyMsgEvent msgEvent) {
+        switch (msgEvent.getNotifyType()) {
+            case COMMENT:
+            case REPLY:
+                CommentDO comment = (CommentDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setRate(true).setArticleId(comment.getArticleId()));
+                break;
+            case COLLECT:
+                UserFootDO foot = (UserFootDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setCollect(true).setArticleId(foot.getDocumentId()));
+                break;
+            case CANCEL_COLLECT:
+                foot = (UserFootDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setCollect(false).setArticleId(foot.getDocumentId()));
+                break;
+            case PRAISE:
+                foot = (UserFootDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setPraise(true).setArticleId(foot.getDocumentId()));
+                break;
+            case CANCEL_PRAISE:
+                foot = (UserFootDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setPraise(false).setArticleId(foot.getDocumentId()));
+                break;
+            case FOLLOW:
+                UserRelationDO relation = (UserRelationDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setFollow(true).setFollowedUserId(relation.getUserId()));
+                break;
+            case CANCEL_FOLLOW:
+                relation = (UserRelationDO) msgEvent.getContent();
+                userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setFollow(false).setFollowedUserId(relation.getUserId()));
+                break;
+            default:
+        }
+    }
 
     /**
      * 发布文章，更新对应的积分
@@ -39,6 +69,11 @@ public class UserActivityListener {
      */
     @Async
     @EventListener(ArticleMsgEvent.class)
-    public void publishArticleListener(ArticleMsgEvent<ArticleDO> event)  {}
+    public void publishArticleListener(ArticleMsgEvent<ArticleDO> event) {
+        ArticleEventEnum type = event.getType();
+        if (type == ArticleEventEnum.ONLINE) {
+            userActivityRankService.addActivityScore(ReqInfoContext.getReqInfo().getUserId(), new ActivityScoreBo().setPublishArticle(true).setArticleId(event.getContent().getId()));
+        }
+    }
 
 }

@@ -36,9 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * 专栏后台
- */
 @RestController
 @Slf4j
 @Permission(role = UserRole.LOGIN)
@@ -75,10 +72,10 @@ public class ColumnSettingRestController {
         return ResVo.ok(true);
     }
 
-
     @Permission(role = UserRole.ADMIN)
     @PostMapping(path = "saveColumnArticle")
     public ResVo<String> saveColumnArticle(@RequestBody ColumnArticleReq req) {
+
         // 要求文章必须存在，且已经发布
         ArticleDO articleDO = articleReadService.queryBasicArticle(req.getArticleId());
         if (articleDO == null || articleDO.getStatus() == PushStatusEnum.OFFLINE.getCode()) {
@@ -130,9 +127,9 @@ public class ColumnSettingRestController {
         return ResVo.ok();
     }
 
+
     /**
      * 移动专栏中教程或者分组的位置
-     *
      * @param req 请求参数
      * @return
      */
@@ -149,6 +146,7 @@ public class ColumnSettingRestController {
         PageVo<ColumnDTO> columnDTOPageVo = columnSettingService.getColumnList(req);
         return ResVo.ok(columnDTOPageVo);
     }
+
 
     @ApiOperation("获取教程分组列表")
     @GetMapping(path = "listGroups")
@@ -171,6 +169,7 @@ public class ColumnSettingRestController {
         return ResVo.ok(vo);
     }
 
+
     /**
      * 教程的文章，根据分组进行汇聚展示
      *
@@ -182,6 +181,7 @@ public class ColumnSettingRestController {
         List<ColumnArticleGroupDTO> list = columnSettingService.getColumnGroupAndArticles(columnId);
         return ResVo.ok(list);
     }
+
 
     @ApiOperation("专栏搜索")
     @GetMapping(path = "query")

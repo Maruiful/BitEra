@@ -3,9 +3,6 @@ package com.github.paicoding.forum.service.statistics.service;
 import com.github.paicoding.forum.api.model.vo.user.dto.ArticleFootCountDTO;
 import com.github.paicoding.forum.api.model.vo.user.dto.UserStatisticInfoDTO;
 
-/**
- * 计数统计相关
- * */
 public interface CountService {
     /**
      * 根据文章ID查询文章计数

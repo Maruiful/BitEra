@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.Signature;
 import java.util.Base64;
 
-/** */
 @Slf4j
 @Service
 @ConditionalOnBean(WxPayConfig.class)
@@ -45,13 +44,35 @@ public class JsapiWxPayIntegration extends AbsWxPayIntegration {
     }
 
     @Override
-    public boolean support(ThirdPayWayEnum payWay)  { return false; }
+    public boolean support(ThirdPayWayEnum payWay) {
+        return ThirdPayWayEnum.WX_JSAPI == payWay;
+    }
 
 
     /**
      * jsApi微信支付 -- 适用于小程序、公众号等方式的支付场景: 需要拿到用户的openId
      */
-    public String createPayOrder(ThirdPayOrderReqBo payReq)  { return null; }
+    public String createPayOrder(ThirdPayOrderReqBo payReq) {
+        PrepayRequest request = new PrepayRequest();
+        request.setAppid(wxPayConfig.getAppId());
+        request.setMchid(wxPayConfig.getMerchantId());
+        request.setDescription(payReq.getDescription());
+        request.setNotifyUrl(wxPayConfig.getPayNotifyUrl());
+        request.setOutTradeNo(payReq.getOutTradeNo());
+
+        Amount amount = new Amount();
+        amount.setTotal(payReq.getTotal());
+        request.setAmount(amount);
+
+        Payer payer = new Payer();
+        payer.setOpenid(payReq.getOpenId());
+        request.setPayer(payer);
+
+        log.info("微信JsApi下单, 请求参数: {}", JsonUtil.toStr(request));
+        com.wechat.pay.java.service.payments.jsapi.model.PrepayResponse response = jsapiService.prepay(request);
+        log.info("微信支付 >>>>>>>>>>>> 返回: {}", response.getPrepayId());
+        return response.getPrepayId();
+    }
 
     @Override
     protected PrePayInfoResBo buildPayInfo(ThirdPayOrderReqBo payReq, String prePayId) {
@@ -90,8 +111,19 @@ public class JsapiWxPayIntegration extends AbsWxPayIntegration {
         }
     }
 
-    public void closeOrder(String outTradeNo)  {}
+    public void closeOrder(String outTradeNo) {
+        CloseOrderRequest closeRequest = new CloseOrderRequest();
+        closeRequest.setMchid(wxPayConfig.getMerchantId());
+        closeRequest.setOutTradeNo(outTradeNo);
+        jsapiService.closeOrder(closeRequest);
+    }
 
 
-    public PayCallbackBo queryOrder(String outTradeNo)  { return null; }
+    public PayCallbackBo queryOrder(String outTradeNo) {
+        QueryOrderByOutTradeNoRequest request = new QueryOrderByOutTradeNoRequest();
+        request.setMchid(wxPayConfig.getMerchantId());
+        request.setOutTradeNo(outTradeNo);
+        Transaction transaction = jsapiService.queryOrderByOutTradeNo(request);
+        return toBo(transaction);
+    }
 }

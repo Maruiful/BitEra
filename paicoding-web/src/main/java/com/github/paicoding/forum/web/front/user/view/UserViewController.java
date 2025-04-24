@@ -36,10 +36,6 @@ import java.util.List;
 import java.util.Objects;
 
 
-/**
- * 用户注册、取消，登录、登出
- *
- **/
 @Controller
 @RequestMapping(path = "user")
 @Slf4j

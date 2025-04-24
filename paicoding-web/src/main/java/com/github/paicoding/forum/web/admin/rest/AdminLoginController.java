@@ -22,10 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
-/**
- * 文章后台
- *
- */
 @RestController
 @Api(value = "后台登录登出管理控制器", tags = "后台登录")
 @RequestMapping(path = {"/api/admin", "/admin"})
@@ -49,7 +45,7 @@ public class AdminLoginController {
      */
     @RequestMapping(path = {"login"})
     public ResVo<BaseUserInfoDTO> login(HttpServletRequest request,
-                                        HttpServletResponse response)  {
+                                        HttpServletResponse response) {
         String username = request.getParameter("username");
         String pwd = request.getParameter("password");
         String session = loginOutService.loginByUserPwd(username, pwd);
@@ -68,13 +64,13 @@ public class AdminLoginController {
      * @return
      */
     @RequestMapping(path = "isLogined")
-    public ResVo<Boolean> isLogined()  {
+    public ResVo<Boolean> isLogined() {
         return ResVo.ok(ReqInfoContext.getReqInfo().getUserId() != null);
     }
 
     @ApiOperation("获取当前登录用户信息")
     @GetMapping("info")
-    public ResVo<BaseUserInfoDTO> info()  {
+    public ResVo<BaseUserInfoDTO> info() {
         BaseUserInfoDTO user = ReqInfoContext.getReqInfo().getUser();
         return ResVo.ok(user);
     }
@@ -87,7 +83,7 @@ public class AdminLoginController {
      */
     @Permission(role = UserRole.LOGIN)
     @GetMapping("logout")
-    public ResVo<Boolean> logOut(HttpServletResponse response)  {
+    public ResVo<Boolean> logOut(HttpServletResponse response) {
         Optional.ofNullable(ReqInfoContext.getReqInfo()).ifPresent(s -> loginOutService.logout(s.getSession()));
         // 为什么不后端实现重定向？ 重定向交给前端执行，避免由于前后端分离，本地开发时端口不一致导致的问题
         // response.sendRedirect("/");

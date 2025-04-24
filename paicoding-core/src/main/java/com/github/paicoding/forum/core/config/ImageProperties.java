@@ -5,10 +5,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * 图片配置文件
- * * @since 2022/9/7
- */
 @Setter
 @Getter
 @Component
@@ -37,7 +33,7 @@ public class ImageProperties {
 
     private OssProperties oss;
 
-    public String buildImgUrl(String url)  {
+    public String buildImgUrl(String url) {
         if (!url.startsWith(cdnHost)) {
             return cdnHost + url;
         }

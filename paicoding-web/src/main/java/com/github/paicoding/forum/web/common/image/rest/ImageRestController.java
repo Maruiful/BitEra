@@ -19,10 +19,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * 图片服务，要求登录之后才允许操作
- *
- */
 @Permission(role = UserRole.LOGIN)
 @RequestMapping(path = {"image/", "admin/image/", "api/admin/image/",})
 @RestController

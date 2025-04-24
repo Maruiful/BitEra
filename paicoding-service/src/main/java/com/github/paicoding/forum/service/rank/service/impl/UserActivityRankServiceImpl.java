@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -22,17 +23,38 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/** */
 @Slf4j
 @Service
 public class UserActivityRankServiceImpl implements UserActivityRankService {
-
     private static final String ACTIVITY_SCORE_KEY = "activity_rank_";
-
 
     @Autowired
     private UserService userService;
 
+    /**
+     * 当天活跃度排行榜
+     *
+     * @return 当天排行榜key
+     */
+    private String todayRankKey() {
+        return ACTIVITY_SCORE_KEY + DateUtil.format(DateTimeFormatter.ofPattern("yyyyMMdd"), System.currentTimeMillis());
+    }
+
+    /**
+     * 本月排行榜
+     *
+     * @return 月度排行榜key
+     */
+    private String monthRankKey() {
+        return ACTIVITY_SCORE_KEY + DateUtil.format(DateTimeFormatter.ofPattern("yyyyMM"), System.currentTimeMillis());
+    }
+
+    /**
+     * 添加活跃分
+     *
+     * @param userId        用于更新活跃积分的用户
+     * @param activityScore 触发活跃积分的时间类型
+     */
     @Override
     public void addActivityScore(Long userId, ActivityScoreBo activityScore) {
         if (userId == null) {
@@ -125,25 +147,17 @@ public class UserActivityRankServiceImpl implements UserActivityRankService {
     }
 
     @Override
-    public RankItemDTO queryRankInfo(Long userId, ActivityRankTimeEnum time) { return null; }
+    public RankItemDTO queryRankInfo(Long userId, ActivityRankTimeEnum time) {
+        RankItemDTO item = new RankItemDTO();
+        item.setUser(userService.querySimpleUserInfo(userId));
 
-    /**
-     * 当天活跃度排行榜
-     *
-     * @return 当天排行榜key
-     */
-    private String todayRankKey() {
-        return ACTIVITY_SCORE_KEY + DateUtil.format(DateTimeFormatter.ofPattern("yyyyMMdd"), System.currentTimeMillis());
+        String rankKey = time == ActivityRankTimeEnum.DAY ? todayRankKey() : monthRankKey();
+        ImmutablePair<Integer, Double> rank = RedisClient.zRankInfo(rankKey, String.valueOf(userId));
+        item.setRank(rank.getLeft());
+        item.setScore(rank.getRight().intValue());
+        return item;
     }
 
-    /**
-     * 本月排行榜
-     *
-     * @return 月度排行榜key
-     */
-    private String monthRankKey() {
-        return ACTIVITY_SCORE_KEY + DateUtil.format(DateTimeFormatter.ofPattern("yyyyMM"), System.currentTimeMillis());
-    }
     @Override
     public List<RankItemDTO> queryRankList(ActivityRankTimeEnum time, int size) {
         String rankKey = time == ActivityRankTimeEnum.DAY ? todayRankKey() : monthRankKey();

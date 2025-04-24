@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 public class Main03004 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution03004 solution = new Solution03004();
+        String s = "barfoobarfoothefoobarman";
+        String[] words = {"foo", "bar"};
+        List<Integer> result = solution.findSubstring(s, words);
+        System.out.println(result);
+    }
 }
 
 class Solution03004 {

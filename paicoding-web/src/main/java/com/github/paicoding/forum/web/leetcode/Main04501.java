@@ -1,7 +1,11 @@
 package com.github.paicoding.forum.web.leetcode;
 
 public class Main04501 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Main04501 solution = new Main04501();
+        System.out.println(solution.jump(new int[]{2, 3, 1, 1, 4})); // 输出 2
+        System.out.println(solution.jump(new int[]{2, 3, 0, 1, 4})); // 输出 2
+    }
 
     public int jump(int[] nums) {
         int n = nums.length;

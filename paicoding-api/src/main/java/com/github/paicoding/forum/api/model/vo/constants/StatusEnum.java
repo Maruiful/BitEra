@@ -2,23 +2,6 @@ package com.github.paicoding.forum.api.model.vo.constants;
 
 import lombok.Getter;
 
-/**
- * 异常码规范：
- * xxx - xxx - xxx
- * 业务 - 状态 - code
- * <p>
- * 业务取值
- * - 100 全局
- * - 200 文章相关
- * - 300 评论相关
- * - 400 用户相关
- * <p>
- * 状态：基于http status的含义
- * - 4xx 调用方使用姿势问题
- * - 5xx 服务内部问题
- * <p>
- * code: 具体的业务code
- * */
 @Getter
 public enum StatusEnum {
     SUCCESS(0, "OK"),

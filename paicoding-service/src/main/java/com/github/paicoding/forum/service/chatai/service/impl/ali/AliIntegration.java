@@ -58,13 +58,28 @@ public class AliIntegration {
 
             gen.streamCall(param, new ResultCallback<GenerationResult>() {
                 @Override
-                public void onEvent(GenerationResult message)  {}
+                public void onEvent(GenerationResult message) {
+                    String content = message.getOutput().getChoices().get(0).getMessage().getContent();
+                    fullContent.append(content);
+                    log.info("Received message: {}", JsonUtils.toJson(message));
+                    item.appendAnswer(content);
+                    callback.accept(AiChatStatEnum.MID, chatRecord);
+                }
 
                 @Override
-                public void onError(Exception err)  {}
+                public void onError(Exception err) {
+                    callback.accept(AiChatStatEnum.ERROR, chatRecord);
+                    log.error("Exception occurred: {}", err.getMessage());
+                    semaphore.release();
+                }
 
                 @Override
-                public void onComplete()  {}
+                public void onComplete() {
+                    item.setAnswerType(ChatAnswerTypeEnum.STREAM_END);
+                    callback.accept(AiChatStatEnum.END, chatRecord);
+                    log.info("Completed");
+                    semaphore.release();
+                }
             });
 
             semaphore.acquire();
@@ -109,7 +124,25 @@ public class AliIntegration {
         return true;
     }
 
-    public static Flowable<ChatMessageAccumulator> mapStreamToAccumulator(Flowable<ModelData> flowable)  { return null; }
+    public static Flowable<ChatMessageAccumulator> mapStreamToAccumulator(Flowable<ModelData> flowable) {
+        return flowable.map(chunk -> {
+            return new ChatMessageAccumulator(chunk.getChoices().get(0).getDelta(), null, chunk.getChoices().get(0), chunk.getUsage(), chunk.getCreated(), chunk.getId());
+        });
+    }
 
-    private List<Message> toMsg(ChatItemVo item)  { return null; }
+    private List<Message> toMsg(ChatItemVo item) {
+        List<Message> list = new ArrayList<>(2);
+        if (item.getQuestion().startsWith(ChatConstants.PROMPT_TAG)) {
+            // 提示词消息
+            list.add(Message.builder().role(Role.SYSTEM.getValue()).content(item.getQuestion().substring(ChatConstants.PROMPT_TAG.length())).build());
+            return list;
+        }
+
+        // 用户问答
+        list.add(Message.builder().role(Role.USER.getValue()).content(item.getQuestion()).build());
+        if (StringUtils.isNotBlank(item.getAnswer())) {
+            list.add(Message.builder().role(Role.ASSISTANT.getValue()).content(item.getAnswer()).build());
+        }
+        return list;
+    }
 }

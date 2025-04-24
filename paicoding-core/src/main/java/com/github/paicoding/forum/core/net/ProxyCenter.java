@@ -9,8 +9,6 @@ import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- */
 public class ProxyCenter {
 
     /**

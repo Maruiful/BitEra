@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 
-/**
- */
 @Slf4j
 @Component
 public class WxLoginQrGenIntegration {

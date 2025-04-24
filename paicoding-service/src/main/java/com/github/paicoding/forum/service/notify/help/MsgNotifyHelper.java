@@ -5,7 +5,6 @@ import com.github.paicoding.forum.api.model.vo.notify.NotifyMsgEvent;
 import com.github.paicoding.forum.core.util.SpringUtil;
 import org.springframework.stereotype.Service;
 
-/** */
 @Service
 public class MsgNotifyHelper {
 
@@ -16,7 +15,9 @@ public class MsgNotifyHelper {
      * @param content 消息内容
      * @param <T>     消息类型
      */
-    public <T> void publishMsg(NotifyTypeEnum type, T content) {}
+    public <T> void publishMsg(NotifyTypeEnum type, T content) {
+        SpringUtil.publishEvent(new NotifyMsgEvent<>(this, type, content));
+    }
 
 
     /**

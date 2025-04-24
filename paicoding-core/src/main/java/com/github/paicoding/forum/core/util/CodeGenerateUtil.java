@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-/**
- */
 public class CodeGenerateUtil {
     public static final Integer CODE_LEN = 3;
 

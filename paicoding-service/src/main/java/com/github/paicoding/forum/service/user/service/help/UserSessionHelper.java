@@ -20,9 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
 
-/**
- * 使用jwt来存储用户token，则不需要后端来存储session了
- * */
 @Slf4j
 @Component
 public class UserSessionHelper {
@@ -44,14 +41,15 @@ public class UserSessionHelper {
         private Long expire;
     }
 
-    private JWTVerifier verifier;
-
     private final JwtProperties jwtProperties;
 
     private Algorithm algorithm;
+    private JWTVerifier verifier;
 
     public UserSessionHelper(JwtProperties jwtProperties) {
         this.jwtProperties = jwtProperties;
+        algorithm = Algorithm.HMAC256(jwtProperties.getSecret());
+        verifier = JWT.require(algorithm).withIssuer(jwtProperties.getIssuer()).build();
     }
 
     public String genSession(Long userId) {

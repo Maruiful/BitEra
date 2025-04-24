@@ -13,9 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-/**
- * 文章标签映mapper接口
- * */
 @Repository
 public class ArticleTagDao extends ServiceImpl<ArticleTagMapper, ArticleTagDO> {
 
@@ -26,7 +23,7 @@ public class ArticleTagDao extends ServiceImpl<ArticleTagMapper, ArticleTagDO> {
      * @param articleId
      * @param tags
      */
-    public void batchSave(Long articleId, Collection<Long> tags)  {
+    public void batchSave(Long articleId, Collection<Long> tags) {
         List<ArticleTagDO> insertList = new ArrayList<>(tags.size());
         tags.forEach(s -> {
             ArticleTagDO tag = new ArticleTagDO();
@@ -76,7 +73,7 @@ public class ArticleTagDao extends ServiceImpl<ArticleTagMapper, ArticleTagDO> {
      * @param articleId
      * @return
      */
-    public List<TagDTO> queryArticleTagDetails(Long articleId)  {
+    public List<TagDTO> queryArticleTagDetails(Long articleId) {
         return baseMapper.listArticleTagDetails(articleId);
     }
 

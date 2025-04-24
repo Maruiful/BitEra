@@ -6,9 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-/**
- * 价格处理类
- */
 public class PriceUtil {
 
     /**

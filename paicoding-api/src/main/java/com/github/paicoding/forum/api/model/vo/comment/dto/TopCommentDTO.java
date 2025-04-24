@@ -6,10 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 评论树状结构
- *
- */
 @Data
 public class TopCommentDTO extends BaseCommentDTO {
     /**

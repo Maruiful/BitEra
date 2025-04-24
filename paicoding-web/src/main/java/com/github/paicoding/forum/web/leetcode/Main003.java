@@ -1,12 +1,18 @@
 package com.github.paicoding.forum.web.leetcode;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 import java.util.Scanner;
 
 public class Main003 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("输入字符串: ");
+        String s = scanner.nextLine(); // 从标准输入读取字符串
+
+        Solution solution = new Solution();
+        int length = solution.lengthOfLongestSubstring(s); // 调用解题函数
+
+        System.out.println("没有重复的最长子串为: " + length); // 输出结果
+    }
 }
 
 class Solution {

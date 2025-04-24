@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
 
-/**
- * 返回json格式数据
- *
- */
 @Slf4j
 @RequestMapping(path = "article/api/pay")
 @RestController

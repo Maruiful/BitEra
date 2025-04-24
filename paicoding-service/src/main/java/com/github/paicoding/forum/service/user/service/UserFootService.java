@@ -10,9 +10,6 @@ import com.github.paicoding.forum.service.user.repository.entity.UserFootDO;
 
 import java.util.List;
 
-/**
- * 用户足迹Service接口
- * */
 public interface UserFootService {
     /**
      * 保存或更新状态信息

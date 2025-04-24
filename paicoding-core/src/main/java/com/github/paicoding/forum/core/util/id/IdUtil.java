@@ -12,9 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.github.paicoding.forum.core.util.CompressUtil.int2str;
 
-/**
- *
- */
 public class IdUtil {
     /**
      * 默认的id生成器
@@ -86,6 +83,5 @@ public class IdUtil {
         AsyncUtil.sleep(3000L);
         id = producer.genId();
         System.out.println("id: " + id + " -> " + int2str(id));
-
     }
 }

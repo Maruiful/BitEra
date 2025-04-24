@@ -4,9 +4,6 @@ import com.github.paicoding.forum.api.model.vo.article.dto.CategoryDTO;
 
 import java.util.List;
 
-/**
- * 标签Service
- * */
 public interface CategoryService {
     /**
      * 查询类目名

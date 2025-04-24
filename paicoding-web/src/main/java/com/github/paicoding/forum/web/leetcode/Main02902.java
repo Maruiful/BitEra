@@ -1,10 +1,15 @@
 package com.github.paicoding.forum.web.leetcode;
 
-/**
- * 微信搜索「沉默王二」，回复 Java
- * */
 public class Main02902 {
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution02902 solution = new Solution02902();
+        System.out.println(solution.divide(100, 1));
+        System.out.println(solution.divide(7, -3));
+        System.out.println(solution.divide(0, 1));
+        System.out.println(solution.divide(1, 1));
+        System.out.println(solution.divide(1, 0));
+        System.out.println(solution.divide(-2147483648, -1));
+    }
 }
 
 class Solution02902 {

@@ -6,9 +6,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- *
- * */
 @Data
 @ApiModel("拖拽移动教程顺序")
 public class MoveColumnArticleOrGroupReq implements Serializable {

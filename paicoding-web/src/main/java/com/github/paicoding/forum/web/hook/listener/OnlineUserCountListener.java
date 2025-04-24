@@ -7,9 +7,6 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-/**
- * 通过监听session来实现实时人数统计
- * */
 @WebListener
 public class OnlineUserCountListener implements HttpSessionListener {
 
@@ -19,7 +16,7 @@ public class OnlineUserCountListener implements HttpSessionListener {
      *
      * @param se
      */
-    public void sessionCreated(HttpSessionEvent se)  {
+    public void sessionCreated(HttpSessionEvent se) {
         HttpSessionListener.super.sessionCreated(se);
         SpringUtil.getBean(UserStatisticService.class).incrOnlineUserCnt(1);
     }
@@ -29,8 +26,8 @@ public class OnlineUserCountListener implements HttpSessionListener {
      *
      * @param se
      */
-    public void sessionDestroyed(HttpSessionEvent se)  {
-        HttpSessionListener.super.sessionCreated(se);
+    public void sessionDestroyed(HttpSessionEvent se) {
+        HttpSessionListener.super.sessionDestroyed(se);
         SpringUtil.getBean(UserStatisticService.class).incrOnlineUserCnt(-1);
     }
 }

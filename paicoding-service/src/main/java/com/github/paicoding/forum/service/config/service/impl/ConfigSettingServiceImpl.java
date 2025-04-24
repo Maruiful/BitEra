@@ -14,14 +14,11 @@ import com.github.paicoding.forum.service.config.repository.params.SearchConfigP
 import com.github.paicoding.forum.service.config.service.ConfigSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
-/**
- * Banner后台接口
- * */
 @Service
 public class ConfigSettingServiceImpl implements ConfigSettingService {
-
 
     @Autowired
     private ConfigDao configDao;
@@ -66,5 +63,9 @@ public class ConfigSettingServiceImpl implements ConfigSettingService {
     }
 
     @Override
-    public PageVo<ConfigDTO> getNoticeList(PageParam pageParam) { return null; }
+    public PageVo<ConfigDTO> getNoticeList(PageParam pageParam) {
+        List<ConfigDTO> configDTOS = configDao.listNotice(pageParam);
+        Integer totalCount = configDao.countNotice();
+        return PageVo.build(configDTOS, pageParam.getPageSize(), pageParam.getPageNum(), totalCount);
+    }
 }

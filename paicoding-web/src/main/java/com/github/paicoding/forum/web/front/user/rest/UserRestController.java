@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.Objects;
 
-/**
- */
 @RestController
 @RequestMapping(path = "user/api")
 public class UserRestController {

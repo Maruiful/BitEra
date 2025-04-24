@@ -2,7 +2,6 @@ package com.github.paicoding.forum.core.util;
 
 import org.springframework.util.Assert;
 
-/** */
 public class EnvUtil {
     private static volatile EnvEnum env;
 

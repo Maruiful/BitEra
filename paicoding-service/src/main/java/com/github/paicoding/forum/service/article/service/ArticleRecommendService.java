@@ -4,7 +4,6 @@ import com.github.paicoding.forum.api.model.vo.PageListVo;
 import com.github.paicoding.forum.api.model.vo.PageParam;
 import com.github.paicoding.forum.api.model.vo.article.dto.ArticleDTO;
 
-/** */
 public interface ArticleRecommendService {
     /**
      * 文章关联推荐

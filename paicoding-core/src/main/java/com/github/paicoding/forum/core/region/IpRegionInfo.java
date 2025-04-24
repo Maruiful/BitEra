@@ -5,9 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
-/**
- * ip区域信息
- * */
 @Data
 public class IpRegionInfo {
     /**

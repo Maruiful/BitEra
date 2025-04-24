@@ -8,23 +8,20 @@ import com.github.paicoding.forum.service.config.service.DictCommonService;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 字典Service
- * */
 @Service
 public class DictCommonServiceImpl implements DictCommonService {
 
+    @Resource
+    private DictCommonDao dictCommonDao;
 
     @Autowired
     private CategoryService categoryService;
-
-    @Autowired
-    private DictCommonDao dictCommonDao;
 
     @Override
     public Map<String, Object> getDict() {
@@ -34,12 +31,12 @@ public class DictCommonServiceImpl implements DictCommonService {
 
         Map<String, Map<String, String>> dictCommonMap = Maps.newLinkedHashMap();
         for (DictCommonDTO dictCommon : dictCommonList) {
-            Map<String, String> codeMap = dictCommonMap.get(dictCommon.getTypeCode());
-            if (codeMap == null || codeMap.isEmpty()) {
-                codeMap = Maps.newLinkedHashMap();
-                dictCommonMap.put(dictCommon.getTypeCode(), codeMap);
-            }
-            codeMap.put(dictCommon.getDictCode(), dictCommon.getDictDesc());
+                Map<String, String> codeMap = dictCommonMap.get(dictCommon.getTypeCode());
+                if (codeMap == null || codeMap.isEmpty()) {
+                    codeMap = Maps.newLinkedHashMap();
+                    dictCommonMap.put(dictCommon.getTypeCode(), codeMap);
+                }
+                codeMap.put(dictCommon.getDictCode(), dictCommon.getDictDesc());
         }
 
         // 获取分类的字典信息
@@ -51,4 +48,5 @@ public class DictCommonServiceImpl implements DictCommonService {
         result.putAll(dictCommonMap);
         return result;
     }
+
 }

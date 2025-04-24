@@ -6,9 +6,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- *
- * */
 @Data
 @ApiModel("教程排序")
 public class SortColumnArticleReq implements Serializable {

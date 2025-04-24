@@ -14,9 +14,6 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 分类后台
- * */
 @RestController
 @Permission(role = UserRole.LOGIN)
 @Api(value = "文章类目管理控制器", tags = "类目管理")

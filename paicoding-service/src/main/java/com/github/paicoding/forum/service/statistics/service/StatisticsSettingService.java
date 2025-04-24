@@ -7,9 +7,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-/**
- * 数据统计后台接口
- * */
 public interface StatisticsSettingService {
 
     /**

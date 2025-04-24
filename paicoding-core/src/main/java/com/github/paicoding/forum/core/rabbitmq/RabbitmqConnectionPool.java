@@ -3,16 +3,13 @@ package com.github.paicoding.forum.core.rabbitmq;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * RabbitMQ连接池
- */
 public class RabbitmqConnectionPool {
 
     private static BlockingQueue<RabbitmqConnection> pool;
 
     public static void initRabbitmqConnectionPool(String host, int port, String userName, String password,
-                                                  String virtualhost,
-                                                  Integer poolSize) {
+                                             String virtualhost,
+                                           Integer poolSize) {
         pool = new LinkedBlockingQueue<>(poolSize);
         for (int i = 0; i < poolSize; i++) {
             pool.add(new RabbitmqConnection(host, port, userName, password, virtualhost));

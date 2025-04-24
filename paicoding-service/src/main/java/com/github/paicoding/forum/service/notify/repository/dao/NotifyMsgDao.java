@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** */
 @Repository
 public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
 
@@ -27,7 +26,19 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param msg
      * @return
      */
-    public NotifyMsgDO getByUserIdRelatedIdAndType(NotifyMsgDO msg)  { return null; }
+    public NotifyMsgDO getByUserIdRelatedIdAndType(NotifyMsgDO msg) {
+        List<NotifyMsgDO> list = lambdaQuery().eq(NotifyMsgDO::getNotifyUserId, msg.getNotifyUserId())
+                .eq(NotifyMsgDO::getOperateUserId, msg.getOperateUserId())
+                .eq(NotifyMsgDO::getType, msg.getType())
+                .eq(NotifyMsgDO::getRelatedId, msg.getRelatedId())
+                .orderByDesc(NotifyMsgDO::getId)
+                .page(new Page<>(0, 1))
+                .getRecords();
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        return list.get(0);
+    }
 
 
     /**
@@ -36,7 +47,7 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param userId
      * @return
      */
-    public int countByUserIdAndStat(long userId, Integer stat)  {
+    public int countByUserIdAndStat(long userId, Integer stat) {
         return lambdaQuery()
                 .eq(NotifyMsgDO::getNotifyUserId, userId)
                 .eq(stat != null, NotifyMsgDO::getState, stat)
@@ -49,7 +60,7 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param userId
      * @return
      */
-    public Map<Integer, Integer> groupCountByUserIdAndStat(long userId, Integer stat)  {
+    public Map<Integer, Integer> groupCountByUserIdAndStat(long userId, Integer stat) {
         QueryWrapper<NotifyMsgDO> wrapper = new QueryWrapper<>();
         wrapper.select("type, count(*) as cnt");
         wrapper.eq("notify_user_id", userId);
@@ -72,7 +83,7 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      * @param type
      * @return
      */
-    public List<NotifyMsgDTO> listNotifyMsgByUserIdAndType(long userId, NotifyTypeEnum type, PageParam page)  {
+    public List<NotifyMsgDTO> listNotifyMsgByUserIdAndType(long userId, NotifyTypeEnum type, PageParam page) {
         switch (type) {
             case REPLY:
             case COMMENT:
@@ -89,7 +100,7 @@ public class NotifyMsgDao extends ServiceImpl<NotifyMsgMapper, NotifyMsgDO> {
      *
      * @param list
      */
-    public void updateNotifyMsgToRead(List<NotifyMsgDTO> list)  {
+    public void updateNotifyMsgToRead(List<NotifyMsgDTO> list) {
         List<Long> ids = list.stream().filter(s -> s.getState() == NotifyStatEnum.UNREAD.getStat()).map(NotifyMsgDTO::getMsgId).collect(Collectors.toList());
         if (!ids.isEmpty()) {
             baseMapper.updateNoticeRead(ids);

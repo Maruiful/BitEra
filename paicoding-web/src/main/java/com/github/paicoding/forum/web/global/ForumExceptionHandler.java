@@ -24,10 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * 全局异常处理
- * fixme: 除了这种姿势之外，还可以使用 ControllerAdvice 注解方式
- * */
 @Slf4j
 @Order(-100)
 public class ForumExceptionHandler implements HandlerExceptionResolver {
@@ -136,6 +132,5 @@ public class ForumExceptionHandler implements HandlerExceptionResolver {
         String requestedWith = request.getHeader("X-Requested-With");
         return "XMLHttpRequest".equals(requestedWith);
     }
-
 
 }

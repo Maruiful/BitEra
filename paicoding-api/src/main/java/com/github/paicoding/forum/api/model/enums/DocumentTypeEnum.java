@@ -2,10 +2,6 @@ package com.github.paicoding.forum.api.model.enums;
 
 import lombok.Getter;
 
-/**
- * 文档类型枚举
- *
- */
 @Getter
 public enum DocumentTypeEnum {
 

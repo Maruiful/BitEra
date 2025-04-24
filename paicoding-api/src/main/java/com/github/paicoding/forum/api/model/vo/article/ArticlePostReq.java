@@ -9,9 +9,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Set;
 
-/**
- * 发布文章请求参数
- * */
 @Data
 public class ArticlePostReq implements Serializable {
     /**

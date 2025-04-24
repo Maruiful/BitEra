@@ -13,10 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-/**
- * 排行榜
- *
- */
 @Controller
 public class RankController {
     @Autowired

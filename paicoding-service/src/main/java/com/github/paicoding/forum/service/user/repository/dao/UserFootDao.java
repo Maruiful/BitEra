@@ -16,10 +16,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/** */
 @Repository
 public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
-    public UserFootDO getByDocumentAndUserId(Long documentId, Integer type, Long userId)  {
+    public UserFootDO getByDocumentAndUserId(Long documentId, Integer type, Long userId) {
         LambdaQueryWrapper<UserFootDO> query = Wrappers.lambdaQuery();
         query.eq(UserFootDO::getDocumentId, documentId)
                 .eq(UserFootDO::getDocumentType, type)
@@ -27,7 +26,9 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
         return baseMapper.selectOne(query);
     }
 
-    public List<SimpleUserInfoDTO> listDocumentPraisedUsers(Long documentId, Integer type, int size)  { return null; }
+    public List<SimpleUserInfoDTO> listDocumentPraisedUsers(Long documentId, Integer type, int size) {
+        return baseMapper.listSimpleUserInfosByArticleId(documentId, type, size);
+    }
 
     /**
      * 查询用户收藏的文章列表
@@ -36,7 +37,7 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param pageParam
      * @return
      */
-    public List<Long> listCollectedArticlesByUserId(Long userId, PageParam pageParam)  {
+    public List<Long> listCollectedArticlesByUserId(Long userId, PageParam pageParam) {
         return baseMapper.listCollectedArticlesByUserId(userId, pageParam);
     }
 
@@ -48,7 +49,7 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param pageParam
      * @return
      */
-    public List<Long> listReadArticleByUserId(Long userId, PageParam pageParam)  {
+    public List<Long> listReadArticleByUserId(Long userId, PageParam pageParam) {
         return baseMapper.listReadArticleByUserId(userId, pageParam);
     }
 
@@ -58,7 +59,7 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param articleId
      * @return
      */
-    public ArticleFootCountDTO countArticleByArticleId(Long articleId)  {
+    public ArticleFootCountDTO countArticleByArticleId(Long articleId) {
         return baseMapper.countArticleByArticleId(articleId);
     }
 
@@ -68,7 +69,12 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param author
      * @return
      */
-    public ArticleFootCountDTO countArticleByUserId(Long author)  { return null; }
+    public ArticleFootCountDTO countArticleByUserId(Long author) {
+        // 统计收藏、点赞数
+        ArticleFootCountDTO count = baseMapper.countArticleByUserId(author);
+        Optional.ofNullable(count).ifPresent(s -> s.setReadCount(baseMapper.countArticleReadsByUserId(author)));
+        return count;
+    }
 
     /**
      * 查询评论的点赞数
@@ -76,7 +82,7 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
      * @param commentId
      * @return
      */
-    public Long countCommentPraise(Long commentId)  {
+    public Long countCommentPraise(Long commentId) {
         return lambdaQuery()
                 .eq(UserFootDO::getDocumentId, commentId)
                 .eq(UserFootDO::getDocumentType, DocumentTypeEnum.COMMENT.getCode())
@@ -84,7 +90,8 @@ public class UserFootDao extends ServiceImpl<UserFootMapper, UserFootDO> {
                 .count();
     }
 
-    public UserFootStatisticDTO getFootCount()  {
+    public UserFootStatisticDTO getFootCount() {
         return baseMapper.getFootCount();
+
     }
 }

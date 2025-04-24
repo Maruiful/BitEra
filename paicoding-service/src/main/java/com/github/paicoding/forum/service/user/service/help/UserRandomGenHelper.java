@@ -1,8 +1,7 @@
 package com.github.paicoding.forum.service.user.service.help;
 
-/**
- * 用户名生成器
- * */
+import java.util.Random;
+
 public class UserRandomGenHelper {
     public static final String[] name_decorate = new String[]{
             "迷你的", "鲜艳的", "飞快的", "真实的", "清新的", "幸福的", "可耐的", "快乐的", "冷静的", "醉熏的", "潇洒的", "糊涂的", "积极的", "冷酷的", "深情的", "粗暴的",
@@ -47,6 +46,10 @@ public class UserRandomGenHelper {
             "羊", "黑猫", "白猫", "万宝路", "金毛", "山水", "音响", "纸飞机", "烧鹅"
     };
 
+    private static final Random RANDOM = new Random();
+
+    private static final int AVATAR_NUM = 92;
+
     private static final String AVATAR_TEMPLATE = "https://cdn.tobebetterjavaer.com/paicoding/avatar/%04d.png";
 
     /**
@@ -54,14 +57,20 @@ public class UserRandomGenHelper {
      *
      * @return
      */
-    public static String genNickName() { return null; }
+    public static String genNickName() {
+        int decorateIndex = RANDOM.nextInt(name_decorate.length);
+        int bodyIndex = RANDOM.nextInt(name_body.length);
+        return name_decorate[decorateIndex] + name_body[bodyIndex];
+    }
 
     /**
      * 头像自动选择
      *
      * @return
      */
-    public static String genAvatar() { return null; }
+    public static String genAvatar() {
+        return String.format(AVATAR_TEMPLATE, RANDOM.nextInt(AVATAR_NUM) + 1);
+    }
 
     /**
      * 生成用户邀请码

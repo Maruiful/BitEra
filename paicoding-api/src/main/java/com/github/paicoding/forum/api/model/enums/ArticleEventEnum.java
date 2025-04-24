@@ -5,10 +5,6 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 文章操作枚举
- *
- */
 @Getter
 public enum ArticleEventEnum {
     CREATE(1, "创建"),

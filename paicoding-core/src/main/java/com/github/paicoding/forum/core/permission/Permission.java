@@ -2,8 +2,6 @@ package com.github.paicoding.forum.core.permission;
 
 import java.lang.annotation.*;
 
-/**
- */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

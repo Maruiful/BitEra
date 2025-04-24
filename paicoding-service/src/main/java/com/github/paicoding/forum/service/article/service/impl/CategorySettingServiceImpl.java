@@ -1,6 +1,5 @@
 package com.github.paicoding.forum.service.article.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.paicoding.forum.api.model.vo.PageVo;
 import com.github.paicoding.forum.api.model.vo.article.CategoryReq;
 import com.github.paicoding.forum.api.model.vo.article.SearchCategoryReq;
@@ -15,22 +14,29 @@ import com.github.paicoding.forum.service.article.service.CategoryService;
 import com.github.paicoding.forum.service.article.service.CategorySettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
-/**
- * 分类后台接口
- * */
 @Service
 public class CategorySettingServiceImpl implements CategorySettingService {
 
-
     @Autowired
     private CategoryDao categoryDao;
+
     @Autowired
     private CategoryService categoryService;
 
     @Override
-    public void saveCategory(CategoryReq categoryReq) {}
+    public void saveCategory(CategoryReq categoryReq) {
+        CategoryDO categoryDO = CategoryStructMapper.INSTANCE.toDO(categoryReq);
+        if (NumUtil.nullOrZero(categoryReq.getCategoryId())) {
+            categoryDao.save(categoryDO);
+        } else {
+            categoryDO.setId(categoryReq.getCategoryId());
+            categoryDao.updateById(categoryDO);
+        }
+        categoryService.refreshCache();
+    }
 
     @Override
     public void deleteCategory(Integer categoryId) {

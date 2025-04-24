@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 通用标签选择
- * */
 @Data
 public class TagSelectDTO implements Serializable {
 

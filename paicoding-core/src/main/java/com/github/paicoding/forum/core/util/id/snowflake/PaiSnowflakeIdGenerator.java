@@ -8,11 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
-/**
- * 自定义实现的雪花算法生成器
- * <p>
- * 时间 + 数据中心(3位) + 机器id(7位) + 序列号(12位)
- */
 @Slf4j
 public class PaiSnowflakeIdGenerator implements IdGenerator {
     /**

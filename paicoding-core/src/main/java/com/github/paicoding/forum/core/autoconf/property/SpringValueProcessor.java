@@ -14,9 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * 配置变更注册, 找到 @Value 注解修饰的配置，注册到 SpringValueRegistry，实现统一的配置变更自动刷新管理
- * */
 @Slf4j
 @Component
 public class SpringValueProcessor implements BeanPostProcessor {
@@ -27,11 +24,28 @@ public class SpringValueProcessor implements BeanPostProcessor {
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException  { return null; }
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        Class clazz = bean.getClass();
+        for (Field field : findAllField(clazz)) {
+            processField(bean, beanName, field);
+        }
+        for (Method method : findAllMethod(clazz)) {
+            processMethod(bean, beanName, method);
+        }
+        return bean;
+    }
 
-    private List<Field> findAllField(Class clazz)  { return null; }
+    private List<Field> findAllField(Class clazz) {
+        final List<Field> res = new LinkedList<>();
+        ReflectionUtils.doWithFields(clazz, res::add);
+        return res;
+    }
 
-    private List<Method> findAllMethod(Class clazz)  { return null; }
+    private List<Method> findAllMethod(Class clazz) {
+        final List<Method> res = new LinkedList<>();
+        ReflectionUtils.doWithMethods(clazz, res::add);
+        return res;
+    }
 
     /**
      * 成员变量上添加 @Value 方式绑定的配置

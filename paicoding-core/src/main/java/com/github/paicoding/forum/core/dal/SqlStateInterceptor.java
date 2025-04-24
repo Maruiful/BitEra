@@ -27,10 +27,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 
-/**
- * mybatis拦截器。输出sql执行情况
- *
- */
 @Slf4j
 @Intercepts({@Signature(type = StatementHandler.class, method = "query", args = {Statement.class, ResultHandler.class}), @Signature(type = StatementHandler.class, method = "update", args = {Statement.class})})
 public class SqlStateInterceptor implements Interceptor {

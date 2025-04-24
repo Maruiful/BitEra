@@ -4,9 +4,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * 关注者用户信息
- * */
 @Data
 public class FollowUserInfoDTO implements Serializable {
     private static final long serialVersionUID = 7169636386013658631L;

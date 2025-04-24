@@ -20,5 +20,9 @@ class Solution05502 {
         return false; // 遍历结束后未到达最后一个位置
     }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        Solution05502 solution = new Solution05502();
+        System.out.println(solution.canJump(new int[]{2, 3, 1, 1, 4})); // 输出: true
+        System.out.println(solution.canJump(new int[]{3, 2, 1, 0, 4})); // 输出: false
+    }
 }

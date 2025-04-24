@@ -28,9 +28,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * 入口，直接运行即可
- * */
 @Slf4j
 @EnableAsync
 @EnableScheduling
@@ -45,19 +42,28 @@ public class QuickForumApplication implements WebMvcConfigurer, ApplicationRunne
     private GlobalViewInterceptor globalViewInterceptor;
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry)  {}
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(globalViewInterceptor).addPathPatterns("/**");
+    }
 
     @Override
-    public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers)  {}
+    public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(0, new ForumExceptionHandler());
+    }
 
     /**
      * 解决swagger-ui访问 /doc.html 404问题
      * @param registry
      */
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry)  {}
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        SpringApplication.run(QuickForumApplication.class, args);
+    }
 
     /**
      * 兼容本地启动时8080端口被占用的场景; 只有dev启动方式才做这个逻辑
@@ -77,5 +83,14 @@ public class QuickForumApplication implements WebMvcConfigurer, ApplicationRunne
     }
 
     @Override
-    public void run(ApplicationArguments args)  {}
+    public void run(ApplicationArguments args) {
+        // 设置类型转换, 主要用于mybatis读取varchar/json类型数据据，并写入到json格式的实体Entity中
+        JacksonTypeHandler.setObjectMapper(new ObjectMapper());
+        // 应用启动之后执行
+        GlobalViewConfig config = SpringUtil.getBean(GlobalViewConfig.class);
+        if (webPort != null) {
+            config.setHost("http://127.0.0.1:" + webPort);
+        }
+        log.info("启动成功，点击进入首页: {}", config.getHost());
+    }
 }

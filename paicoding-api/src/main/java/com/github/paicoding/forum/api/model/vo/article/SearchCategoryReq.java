@@ -2,9 +2,6 @@ package com.github.paicoding.forum.api.model.vo.article;
 
 import lombok.Data;
 
-/**
- *
- * */
 @Data
 public class SearchCategoryReq {
     // 类目名称

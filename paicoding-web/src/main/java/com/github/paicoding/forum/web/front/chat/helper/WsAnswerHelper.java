@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- */
 @Slf4j
 @Component
 public class WsAnswerHelper {

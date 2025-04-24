@@ -3,7 +3,6 @@ package com.github.paicoding.forum.core.util;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 
-/** */
 public class StrUtil {
 
     /**
@@ -64,5 +63,17 @@ public class StrUtil {
     }
 
 
-    public static void main(String[] args)  {}
+    public static void main(String[] args) {
+        String text = "这是一个有趣的表😄过滤- 123 143 d 哒哒";
+        System.out.println(pickWxSupportTxt(text));
+
+        text = "view.site.Host";
+        System.out.println(formatSpringConfigKey(text));
+
+        text = "view.site.webHost";
+        System.out.println(formatSpringConfigKey(text));
+
+        text = "view.site.web-Host";
+        System.out.println(formatSpringConfigKey(text));
+    }
 }

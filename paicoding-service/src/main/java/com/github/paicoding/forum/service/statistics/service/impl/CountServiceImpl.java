@@ -12,36 +12,56 @@ import com.github.paicoding.forum.service.user.repository.dao.UserDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserFootDao;
 import com.github.paicoding.forum.service.user.repository.dao.UserRelationDao;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 计数服务，后续计数相关的可以考虑基于redis来做
- * */
 @Slf4j
 @Service
 public class CountServiceImpl implements CountService {
+    private final UserFootDao userFootDao;
+    public CountServiceImpl(UserFootDao userFootDao) {
+        this.userFootDao = userFootDao;
+    }
 
+    @Resource
+    private UserRelationDao userRelationDao;
 
-    @Autowired
+    @Resource
     private ArticleDao articleDao;
 
-    @Autowired
-    private UserFootDao userFootDao;
-
-    @Autowired
+    @Resource
     private CommentReadService commentReadService;
 
-    @Override
-    public ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId) { return null; }
+    @Resource
+    private UserDao userDao;
 
     @Override
-    public ArticleFootCountDTO queryArticleCountInfoByUserId(Long userId) { return null; }
+    public ArticleFootCountDTO queryArticleCountInfoByArticleId(Long articleId) {
+        ArticleFootCountDTO res = userFootDao.countArticleByArticleId(articleId);
+        if (res == null) {
+            res = new ArticleFootCountDTO();
+        } else {
+            res.setCommentCount(commentReadService.queryCommentCount(articleId));
+        }
+        return res;
+    }
 
+
+    @Override
+    public ArticleFootCountDTO queryArticleCountInfoByUserId(Long userId) {
+        return userFootDao.countArticleByUserId(userId);
+    }
+
+    /**
+     * 查询评论的点赞数
+     *
+     * @param commentId
+     * @return
+     */
     @Override
     public Long queryCommentPraiseCount(Long commentId) {
         return userFootDao.countCommentPraise(commentId);
@@ -84,17 +104,59 @@ public class CountServiceImpl implements CountService {
                 .execute();
     }
 
-    
+    /**
+     * 每天4:15分执行定时任务，全量刷新用户的统计信息
+     */
+    @Scheduled(cron = "0 15 4 * * ?")
+    public void autoRefreshAllUserStatisticInfo() {
+        Long now = System.currentTimeMillis();
+        log.info("开始自动刷新用户统计信息");
+        Long userId = 0L;
+        int batchSize = 20;
+        while (true) {
+            List<Long> userIds = userDao.scanUserId(userId, batchSize);
+            userIds.forEach(this::refreshUserStatisticInfo);
+            if (userIds.size() < batchSize) {
+                userId = userIds.get(userIds.size() - 1);
+                break;
+            } else {
+                userId = userIds.get(batchSize - 1);
+            }
+        }
+        log.info("结束自动刷新用户统计信息，共耗时: {}ms, maxUserId: {}", System.currentTimeMillis() - now, userId);
+    }
 
-    
-    public void autoRefreshAllUserStatisticInfo() {}
 
+    /**
+     * 更新用户的统计信息
+     *
+     * @param userId
+     */
     @Override
-    public void refreshUserStatisticInfo(Long userId) {}
+    public void refreshUserStatisticInfo(Long userId) {
+        // 用户的文章点赞数，收藏数，阅读计数
+        ArticleFootCountDTO count = userFootDao.countArticleByUserId(userId);
+        if (count == null) {
+            count = new ArticleFootCountDTO();
+        }
 
-    
+        // 获取关注数
+        Long followCount = userRelationDao.queryUserFollowCount(userId);
+        // 粉丝数
+        Long fansCount = userRelationDao.queryUserFansCount(userId);
 
-    
+        // 查询用户发布的文章数
+        Integer articleNum = articleDao.countArticleByUser(userId);
+
+        String key = CountConstants.USER_STATISTIC_INFO + userId;
+        RedisClient.hMSet(key, MapUtils.create(CountConstants.PRAISE_COUNT, count.getPraiseCount(),
+                CountConstants.COLLECTION_COUNT, count.getCollectionCount(),
+                CountConstants.READ_COUNT, count.getReadCount(),
+                CountConstants.FANS_COUNT, fansCount,
+                CountConstants.FOLLOW_COUNT, followCount,
+                CountConstants.ARTICLE_COUNT, articleNum));
+
+    }
 
 
     public void refreshArticleStatisticInfo(Long articleId) {

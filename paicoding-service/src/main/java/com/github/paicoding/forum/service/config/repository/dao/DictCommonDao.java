@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/** */
 @Repository
 public class DictCommonDao extends ServiceImpl<DictCommonMapper, DictCommonDO> {
 
@@ -17,7 +16,7 @@ public class DictCommonDao extends ServiceImpl<DictCommonMapper, DictCommonDO> {
      * 获取所有字典列表
      * @return
      */
-    public List<DictCommonDTO> getDictList()  {
+    public List<DictCommonDTO> getDictList() {
         List<DictCommonDO> list = lambdaQuery().list();
         return DictCommonConverter.toDTOS(list);
     }
