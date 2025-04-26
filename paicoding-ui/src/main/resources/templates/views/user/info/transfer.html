@@ -32,9 +32,11 @@
                             <button type="button" class="btn rounded-left font-weight-bold" id="userPwdBtn" style="background-color: var(--pai-brand-1-normal); border-color: var(--pai-brand-1-normal); color: white;">
                                 <i class="fa fa-user-lock mr-1"></i> 用户名/密码方式
                             </button>
+                            <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
                             <button type="button" class="btn rounded-right font-weight-bold" id="zsxqBtn" style="background-color: transparent; border: 2px solid var(--pai-color-5-gray); color: var(--pai-color-4-gray);">
                                 <i class="fa fa-star mr-1"></i> 知识星球方式
                             </button>
+                            -->
                         </div>
                     </div>
 
@@ -81,7 +83,7 @@
                         </div>
                     </form>
 
-                    <!-- 知识星球方式表单 -->
+                    <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
                     <div id="zsxqForm" style="display: none;">
                         <div class="alert mb-4 rounded-lg" style="background-color: var(--pai-bg-normal-1); border-left: 4px solid var(--pai-brand-3-click); color: var(--pai-color-4-gray);">
                             <i class="fa fa-exclamation-circle mr-2"></i> 通过知识星球授权进行账号绑定和迁移
@@ -125,6 +127,7 @@
                             </div>
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
             <div class="modal-footer pr-5 pb-4 border-0" id="operateBtn" style="background-color: white; border-top: 1px solid var(--pai-border-color-1);">
@@ -154,13 +157,16 @@
                 // 用户名/密码方式，触发表单提交
                 $('#userPwdForm').submit();
             } else {
+                // 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
                 // 知识星球方式的处理逻辑可以在这里添加
-                toastr.info("知识星球迁移功能开发中...");
+                // toastr.info("知识星球迁移功能开发中...");
             }
         });
 
         // 清除旧的事件绑定
-        $('#userPwdBtn, #zsxqBtn').off('click');
+        // 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
+        // $('#userPwdBtn, #zsxqBtn').off('click');
+        $('#userPwdBtn').off('click');
 
         // 直接绑定新的事件
         $('#userPwdBtn').click(function () {
@@ -170,17 +176,22 @@
                 'border-color': 'var(--pai-brand-1-normal)',
                 'color': 'white'
             });
+            // 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
+            /*
             // 去激活知识星球按钮
             $('#zsxqBtn').css({
                 'background-color': 'transparent',
                 'border': '2px solid var(--pai-color-5-gray)',
                 'color': 'var(--pai-color-4-gray)'
             });
+            */
             $('#userPwdForm').show();
-            $('#zsxqForm').hide();
+            // $('#zsxqForm').hide();
             $('#operateBtn').show();
         });
 
+        // 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
+        /*
         $('#zsxqBtn').click(function () {
             // 激活知识星球按钮
             $(this).css({
@@ -198,6 +209,7 @@
             $('#userPwdForm').hide();
             $('#operateBtn').hide();
         });
+        */
     });
 
     // 用户名/密码方式迁移

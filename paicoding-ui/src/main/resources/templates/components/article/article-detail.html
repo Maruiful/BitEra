@@ -113,6 +113,8 @@
     <button class="c-btn c-btn-hole" style="border-radius: 1.5em;" th:text="${payUsers.size()} + '人已赏'" th:if="${payUsers != null}" onclick="showPayUserInfo()">15人已赏</button>
   </div>
 
+  <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释 -->
+  <!--
   <div th:if="${other.readType == 3 && !(global.user != null && global.user.starStatus.code == 2)}">
     <div class="needlock">
       <a class="btn-readmore no-login underline" href="#" target="_blank" data-target="#registerModal" data-toggle="modal">
@@ -120,6 +122,7 @@
       </a>
     </div>
   </div>
+  -->
 
   <!-- 打赏支付  -->
   <div class="modal fade"
@@ -135,9 +138,14 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
+          <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释 -->
+          <!--
           <a href="https://t.zsxq.com/11YwgyGmC" target="_blank">
-            <h5 class="modal-title" id="payInfoModel">支付解锁阅读全文</h5>
+          -->
+          <h5 class="modal-title" id="payInfoModel">支付解锁阅读全文</h5>
+          <!--
           </a>
+          -->
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -169,9 +177,14 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
+          <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释 -->
+          <!--
           <a href="https://t.zsxq.com/11YwgyGmC" target="_blank">
-            <h5 class="modal-title">打赏用户列表</h5>
+          -->
+          <h5 class="modal-title">打赏用户列表</h5>
+          <!--
           </a>
+          -->
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -198,6 +211,8 @@
     </div>
   </div>
 
+  <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释 -->
+  <!--
   <!-- 星球详情  -->
   <div class="modal fade"
        id="starModel"
@@ -221,7 +236,7 @@
         <div class="modal-body">
           <div  class="content join-star">
             <p >二哥编程星球的内容包括：</p>
-            <p ><span class="category">1. 实战项目</span>: 派聪明RAG、校招派Agent、PmHub、技术派、MYDB 等</p>
+            <p ><span class="category">1. 实战项目</span>: 比特灵犀RAG、校招派Agent、PmHub、技术派、MYDB 等</p>
             <p ><span class="category">2. 面试指南</span>: 40 万+字面试求职攻略+面渣逆袭</p>
             <p ><span class="category">3. 专属问答</span>: 向二哥 1v1 发起提问，内容不限于 offer 选择、学习路线、职业规划等</p>
             <p ><span class="category">4. 简历修改</span>: 提供简历修改服务，附赠星球 5000+优质简历模板可供参考</p><br >
@@ -239,6 +254,7 @@
       </div>
     </div>
   </div>
+  -->
 
 
   <!-- 删除文章再次确认 Modal -->
@@ -326,7 +342,9 @@
       console.log('复制失败');
     });
 
+    // 知识星球相关内容暂时隐藏，开设知识星球后可取消注释
     // 星球文章的权限控制
+    /*
     console.log("实体内容:", [[${article}]])
     let loginRead = [[${other.readType}]];
     let user = [[${global.user}]];
@@ -345,6 +363,19 @@
         }
       }
     } else if (loginRead == 4) {
+      // 对于付费阅读场景
+      if (![[${article.canRead}]]) {
+        if (user == null) {
+          // 未登录时，弹出登录窗口
+          $('#loginModal').modal('show')
+        }
+      }
+    }
+    */
+    // 付费阅读场景（保留）
+    let loginRead = [[${other.readType}]];
+    let user = [[${global.user}]];
+    if (loginRead == 4) {
       // 对于付费阅读场景
       if (![[${article.canRead}]]) {
         if (user == null) {

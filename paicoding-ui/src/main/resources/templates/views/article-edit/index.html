@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <div th:replace="components/layout/header :: head(~{::title}, ~{}, ~{})">
-  <title th:text="${global.siteInfo.websiteName}">比特纪元 - 文章发表</title>
+  <title th:text="${global.siteInfo.websiteName}">技术派 - 文章发表</title>
 </div>
 
 <link rel="stylesheet" href="/editormd/css/editormd.css" th:href="${global.siteInfo.oss + '/editormd/css/editormd.css'}" />
@@ -129,11 +129,14 @@
               <input type="radio" name="readType" value="4" th:checked="${vo.article != null && vo.article.readType == 4}"  class="form-selectgroup-input"/>
               <span class="form-selectgroup-label">付费阅读</span>
             </label>
+            <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释 -->
+            <!--
             <label class="r-form-selectgroup-item"
                    th:class="'r-form-selectgroup-item ' + ${vo.article != null && vo.article.readType == 3 ? 'form-selectgroup-item--active': ''}">
               <input type="radio" name="readType" value="3" th:checked="${vo.article != null && vo.article.readType == 3}" class="form-selectgroup-input"/>
               <span class="form-selectgroup-label">星球专享</span>
             </label>
+            -->
           </div>
         </div>
         <!--    支付阅读相关配置        -->

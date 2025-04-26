@@ -8,6 +8,8 @@
           <div>
             <span th:text="${userHome.userName}">用户名</span>
           </div>
+          <!-- 知识星球相关内容暂时隐藏，开设知识星球后可取消注释 -->
+          <!--
           <div th:if="${vo.userHome.starNumber != '' && vo.userHome.starNumber != null && global.isLogin && vo.userHome.userId == global.user.userId}"
             style="font-size: 14px">
             星球编号: <span th:text="${vo.userHome != null ? vo.userHome.starNumber: ''}"></span><br/>
@@ -18,6 +20,7 @@
               会员已过期，知识星球续费之后点击此处，重置会员信息
             </a>
           </div>
+          -->
         </div>
         <div class="user-head-title-classify">
           <div class="user-head-title-classify-item">
